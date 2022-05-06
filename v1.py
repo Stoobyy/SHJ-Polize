@@ -14,10 +14,8 @@ startroles = [767016755809091654, 767029516769689601,
               767017209389252658, 767017558095429649, 767017041319428107]
 giveawaytags = []
 
-intents = discord.Intents.default()
-intents.members = True
-intents.message_content = True
-client = discord.Bot(help_command=None, intents=intents)
+
+client = discord.Bot(help_command=None, intents=discord.Intents.all())
 
 
 @client.event
@@ -70,7 +68,7 @@ async def on_message(message):
                             message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
                         message1.reverse()
                         embed = discord.Embed(
-                            title=f'**{msg}**', description=f'{"".join(message1)}\n[Jump to message]({message.jump_url})', color=1752220)
+                            title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
                         embed.set_footer(
                             text=f'Message ID: {message.id} | Author ID: {message.author.id}')
                         member = message.guild.get_member(int(str(user)))
