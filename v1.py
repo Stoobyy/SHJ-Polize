@@ -154,7 +154,7 @@ async def on_message_delete(message):
         img = message.attachments[0]
         content=message.content
         author=str(message.author)
-        message_author_avatar = str(message.author.avatar_url)
+        message_author_avatar = str(message.author.avatar.url)
         channel=str(message.channel.id)
         timee=datetime.utcnow()
         imgurl=img.proxy_url
@@ -165,7 +165,7 @@ async def on_message_delete(message):
     else:
         content=message.content
         author=str(message.author)
-        message_author_avatar = str(message.author.avatar_url)
+        message_author_avatar = str(message.author.avatar.url)
         channel=message.channel.id
         response=requests.get('https://showcase.api.linx.twenty57.net/UnixTime/tounixtimestamp?datetime=now')
         raw=response.json()
@@ -186,7 +186,7 @@ async def snipe(ctx):
         timee=mix[channel]['time']
         content=mix[channel]['content']
     except:
-        await ctx.send('There is no deleted message in this channel')
+        await ctx.respond('There is no deleted message in this channel')
     try:
         imgurl=mix[channel]['imgurl']
     except:
@@ -196,7 +196,7 @@ async def snipe(ctx):
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
     if imgurl:
         embed.set_image(url=imgurl)
-    await ctx.send(embed=embed)
+    await ctx.respond(embed=embed)
 
 @client.command(name='dmsnipe', description = 'Snipes the last deleted message sent in the channel and sends it to your DMs')
 @commands.has_any_role(773245326747500604,734307591630356530,734304865794392094,888692319447023636,888461103250669608,861175306127933470,874272681124589629,860431948236587059)
@@ -209,7 +209,7 @@ async def dmsnipe(ctx):
         timee=mix[channel]['time']
         content=mix[channel]['content']
     except:
-        await ctx.send('There is no deleted message in this channel')
+        await ctx.respond('There is no deleted message in this channel')
     try:
         imgurl=mix[channel]['imgurl']
     except:
@@ -221,14 +221,13 @@ async def dmsnipe(ctx):
     if imgurl:
         embed.set_image(url=imgurl)
     await ctx.author.send(embed=embed)
-    await ctx.message.add_reaction('👍')
 @client.event
 async def on_message_edit(oldmsg,newmsg):
     author=oldmsg.author
     oldcontent=oldmsg.content
     newcontent=newmsg.content
     channel=oldmsg.channel.id
-    authav=oldmsg.author.avatar_url
+    authav=oldmsg.author.avatar.url
     msgurl=oldmsg.jump_url
     timee=datetime.utcnow()
     if oldmsg.author.discriminator=='0000':
@@ -249,13 +248,13 @@ async def esnipe(ctx):
         messageurl=editmsg[ctx.channel.id]['msgurl']
         timee=editmsg[ctx.channel.id]['time']
     except:
-        await ctx.send('There isn\'t any deleted message in this channel.')
+        await ctx.respond('There isn\'t any deleted message in this channel.')
         invalid=True
     if invalid!=True:
         embed=discord.Embed(description=f'{oldmsg}\n [Jump to message]({messageurl})',colour=1752220)
         embed.timestamp = timee
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed)
 
 @client.command(name='dmesnipe', description = 'Snipes the last edited message sent in the channel to your DMs')
 @commands.has_any_role(773245326747500604,734307591630356530,734304865794392094,888692319447023636,888461103250669608,861175306127933470,874272681124589629,860431948236587059)
@@ -269,7 +268,7 @@ async def dmesnipe(ctx):
         messageurl=editmsg[ctx.channel.id]['msgurl']
         timee=editmsg[ctx.channel.id]['time']
     except:
-        await ctx.send('There isn\'t any deleted message in this channel.')
+        await ctx.respond('There isn\'t any deleted message in this channel.')
         invalid=True
     if invalid!=True:
         embed=discord.Embed(description=f'{oldmsg}\n [Jump to message]({messageurl})',colour=1752220)
@@ -277,6 +276,5 @@ async def dmesnipe(ctx):
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
         embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
         await ctx.author.send(embed=embed)
-        await ctx.message.add_reaction('👍')
 
 client.run('OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0')
