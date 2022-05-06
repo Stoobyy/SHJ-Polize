@@ -145,7 +145,7 @@ async def giveaway(ctx, time, prize):
     winner = await client.fetch_user(winner)
     await ctx.send(f"{winner.mention} won the giveaway for {prize}!")
     embed = discord.Embed(color=15844367)
-    embed.add_field(name=f"{prize}", value=f'~~React with 🎉 to enter!\nEnds: <t:{unix_timestamp_plus_5_min}:R>\nHosted by: {ctx.author.mention}~~', inline=False)
+    embed.add_field(name=f"{prize}", value=f'~~React with 🎉 to enter!\nEnds: <t:{unix_timestamp_plus_5_min}:R>\nHosted by: {ctx.author.mention}\nWinner: {winner.mention}~~', inline=False)
     await message.edit('~~:tada: **GIVEAWAY** :tada:~~', embed=embed, view=None)
     giveawaytags.clear()
 
@@ -164,7 +164,7 @@ async def on_message_delete(message):
         img = message.attachments[0]
         content = message.content
         author = str(message.author)
-        message_author_avatar = str(message.author.avatar.url)
+        message_author_avatar = str(message.author.avatar)
         channel = str(message.channel.id)
         timee = datetime.utcnow()
         imgurl = img.proxy_url
@@ -172,7 +172,7 @@ async def on_message_delete(message):
     else:
         content = message.content
         author = str(message.author)
-        message_author_avatar = str(message.author.avatar.url)
+        message_author_avatar = str(message.author.avatar)
         channel = message.channel.id
 
         # what is this you dont even use it bruh
@@ -236,7 +236,7 @@ async def on_message_edit(oldmsg, newmsg):
     oldcontent = oldmsg.content
     newcontent = newmsg.content
     channel = oldmsg.channel.id
-    authav = oldmsg.author.avatar.url
+    authav = oldmsg.author.avatar
     msgurl = oldmsg.jump_url
     timee = datetime.utcnow()
 
