@@ -14,10 +14,8 @@ startroles = [767016755809091654, 767029516769689601,
               767017209389252658, 767017558095429649, 767017041319428107]
 giveawaytags = []
 
-intents = discord.Intents.default()
-intents.members = True
-intents.message_content = True
-client = discord.Bot(help_command=None, intents=intents)
+
+client = discord.Bot(help_command=None, intents=discord.Intents.all())
 
 
 @client.event
