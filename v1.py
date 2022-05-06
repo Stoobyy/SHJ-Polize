@@ -1,6 +1,7 @@
 import discord
 import asyncio
 from discord.ext import commands, tasks
+from discord.commands import slash_command
 from discord.ui import View
 import time
 import random
@@ -14,18 +15,19 @@ roles = {0: 734056569041322066, 3: 756979356332589117, 5: 734302084350083166, 10
 startroles = [767016755809091654, 767029516769689601,
               767017209389252658, 767017558095429649, 767017041319428107]
 giveawaytags = []
-mix={}
-editmsg={}
-ignore=[]
-idict={}
+mix = {}
+editmsg = {}
+ignore = []
+idict = {}
 
 
-client = discord.Bot(help_command=None, intents=discord.Intents.all())
+client = commands.Bot(command_prefix='>', help_command=None,
+                      intents=discord.Intents.all())
 
 
 @client.event
 async def on_ready():
-    print('Bot is ready!')
+    print(f"Logged in as {client.user}")
 
 
 class GiveawayView(View):
@@ -36,14 +38,13 @@ class GiveawayView(View):
     @discord.ui.button(label="🎉", style=discord.ButtonStyle.primary, custom_id="gaw_button")
     async def greyu(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user.id in giveawaytags:
-            embed = discord.Embed(
-                title="Error!", description="You have already entered the giveaway!", color=15158332)
+            embed = discord.Embed(title="Error!", description="You have already entered the giveaway!", color=15158332)
             await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
             giveawaytags.append(interaction.user.id)
-            embed = discord.Embed(
-                title="Success!", description="You have entered the giveaway!", color=2067276)
+            embed = discord.Embed(title="Success!", description="You have entered the giveaway!", color=2067276)
             await interaction.response.send_message(embed=embed, ephemeral=True)
+
 
 @client.listen('on_message')
 async def on_message(message):
@@ -70,7 +71,8 @@ async def on_message(message):
                         message1 = []
                         async for i in message.channel.history(limit=5):
                             timee = i.created_at
-                            message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
+                            message1.append(
+                                f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
                         message1.reverse()
                         embed = discord.Embed(
                             title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
@@ -83,7 +85,7 @@ async def on_message(message):
                             await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
 
 
-@client.command(name='hl')
+@client.slash_command(name='hl')
 async def hl(ctx, word=None):
     guildid = str(ctx.guild.id)
     with open('hl.json', 'r') as f:
@@ -111,167 +113,184 @@ async def hl(ctx, word=None):
             hl[guildid] = {}
 
         if str(ctx.author.id) not in hl[guildid]:
-            embed = discord.Embed(
-                title='Highlight List', description=f'You currently have no highlight words\nRun -hl [word] to add some', color=1752220)
+            embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun -hl [word] to add some', color=1752220)
             await ctx.respond(embed=embed, ephemeral=True)
         else:
             if len(hl[guildid][str(ctx.author.id)]) == 0:
-                embed = discord.Embed(
-                title='Highlight List', description=f'You currently have no highlight words\nRun -hl [word] to add some', color=1752220)
+                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun -hl [word] to add some', color=1752220)
                 await ctx.respond(embed=embed, ephemeral=True)
             else:
                 str1 = ''
                 for i in hl[guildid][str(ctx.author.id)]:
                     str1 += f'{i}\n'
-                embed = discord.Embed(
-                    title='You\'re currently tracking the following words', description=str1, color=1752220)
+                embed = discord.Embed(title='You\'re currently tracking the following words', description=str1, color=1752220)
                 await ctx.respond(embed=embed, ephemeral=True)
 
 
-@client.command(name='giveaway')
+@client.slash_command(name='giveaway')
 async def giveaway(ctx, time, prize):
     embed = discord.Embed(color=15844367)
     current_time = datetime.now(timezone.utc)
     unix_timestamp = current_time.timestamp()
     unix_timestamp_plus_5_min = unix_timestamp + (int(time) * 60)
     unix_timestamp_plus_5_min = int(unix_timestamp_plus_5_min)
-    embed.add_field(
-        name=f"{prize}", value=f'React with 🎉 to enter!\nEnds: <t:{unix_timestamp_plus_5_min}:R>\nHosted by: {ctx.author.mention}', inline=False)
+    embed.add_field(name=f"{prize}", value=f'React with 🎉 to enter!\nEnds: <t:{unix_timestamp_plus_5_min}:R>\nHosted by: {ctx.author.mention}', inline=False)
     message = await ctx.send(':tada: **GIVEAWAY** :tada:', embed=embed, view=GiveawayView())
+    await ctx.respond(f'Giveaway has been created successfully!', ephemeral=True)
     await asyncio.sleep(int(time) * 60)
     winner = random.choice(giveawaytags)
     winner = await client.fetch_user(winner)
     await ctx.send(f"{winner.mention} won the giveaway for {prize}!")
     embed = discord.Embed(color=15844367)
-    embed.add_field(
-        name=f"{prize}", value=f'~~React with 🎉 to enter!\nEnds: <t:{unix_timestamp_plus_5_min}:R>\nHosted by: {ctx.author.mention}~~', inline=False)
+    embed.add_field(name=f"{prize}", value=f'~~React with 🎉 to enter!\nEnds: <t:{unix_timestamp_plus_5_min}:R>\nHosted by: {ctx.author.mention}~~', inline=False)
     await message.edit('~~:tada: **GIVEAWAY** :tada:~~', embed=embed, view=None)
     giveawaytags.clear()
 
+
 @client.event
 async def on_message_delete(message):
+    if message.author.bot:
+        return
+    
+    #remove if you want to snipe nqn messages
+    if message.author.discriminator == '0000':
+        return
+
+
     if message.attachments:
         img = message.attachments[0]
-        content=message.content
-        author=str(message.author)
+        content = message.content
+        author = str(message.author)
         message_author_avatar = str(message.author.avatar.url)
-        channel=str(message.channel.id)
-        timee=datetime.utcnow()
-        imgurl=img.proxy_url
-        if message.author.bot==True:
-            print('none')
-        else:
-            mix[channel]={'content':content,'author':author,'authorav':message_author_avatar,'time':timee,'imgurl':imgurl}
+        channel = str(message.channel.id)
+        timee = datetime.utcnow()
+        imgurl = img.proxy_url
+        mix[channel] = {'content': content, 'author': author,'authorav': message_author_avatar, 'time': timee, 'imgurl': imgurl}
     else:
-        content=message.content
-        author=str(message.author)
+        content = message.content
+        author = str(message.author)
         message_author_avatar = str(message.author.avatar.url)
-        channel=message.channel.id
-        response=requests.get('https://showcase.api.linx.twenty57.net/UnixTime/tounixtimestamp?datetime=now')
-        raw=response.json()
-        timee=datetime.utcnow()
-        if message.author.bot==True:
-            print('none')
-        else:
-            mix[channel]={'content':content,'author':author,'authorav':message_author_avatar,'time':timee}
+        channel = message.channel.id
 
-@client.command(name='snipe', description = 'Snipes the last deleted message sent in the channel')
-@commands.has_any_role(773245326747500604,734307591630356530,734304865794392094,888692319447023636,888461103250669608,861175306127933470,874272681124589629)
+        # what is this you dont even use it bruh
+        response = requests.get('https://showcase.api.linx.twenty57.net/UnixTime/tounixtimestamp?datetime=now')
+        raw = response.json()
+
+        timee = datetime.utcnow()
+        mix[channel] = {'content': content, 'author': author,'authorav': message_author_avatar, 'time': timee}
+
+# @client.command(name='snipe', description = 'Snipes the last deleted message sent in the channel')
+@client.command(aliases=['s'])
+@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629)
 async def snipe(ctx):
-    print(type(ctx.author.roles[0]))
-    channel=ctx.channel.id
+    channel = ctx.channel.id
     try:
-        author=mix[channel]['author']
-        authorav=mix[channel]['authorav']
-        timee=mix[channel]['time']
-        content=mix[channel]['content']
+        author = mix[channel]['author']
+        authorav = mix[channel]['authorav']
+        timee = mix[channel]['time']
+        content = mix[channel]['content']
     except:
         await ctx.respond('There is no deleted message in this channel')
     try:
-        imgurl=mix[channel]['imgurl']
+        imgurl = mix[channel]['imgurl']
     except:
-        imgurl=False
-    embed=discord.Embed(description=f'{content}',colour=1752220)
+        imgurl = False
+    embed = discord.Embed(description=f'{content}', colour=1752220)
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
     if imgurl:
         embed.set_image(url=imgurl)
     await ctx.respond(embed=embed)
 
-@client.command(name='dmsnipe', description = 'Snipes the last deleted message sent in the channel and sends it to your DMs')
-@commands.has_any_role(773245326747500604,734307591630356530,734304865794392094,888692319447023636,888461103250669608,861175306127933470,874272681124589629,860431948236587059)
+# @client.command(name='dmsnipe', description = 'Snipes the last deleted message sent in the channel and sends it to your DMs')
+@client.command(aliases=['dms'])
+@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059)
 async def dmsnipe(ctx):
-    print(type(ctx.author.roles[0]))
-    channel=ctx.channel.id
+    channel = ctx.channel.id
     try:
-        author=mix[channel]['author']
-        authorav=mix[channel]['authorav']
-        timee=mix[channel]['time']
-        content=mix[channel]['content']
+        author = mix[channel]['author']
+        authorav = mix[channel]['authorav']
+        timee = mix[channel]['time']
+        content = mix[channel]['content']
     except:
         await ctx.respond('There is no deleted message in this channel')
     try:
-        imgurl=mix[channel]['imgurl']
+        imgurl = mix[channel]['imgurl']
     except:
-        imgurl=False
-    embed=discord.Embed(description=f'{content}',colour=1752220)
+        imgurl = False
+    embed = discord.Embed(description=f'{content}', colour=1752220)
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
     embed.set_footer(text=f'Deleted in {ctx.channel} ({ctx.guild.name})')
     if imgurl:
         embed.set_image(url=imgurl)
     await ctx.author.send(embed=embed)
+
+
 @client.event
-async def on_message_edit(oldmsg,newmsg):
-    author=oldmsg.author
-    oldcontent=oldmsg.content
-    newcontent=newmsg.content
-    channel=oldmsg.channel.id
-    authav=oldmsg.author.avatar.url
-    msgurl=oldmsg.jump_url
-    timee=datetime.utcnow()
-    if oldmsg.author.discriminator=='0000':
-        print('ded')
+async def on_message_edit(oldmsg, newmsg):
+    author = oldmsg.author
+    oldcontent = oldmsg.content
+    newcontent = newmsg.content
+    channel = oldmsg.channel.id
+    authav = oldmsg.author.avatar.url
+    msgurl = oldmsg.jump_url
+    timee = datetime.utcnow()
+
+    if oldmsg.author.bot:
+        return
+    
+    #remove if you want to snipe nqn messages
+    if oldmsg.author.discriminator == '0000':
+        return
+
+    
     else:
-        editmsg[channel]={'author':author,'oldcontent':oldcontent,'newcontent':newcontent,'authorav':authav,'msgurl':msgurl,'time':timee}
+        editmsg[channel] = {'author': author, 'oldcontent': oldcontent,'newcontent': newcontent, 'authorav': authav, 'msgurl': msgurl, 'time': timee}
 
 
-@client.command(name='esnipe', description = 'Snipes the last edited message sent in the channel')
-@commands.has_any_role(773245326747500604,734307591630356530,734304865794392094,888692319447023636,888461103250669608,861175306127933470,874272681124589629,860431948236587059)
+# @client.command(name='esnipe', description = 'Snipes the last edited message sent in the channel')
+@client.command(aliases=['es'])
+@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059)
 async def esnipe(ctx):
-    invalid=False
+    invalid = False
     try:
-        author=editmsg[ctx.channel.id]['author']
-        oldmsg=editmsg[ctx.channel.id]['oldcontent']
-        newmsg=editmsg[ctx.channel.id]['newcontent']
-        authav=editmsg[ctx.channel.id]['authorav']
-        messageurl=editmsg[ctx.channel.id]['msgurl']
-        timee=editmsg[ctx.channel.id]['time']
+        author = editmsg[ctx.channel.id]['author']
+        oldmsg = editmsg[ctx.channel.id]['oldcontent']
+        newmsg = editmsg[ctx.channel.id]['newcontent']
+        authav = editmsg[ctx.channel.id]['authorav']
+        messageurl = editmsg[ctx.channel.id]['msgurl']
+        timee = editmsg[ctx.channel.id]['time']
     except:
         await ctx.respond('There isn\'t any deleted message in this channel.')
-        invalid=True
-    if invalid!=True:
-        embed=discord.Embed(description=f'{oldmsg}\n [Jump to message]({messageurl})',colour=1752220)
+        invalid = True
+    if invalid != True:
+        embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
+        embed.add_field(name='Original Message', value=f'{oldmsg}')
+        embed.add_field(name='Edited message', value=f'{newmsg}')
         embed.timestamp = timee
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
         await ctx.respond(embed=embed)
 
-@client.command(name='dmesnipe', description = 'Snipes the last edited message sent in the channel to your DMs')
-@commands.has_any_role(773245326747500604,734307591630356530,734304865794392094,888692319447023636,888461103250669608,861175306127933470,874272681124589629,860431948236587059)
+# @client.command(name='dmesnipe', description = 'Snipes the last edited message sent in the channel to your DMs')
+@client.command(aliases=['dmes'])
+@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059)
 async def dmesnipe(ctx):
-    invalid=False
+    invalid = False
     try:
-        author=editmsg[ctx.channel.id]['author']
-        oldmsg=editmsg[ctx.channel.id]['oldcontent']
-        newmsg=editmsg[ctx.channel.id]['newcontent']
-        authav=editmsg[ctx.channel.id]['authorav']
-        messageurl=editmsg[ctx.channel.id]['msgurl']
-        timee=editmsg[ctx.channel.id]['time']
+        author = editmsg[ctx.channel.id]['author']
+        oldmsg = editmsg[ctx.channel.id]['oldcontent']
+        newmsg = editmsg[ctx.channel.id]['newcontent']
+        authav = editmsg[ctx.channel.id]['authorav']
+        messageurl = editmsg[ctx.channel.id]['msgurl']
+        timee = editmsg[ctx.channel.id]['time']
     except:
         await ctx.respond('There isn\'t any deleted message in this channel.')
-        invalid=True
-    if invalid!=True:
-        embed=discord.Embed(description=f'{oldmsg}\n [Jump to message]({messageurl})',colour=1752220)
+        invalid = True
+    if invalid != True:
+        embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
+        embed.add_field(name='Original Message', value=f'{oldmsg}')
+        embed.add_field(name='Edited message', value=f'{newmsg}')
         embed.timestamp = timee
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
         embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
