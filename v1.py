@@ -68,7 +68,7 @@ async def on_message(message):
                             message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
                         message1.reverse()
                         embed = discord.Embed(
-                            title=f'**{msg}**', description=f'{"".join(message1)}\n[Jump to message]({message.jump_url})', color=1752220)
+                            title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
                         embed.set_footer(
                             text=f'Message ID: {message.id} | Author ID: {message.author.id}')
                         member = message.guild.get_member(int(str(user)))
