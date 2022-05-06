@@ -69,7 +69,6 @@ async def on_message(message):
                             timee = i.created_at
                             message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
                         message1.reverse()
-                        print(message1)
                         embed = discord.Embed(
                             title=f'**{msg}**', description=f'{"".join(message1)}\n[Jump to message]({message.jump_url})', color=1752220)
                         embed.set_footer(
