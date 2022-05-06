@@ -66,7 +66,8 @@ async def on_message(message):
                     if msg.upper() in message.content.upper().split():
                         message1 = []
                         async for i in message.channel.history(limit=5):
-                            message1.append(f'**{i.author.name}**: {i.content}\n')
+                            timee = i.created_at
+                            message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
                         message1.reverse()
                         print(message1)
                         embed = discord.Embed(
