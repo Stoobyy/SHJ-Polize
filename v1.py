@@ -1,13 +1,15 @@
-import discord
 import asyncio
-from discord.ext import commands, tasks
-from discord.commands import slash_command
-from discord.ui import View
-import time
-import random
-from datetime import *
-import requests
 import json
+import random
+import time
+from datetime import *
+
+import requests
+
+import discord
+from discord.commands import slash_command
+from discord.ext import commands, tasks
+from discord.ui import View
 from discord.utils import get
 
 roles = {0: 734056569041322066, 3: 756979356332589117, 5: 734302084350083166, 10: 734305511759151144,
@@ -38,7 +40,8 @@ class GiveawayView(View):
     @discord.ui.button(label="🎉", style=discord.ButtonStyle.primary, custom_id="gaw_button")
     async def greyu(self, button: discord.ui.Button, interaction: discord.Interaction):
         if interaction.user.id in giveawaytags:
-            embed = discord.Embed(title="Error!", description="You have already entered the giveaway!", color=15158332)
+            giveawaytags.remove(interaction.user.id)
+            embed = discord.Embed(description="You have successfully been removed from the giveaway!", color=15158332)
             await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
             giveawaytags.append(interaction.user.id)
