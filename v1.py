@@ -70,14 +70,14 @@ async def on_message(message):
                         message1.reverse()
                         print(message1)
                         embed = discord.Embed(
-                            title='Highlighted Message', description=f'{"".join(message1)}\n[Jump to message]({message.jump_url})', color=1752220)
+                            title=f'**{msg}**', description=f'{"".join(message1)}\n[Jump to message]({message.jump_url})', color=1752220)
                         embed.set_footer(
                             text=f'Message ID: {message.id} | Author ID: {message.author.id}')
                         member = message.guild.get_member(int(str(user)))
                         timee = datetime.now(timezone.utc).timestamp()
                         lastt = last[guild][user] if user in last[guild] else 0
                         if lastt == 0 or timee - lastt > 300:
-                            await member.send(f"In {message.guild.name} {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
+                            await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
 
 
 @client.command(name='hl')
