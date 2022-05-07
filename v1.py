@@ -301,4 +301,9 @@ async def dmesnipe(ctx):
         embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
         await ctx.author.send(embed=embed)
 
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, discord.ext.commands.errors.MissingAnyRole):
+        await ctx.message.add_reaction('<a:nochamp:972351244700090408>')
+
 client.run('OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0')
