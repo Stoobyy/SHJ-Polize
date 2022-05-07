@@ -160,51 +160,55 @@ async def on_message_delete(message):
     if message.author.discriminator == '0000':
         return
 
+    content = message.content
+    author = str(message.author)
+    message_author_avatar = str(message.author.avatar)
+    channel = str(message.channel.id)
+    timee = datetime.utcnow()
+    mix[channel] = {'content': content, 'author': author,'authorav': message_author_avatar, 'time': timee}
 
     if message.attachments:
-        img = message.attachments[0]
-        content = message.content
-        author = str(message.author)
-        message_author_avatar = str(message.author.avatar)
-        channel = str(message.channel.id)
-        timee = datetime.utcnow()
-        imgurl = img.proxy_url
-        mix[channel] = {'content': content, 'author': author,'authorav': message_author_avatar, 'time': timee, 'imgurl': imgurl}
-    else:
-        content = message.content
-        author = str(message.author)
-        message_author_avatar = str(message.author.avatar)
-        channel = message.channel.id
+        attachment = message.attachments[0]
+        attachment
+        if attachment.url.endswith(('.png', '.jpg', '.jpeg', '.gif')):
+            imgurl = attachment.url
+            mix[channel]['imgurl'] = imgurl
+        else:
+            mix[channel]['attachment'] = attachment.url
+    print(mix[channel])
+        
 
-        timee = datetime.utcnow()
-        mix[channel] = {'content': content, 'author': author,'authorav': message_author_avatar, 'time': timee}
+
 
 # @client.command(name='snipe', description = 'Snipes the last deleted message sent in the channel')
 @client.command(aliases=['s'])
-@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629)
+@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 960209393339731989)
 async def snipe(ctx):
-    channel = ctx.channel.id
-    try:
+    channel = str(ctx.channel.id)
+    if channel in mix:
         author = mix[channel]['author']
         authorav = mix[channel]['authorav']
         timee = mix[channel]['time']
         content = mix[channel]['content']
-    except:
+    else:
         await ctx.send('There is no deleted message in this channel')
-    try:
-        imgurl = mix[channel]['imgurl']
-    except:
-        imgurl = False
+        return
     embed = discord.Embed(description=f'{content}', colour=1752220)
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
-    if imgurl:
+    if 'imgurl' in mix[channel]:
+        print('imgurl')
+        imgurl = mix[channel]['imgurl']
         embed.set_image(url=imgurl)
+    if 'attachment' in mix[channel]:
+        attachment = mix[channel]['attachment']
+        print(attachment)
+        embed.add_field(name="Attachment", value=f"[Here is the link]({attachment})")
     await ctx.send(embed=embed)
 
 # @client.command(name='dmsnipe', description = 'Snipes the last deleted message sent in the channel and sends it to your DMs')
 @client.command(aliases=['dms'])
-@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059)
+@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def dmsnipe(ctx):
     channel = ctx.channel.id
     try:
@@ -252,7 +256,7 @@ async def on_message_edit(oldmsg, newmsg):
 
 # @client.command(name='esnipe', description = 'Snipes the last edited message sent in the channel')
 @client.command(aliases=['es'])
-@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059)
+@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def esnipe(ctx):
     invalid = False
     try:
@@ -275,7 +279,7 @@ async def esnipe(ctx):
 
 # @client.command(name='dmesnipe', description = 'Snipes the last edited message sent in the channel to your DMs')
 @client.command(aliases=['dmes'])
-@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059)
+@commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def dmesnipe(ctx):
     invalid = False
     try:
