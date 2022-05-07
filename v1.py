@@ -201,7 +201,7 @@ async def snipe(ctx):
         return
     if 'attachment' in mix[channel]:
         attachment = mix[channel]['attachment']
-        content += f"\n[:open_file_folder: Attachment]({attachment})"
+        content += f"\n:open_file_folder:[ Attachment]({attachment})"
     embed = discord.Embed(description=f'{content}', colour=1752220)
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
