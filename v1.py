@@ -191,7 +191,7 @@ async def snipe(ctx):
         timee = mix[channel]['time']
         content = mix[channel]['content']
     except:
-        await ctx.respond('There is no deleted message in this channel')
+        await ctx.send('There is no deleted message in this channel')
     try:
         imgurl = mix[channel]['imgurl']
     except:
@@ -201,7 +201,7 @@ async def snipe(ctx):
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
     if imgurl:
         embed.set_image(url=imgurl)
-    await ctx.respond(embed=embed)
+    await ctx.send(embed=embed)
 
 # @client.command(name='dmsnipe', description = 'Snipes the last deleted message sent in the channel and sends it to your DMs')
 @client.command(aliases=['dms'])
@@ -214,7 +214,7 @@ async def dmsnipe(ctx):
         timee = mix[channel]['time']
         content = mix[channel]['content']
     except:
-        await ctx.respond('There is no deleted message in this channel')
+        await ctx.send('There is no deleted message in this channel')
     try:
         imgurl = mix[channel]['imgurl']
     except:
@@ -263,7 +263,7 @@ async def esnipe(ctx):
         messageurl = editmsg[ctx.channel.id]['msgurl']
         timee = editmsg[ctx.channel.id]['time']
     except:
-        await ctx.respond('There isn\'t any deleted message in this channel.')
+        await ctx.send('There isn\'t any edited message in this channel.')
         invalid = True
     if invalid != True:
         embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
@@ -271,7 +271,7 @@ async def esnipe(ctx):
         embed.add_field(name='Edited message', value=f'{newmsg}')
         embed.timestamp = timee
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
-        await ctx.respond(embed=embed)
+        await ctx.send(embed=embed)
 
 # @client.command(name='dmesnipe', description = 'Snipes the last edited message sent in the channel to your DMs')
 @client.command(aliases=['dmes'])
@@ -286,7 +286,7 @@ async def dmesnipe(ctx):
         messageurl = editmsg[ctx.channel.id]['msgurl']
         timee = editmsg[ctx.channel.id]['time']
     except:
-        await ctx.respond('There isn\'t any deleted message in this channel.')
+        await ctx.send('There isn\'t any edited message in this channel.')
         invalid = True
     if invalid != True:
         embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
