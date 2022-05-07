@@ -175,11 +175,7 @@ async def on_message_delete(message):
             mix[channel]['imgurl'] = imgurl
         else:
             mix[channel]['attachment'] = attachment.url
-    print(mix[channel])
         
-
-
-
 # @client.command(name='snipe', description = 'Snipes the last deleted message sent in the channel')
 @client.command(aliases=['s'])
 @commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 960209393339731989)
@@ -193,43 +189,41 @@ async def snipe(ctx):
     else:
         await ctx.send('There is no deleted message in this channel')
         return
+    if 'attachment' in mix[channel]:
+        attachment = mix[channel]['attachment']
+        content += f"\n[:open_file_folder: Attachment]({attachment})"
     embed = discord.Embed(description=f'{content}', colour=1752220)
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
     if 'imgurl' in mix[channel]:
-        print('imgurl')
         imgurl = mix[channel]['imgurl']
         embed.set_image(url=imgurl)
-    if 'attachment' in mix[channel]:
-        attachment = mix[channel]['attachment']
-        print(attachment)
-        embed.add_field(name="Attachment", value=f"[Here is the link]({attachment})")
     await ctx.send(embed=embed)
 
 # @client.command(name='dmsnipe', description = 'Snipes the last deleted message sent in the channel and sends it to your DMs')
 @client.command(aliases=['dms'])
 @commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def dmsnipe(ctx):
-    channel = ctx.channel.id
-    try:
+    channel = str(ctx.channel.id)
+    if channel in mix:
         author = mix[channel]['author']
         authorav = mix[channel]['authorav']
         timee = mix[channel]['time']
         content = mix[channel]['content']
-    except:
+    else:
         await ctx.send('There is no deleted message in this channel')
-    try:
-        imgurl = mix[channel]['imgurl']
-    except:
-        imgurl = False
+        return
+    if 'attachment' in mix[channel]:
+        attachment = mix[channel]['attachment']
+        content += f"\n[:open_file_folder: Attachment]({attachment})"
     embed = discord.Embed(description=f'{content}', colour=1752220)
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
-    embed.set_footer(text=f'Deleted in {ctx.channel} ({ctx.guild.name})')
-    if imgurl:
+    if 'imgurl' in mix[channel]:
+        imgurl = mix[channel]['imgurl']
         embed.set_image(url=imgurl)
     await ctx.author.send(embed=embed)
-    await ctx.add_reaction('👍')
+    await ctx.message.add_reaction('👌')
 
 
 @client.event
@@ -270,9 +264,7 @@ async def esnipe(ctx):
         await ctx.send('There isn\'t any edited message in this channel.')
         invalid = True
     if invalid != True:
-        embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
-        embed.add_field(name='Original Message', value=f'{oldmsg}')
-        embed.add_field(name='Edited message', value=f'{newmsg}')
+        embed = discord.Embed(description=f'**Original Message**\n{oldmsg}\n**Edited Message**\n{newmsg}\n[Jump to message]({messageurl})', colour=1752220)
         embed.timestamp = timee
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
         await ctx.send(embed=embed)
