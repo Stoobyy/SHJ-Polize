@@ -5,6 +5,7 @@ import time
 from datetime import *
 
 import requests
+from discord_webhook import DiscordWebhook
 
 import discord
 from discord.commands import slash_command
@@ -21,6 +22,7 @@ mix = {}
 editmsg = {}
 ignore = []
 idict = {}
+ez = ["Wait... This isn't what I typed!", 'Anyone else really like Rick Astley?', 'Hey helper, how play game?', 'Sometimes I sing soppy, love songs in the car.', 'I like long walks on the beach.', 'Please go easy on me, this is my first time on discord!', "You're a great person! Do you want to chat?", 'In my free time I like to watch cat videos on Youtube', 'When I saw the witch with the potion, I knew there was trouble brewing.', 'If the Minecraft world is infinite, how is the sun spinning around it?', 'Hello everyone! I am an innocent person who loves chatting.', 'Plz give me doggo memes!', 'I heard you like Minecraft, so I built a computer in Minecraft in your Minecraft so you can Minecraft while you Minecraft', "Why can't the Ender Dragon read a book? Because he always starts at the End.", 'Maybe we can have a rematch?', 'I sometimes try to say bad things then this happens :(', 'Behold, the great and powerful, my magnificent and almighty nemisis!', 'Doin a bamboozle fren.', 'Your comebacks are godly. :eek:', 'What happens if I add chocolate milk to macaroni and cheese?', 'Can you paint with all the colors of the wind', 'Blue is greener than purple for sure', 'I had something to say, then I forgot it.', 'When nothing is right, go left.', 'I need help, teach me how to play!', 'Your personality shines brighter than the sun.', 'You are very good at the game friend.', 'I like pineapple on my pizza', 'I like pasta, do you prefer nachos?', 'I like fighting but you are truly better than me!', 'I have really enjoyed playing with you! <3', 'ILY <3', "Pineapple doesn't go on pizza!", 'Lets be friends instead of fighting okay?']
 
 
 client = commands.Bot(command_prefix='>', help_command=None,intents=discord.Intents.all())
@@ -55,6 +57,13 @@ async def on_message(message):
     with open('last.json', 'r') as f:
         last = json.load(f)
     if message.author.bot or message.guild is False:
+        return
+    if 'ez' in message.content.lower():
+        webhooks = await message.channel.webhooks()
+        webhookurl = webhooks[0].url
+        data = {"content": random.choice(ez), "username": message.author.name, "avatar_url": message.author.avatar.url}
+        response = requests.post(webhookurl, json=data)
+        await message.delete()
         return
     guildid = str(message.guild.id)
     current_time = datetime.now(timezone.utc)
@@ -91,6 +100,7 @@ async def on_message(message):
 
 @client.slash_command(name='hl')
 async def hl(ctx, word=None):
+
     guildid = str(ctx.guild.id)
     with open('hl.json', 'r') as f:
         hl = json.load(f)
@@ -264,7 +274,9 @@ async def esnipe(ctx):
         await ctx.send('There isn\'t any edited message in this channel.')
         invalid = True
     if invalid != True:
-        embed = discord.Embed(description=f'**Original Message**\n{oldmsg}\n**Edited Message**\n{newmsg}\n[Jump to message]({messageurl})', colour=1752220)
+        embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
+        embed.add_field(name='Original Message', value=f'{oldmsg}')
+        embed.add_field(name='Edited message', value=f'{newmsg}')
         embed.timestamp = timee
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
         await ctx.send(embed=embed)
