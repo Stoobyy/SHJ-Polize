@@ -177,10 +177,6 @@ async def on_message_delete(message):
         message_author_avatar = str(message.author.avatar)
         channel = message.channel.id
 
-        # what is this you dont even use it bruh
-        response = requests.get('https://showcase.api.linx.twenty57.net/UnixTime/tounixtimestamp?datetime=now')
-        raw = response.json()
-
         timee = datetime.utcnow()
         mix[channel] = {'content': content, 'author': author,'authorav': message_author_avatar, 'time': timee}
 
