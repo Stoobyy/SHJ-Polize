@@ -30,6 +30,8 @@ client = commands.Bot(command_prefix='>', help_command=None,
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
+    await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
+
 
 
 class GiveawayView(View):
