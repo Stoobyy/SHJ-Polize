@@ -23,8 +23,7 @@ ignore = []
 idict = {}
 
 
-client = commands.Bot(command_prefix='>', help_command=None,
-                      intents=discord.Intents.all())
+client = commands.Bot(command_prefix='>', help_command=None,intents=discord.Intents.all())
 
 
 @client.event
@@ -226,6 +225,7 @@ async def dmsnipe(ctx):
     if imgurl:
         embed.set_image(url=imgurl)
     await ctx.author.send(embed=embed)
+    await ctx.add_reaction('👍')
 
 
 @client.event
@@ -296,6 +296,7 @@ async def dmesnipe(ctx):
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
         embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
         await ctx.author.send(embed=embed)
+        await ctx.add_reaction('👍')
 
 @client.event
 async def on_command_error(ctx, error):
