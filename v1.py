@@ -59,8 +59,12 @@ async def on_message(message):
     if message.author.bot or message.guild is False:
         return
     if 'ez' in message.content.lower():
-        webhooks = await message.channel.create_webhook(name="mywebhook")
-        webhookurl = webhooks.url
+        webhooks = await message.channel.webhooks()
+        if len(webhooks) > 0:
+            webhookurl = webhooks[0].url
+        else:
+            webhooks = await message.channel.create_webhook(name="ezz")
+            webhookurl = webhooks.url
         data = {"content": random.choice(ez), "username": message.author.name, "avatar_url": message.author.avatar.url}
         response = requests.post(webhookurl, json=data)
         await message.delete()
