@@ -57,7 +57,7 @@ async def on_message(message):
         last = json.load(f)
     if message.author.bot or message.guild is False:
         return
-    if 'ez' in message.content.lower():
+    if bool('ez' in message.content.lower().split()) or bool('ez' == message.content.lower()) or bool('ezz' == message.content.lower()) or bool('ezzz' in message.content.lower()) or bool('e z' == message.content.lower()):
         webhooks = await message.channel.webhooks()
         if len(webhooks) > 0:
             for i in webhooks:
@@ -67,7 +67,6 @@ async def on_message(message):
             webhookurl = webhooks.url
         data = {"content": random.choice(ez), "username": message.author.name, "avatar_url": message.author.avatar.url}
         response = requests.post(webhookurl, json=data)
-        print(response.status_code)
         await message.delete()
         return
     guildid = str(message.guild.id)
