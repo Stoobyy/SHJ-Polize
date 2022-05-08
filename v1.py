@@ -5,7 +5,6 @@ import time
 from datetime import *
 
 import requests
-from discord_webhook import DiscordWebhook
 
 import discord
 from discord.commands import slash_command
@@ -61,12 +60,14 @@ async def on_message(message):
     if 'ez' in message.content.lower():
         webhooks = await message.channel.webhooks()
         if len(webhooks) > 0:
-            webhookurl = webhooks[0].url
+            for i in webhooks:
+                webhookurl = i.url
         else:
             webhooks = await message.channel.create_webhook(name="ezz")
             webhookurl = webhooks.url
         data = {"content": random.choice(ez), "username": message.author.name, "avatar_url": message.author.avatar.url}
         response = requests.post(webhookurl, json=data)
+        print(response.status_code)
         await message.delete()
         return
     guildid = str(message.guild.id)
