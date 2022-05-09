@@ -1,7 +1,6 @@
 import asyncio
 import json
 import random
-import time
 from datetime import *
 
 import requests
@@ -10,14 +9,9 @@ import discord
 from discord.commands import slash_command
 from discord.ext import commands, tasks
 from discord.ui import View
-from discord.utils import get
 
 devs = (499112914578309120, 700195735689494558)
 
-roles = {0: 734056569041322066, 3: 756979356332589117, 5: 734302084350083166, 10: 734305511759151144,
-         25: 757698628360863876, 35: 734302384032841759, 50: 734304865794392094, 65: 808060262179012658, 70: 734306269430677515}
-startroles = [767016755809091654, 767029516769689601,
-              767017209389252658, 767017558095429649, 767017041319428107]
 giveawaytags = []
 mix = {}
 editmsg = {}
@@ -196,7 +190,6 @@ async def on_message_delete(message):
         else:
             mix[channel]['attachment'] = attachment.url
         
-# @client.command(name='snipe', description = 'Snipes the last deleted message sent in the channel')
 @client.command(aliases=['s'])
 @commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 960209393339731989)
 async def snipe(ctx):
@@ -207,7 +200,7 @@ async def snipe(ctx):
         timee = mix[channel]['time']
         content = mix[channel]['content']
     else:
-        await ctx.send('There is no deleted message in this channel')
+        await ctx.reply('There is no deleted message in this channel', mention_author=False)
         return
     if 'attachment' in mix[channel]:
         attachment = mix[channel]['attachment']
@@ -218,9 +211,8 @@ async def snipe(ctx):
     if 'imgurl' in mix[channel]:
         imgurl = mix[channel]['imgurl']
         embed.set_image(url=imgurl)
-    await ctx.send(embed=embed)
+    await ctx.reply(embed=embed, mention_author=False)
 
-# @client.command(name='dmsnipe', description = 'Snipes the last deleted message sent in the channel and sends it to your DMs')
 @client.command(aliases=['dms'])
 @commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def dmsnipe(ctx):
@@ -231,7 +223,7 @@ async def dmsnipe(ctx):
         timee = mix[channel]['time']
         content = mix[channel]['content']
     else:
-        await ctx.send('There is no deleted message in this channel')
+        await ctx.reply('There is no deleted message in this channel', mention_author=False)
         return
     if 'attachment' in mix[channel]:
         attachment = mix[channel]['attachment']
@@ -268,7 +260,6 @@ async def on_message_edit(oldmsg, newmsg):
         editmsg[channel] = {'author': author, 'oldcontent': oldcontent,'newcontent': newcontent, 'authorav': authav, 'msgurl': msgurl, 'time': timee}
 
 
-# @client.command(name='esnipe', description = 'Snipes the last edited message sent in the channel')
 @client.command(aliases=['es'])
 @commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def esnipe(ctx):
@@ -281,7 +272,7 @@ async def esnipe(ctx):
         messageurl = editmsg[ctx.channel.id]['msgurl']
         timee = editmsg[ctx.channel.id]['time']
     except:
-        await ctx.send('There isn\'t any edited message in this channel.')
+        await ctx.reply('There isn\'t any edited message in this channel.', mention_author=False)
         invalid = True
     if invalid != True:
         embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
@@ -289,9 +280,8 @@ async def esnipe(ctx):
         embed.add_field(name='Edited message', value=f'{newmsg}')
         embed.timestamp = timee
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed, mention_author=False)
 
-# @client.command(name='dmesnipe', description = 'Snipes the last edited message sent in the channel to your DMs')
 @client.command(aliases=['dmes'])
 @commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def dmesnipe(ctx):
@@ -304,7 +294,7 @@ async def dmesnipe(ctx):
         messageurl = editmsg[ctx.channel.id]['msgurl']
         timee = editmsg[ctx.channel.id]['time']
     except:
-        await ctx.send('There isn\'t any edited message in this channel.')
+        await ctx.reply('There isn\'t any edited message in this channel.', mention_author=False)
         invalid = True
     if invalid != True:
         embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
@@ -318,20 +308,33 @@ async def dmesnipe(ctx):
 
 @client.event
 async def on_reaction_add(reaction, user):
-    print(reaction.emoji, user, reaction.message.author)
     message = await reaction.message.channel.fetch_message(reaction.message.id)
+    try:
+        snipemsg = await reaction.message.channel.fetch_message(message.reference.message_id)
+        s_user = snipemsg.author.id
+    except:
+        s_user = None
     if message.author.id == client.user.id:
         if reaction.emoji == '❌':
-            if user.id in devs:
+            if user.id == s_user or user.id in devs:
                 await message.delete()
+                if s_user != None:
+                    await snipemsg.delete()
 
 @client.command(aliases=['d'])
 async def delete(ctx):
-    if ctx.author.id in devs:
-        message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
-        if message.author.id == client.user.id:
+    message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+    try:
+        snipemsg = await ctx.channel.fetch_message(message.reference.message_id)
+        s_user = snipemsg.author.id
+    except:
+        s_user = None
+    if message.author.id == client.user.id:
+        if ctx.author.id in devs or ctx.author.id == s_user:
             await message.delete()
             await ctx.message.delete()
+            if s_user != None:
+                await snipemsg.delete()
     else:
         await ctx.react('<a:nochamp:972351244700090408>')
 
