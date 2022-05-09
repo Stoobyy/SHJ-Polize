@@ -12,6 +12,8 @@ from discord.ext import commands, tasks
 from discord.ui import View
 from discord.utils import get
 
+devs = (499112914578309120, 700195735689494558)
+
 roles = {0: 734056569041322066, 3: 756979356332589117, 5: 734302084350083166, 10: 734305511759151144,
          25: 757698628360863876, 35: 734302384032841759, 50: 734304865794392094, 65: 808060262179012658, 70: 734306269430677515}
 startroles = [767016755809091654, 767029516769689601,
@@ -309,6 +311,25 @@ async def dmesnipe(ctx):
         embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
         await ctx.author.send(embed=embed)
         await ctx.add_reaction('👍')
+
+@client.event
+async def on_reaction_add(reaction, user):
+    print(reaction.emoji, user, reaction.message.author)
+    message = await reaction.message.channel.fetch_message(reaction.message.id)
+    if message.author.id == client.user.id:
+        if reaction.emoji == '❌':
+            if user.id in devs:
+                await message.delete()
+
+@client.command(aliases=['d'])
+async def delete(ctx):
+    if ctx.author.id in devs:
+        message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+        if message.author.id == client.user.id:
+            await message.delete()
+            await ctx.message.delete()
+    else:
+        await ctx.react('<a:nochamp:972351244700090408>')
 
 @client.event
 async def on_command_error(ctx, error):
