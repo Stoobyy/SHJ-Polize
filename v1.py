@@ -70,7 +70,7 @@ async def on_message(message):
         await message.delete()
         return
     guildid = str(message.guild.id)
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(timezone(timedelta(hours=4)))
     unix_timestamp = current_time.timestamp()
     if guildid in last:
         last[guildid][str(message.author.id)] = unix_timestamp
@@ -96,7 +96,7 @@ async def on_message(message):
                         embed.set_footer(
                             text=f'Message ID: {message.id} | Author ID: {message.author.id}')
                         member = message.guild.get_member(int(str(user)))
-                        timee = datetime.now(timezone.utc).timestamp()
+                        timee = datetime.now(timezone(timedelta(hours=4))).timestamp()
                         lastt = last[guild][user] if user in last[guild] else 0
                         if lastt == 0 or timee - lastt > 300:
                             await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
@@ -178,7 +178,7 @@ async def on_message_delete(message):
     author = str(message.author)
     message_author_avatar = str(message.author.avatar)
     channel = str(message.channel.id)
-    timee = datetime.utcnow()
+    timee = datetime.now(timezone(timedelta(hours=4)))
     mix[channel] = {'content': content, 'author': author,'authorav': message_author_avatar, 'time': timee}
 
     if message.attachments:
@@ -248,7 +248,7 @@ async def on_message_edit(oldmsg, newmsg):
     channel = oldmsg.channel.id
     authav = oldmsg.author.avatar
     msgurl = oldmsg.jump_url
-    timee = datetime.utcnow()
+    timee = datetime.now(timezone(timedelta(hours=4)))
 
     if oldmsg.author.bot:
         return
