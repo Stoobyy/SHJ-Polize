@@ -265,49 +265,47 @@ async def on_message_edit(oldmsg, newmsg):
 @client.command(aliases=['es'])
 @commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def esnipe(ctx):
-    invalid = False
-    try:
-        author = editmsg[ctx.channel.id]['author']
-        oldmsg = editmsg[ctx.channel.id]['oldcontent']
-        newmsg = editmsg[ctx.channel.id]['newcontent']
-        authav = editmsg[ctx.channel.id]['authorav']
-        messageurl = editmsg[ctx.channel.id]['msgurl']
-        timee = editmsg[ctx.channel.id]['time']
-    except:
-        await ctx.reply('There isn\'t any edited message in this channel.', mention_author=False)
-        invalid = True
-    if invalid != True:
-        embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
-        embed.add_field(name='Original Message', value=f'{oldmsg}')
-        embed.add_field(name='Edited message', value=f'{newmsg}')
-        embed.timestamp = timee
-        embed.set_author(name=f'{author}', icon_url=f'{authav}')
-        await ctx.reply(embed=embed, mention_author=False)
+    channel = str(ctx.channel.id)
+    if channel in mix:
+        author = editmsg[channel]['author']
+        oldmsg = editmsg[channel]['oldcontent']
+        newmsg = editmsg[channel]['newcontent']
+        authav = editmsg[channel]['authorav']
+        messageurl = editmsg[channel]['msgurl']
+        timee = editmsg[channel]['time']
+    else:
+        await ctx.reply('There is no deleted message in this channel', mention_author=False)
+        return
+    embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
+    embed.add_field(name='Original Message', value=f'{oldmsg}')
+    embed.add_field(name='Edited message', value=f'{newmsg}')
+    embed.timestamp = timee
+    embed.set_author(name=f'{author}', icon_url=f'{authav}')
+    await ctx.reply(embed=embed, mention_author=False)
 
 
 @client.command(aliases=['dmes'])
 @commands.has_any_role(773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989)
 async def dmesnipe(ctx):
-    invalid = False
-    try:
-        author = editmsg[ctx.channel.id]['author']
-        oldmsg = editmsg[ctx.channel.id]['oldcontent']
-        newmsg = editmsg[ctx.channel.id]['newcontent']
-        authav = editmsg[ctx.channel.id]['authorav']
-        messageurl = editmsg[ctx.channel.id]['msgurl']
-        timee = editmsg[ctx.channel.id]['time']
-    except:
-        await ctx.reply('There isn\'t any edited message in this channel.', mention_author=False)
-        invalid = True
-    if invalid != True:
-        embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
-        embed.add_field(name='Original Message', value=f'{oldmsg}')
-        embed.add_field(name='Edited message', value=f'{newmsg}')
-        embed.timestamp = timee
-        embed.set_author(name=f'{author}', icon_url=f'{authav}')
-        embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
-        await ctx.author.send(embed=embed)
-        await ctx.add_reaction('👍')
+    channel = str(ctx.channel.id)
+    if channel in mix:
+        author = editmsg[channel]['author']
+        oldmsg = editmsg[channel]['oldcontent']
+        newmsg = editmsg[channel]['newcontent']
+        authav = editmsg[channel]['authorav']
+        messageurl = editmsg[channel]['msgurl']
+        timee = editmsg[channel]['time']
+    else:
+        await ctx.reply('There is no deleted message in this channel', mention_author=False)
+        return
+    embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
+    embed.add_field(name='Original Message', value=f'{oldmsg}')
+    embed.add_field(name='Edited message', value=f'{newmsg}')
+    embed.timestamp = timee
+    embed.set_author(name=f'{author}', icon_url=f'{authav}')
+    embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
+    await ctx.author.send(embed=embed)
+    await ctx.add_reaction('👍')
 
 
 @client.event
