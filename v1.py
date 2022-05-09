@@ -60,16 +60,20 @@ async def on_message(message):
     if message.author.bot or message.guild is False:
         return
     if bool('ez' in message.content.lower().split()) or bool('ez' == message.content.lower()) or bool('ezz' == message.content.lower()) or bool('ezzz' in message.content.lower()) or bool('e z' == message.content.lower()):
-        webhooks = await message.channel.webhooks()
-        if len(webhooks) > 0:
-            for i in webhooks:
-                webhookurl = i.url
-        else:
-            webhooks = await message.channel.create_webhook(name="ezz")
-            webhookurl = webhooks.url
+        hooks = await message.channel.webhooks()
+        hook = discord.utils.get(hooks, name='ezz')  
+        if hook is None:
+            hook = await message.channel.create_webhook(name='ezz', avatar=None, reason=None)
+
         data = {"content": random.choice(ez), "username": message.author.name, "avatar_url": message.author.avatar.url}
-        response = requests.post(webhookurl, json=data)
+        hookurl = hook.url + '?wait=true'
+        response = requests.post(hookurl, json=data)
+        raw = response.json()
+        channel = await client.fetch_channel(int(raw['channel_id']))
+        messageid = await channel.fetch_message(int(raw['id']))
         await message.delete()
+        await asyncio.sleep(10)
+        await messageid.delete()
         return
     guildid = str(message.guild.id)
     current_time = datetime.now(timezone(timedelta(hours=4)))
