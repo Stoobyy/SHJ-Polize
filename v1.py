@@ -261,25 +261,25 @@ async def on_message_delete(message):
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
 async def snipe(ctx, channel: discord.TextChannel = None):
     if channel is None:
-        channel = str(ctx.channel.id)
-    else:
-        channel = str(channel.id)
-    if channel in mix:
-        author = mix[channel]['author']
-        authorav = mix[channel]['authorav']
-        timee = mix[channel]['time']
-        content = mix[channel]['content']
+        channel = ctx.channel
+    channel_id = str(channel.id)
+    if channel_id in mix:
+        author = mix[channel_id]['author']
+        authorav = mix[channel_id]['authorav']
+        timee = mix[channel_id]['time']
+        content = mix[channel_id]['content']
     else:
         await ctx.reply('There is no deleted message in this channel', mention_author=False)
         return
-    if 'attachment' in mix[channel]:
-        attachment = mix[channel]['attachment']
+    if 'attachment' in mix[channel_id]:
+        attachment = mix[channel_id]['attachment']
         content += f"\n:open_file_folder:[Attachment]({attachment})"
     embed = discord.Embed(description=f'{content}', colour=1752220)
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
-    if 'img' in mix[channel]:
-        img = mix[channel]['img']
+    embed.set_footer(text=f'Deleted in {channel}')
+    if 'img' in mix[channel_id]:
+        img = mix[channel_id]['img']
         embed.set_image(url=f'attachment://{img.filename}')
         await ctx.reply(embed=embed, file=img, mention_author=False)
         return
@@ -290,25 +290,25 @@ async def snipe(ctx, channel: discord.TextChannel = None):
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
 async def dmsnipe(ctx, channel: discord.TextChannel = None):
     if channel is None:
-        channel = str(ctx.channel.id)
-    else:
-        channel = str(channel.id)
-    if channel in mix:
-        author = mix[channel]['author']
-        authorav = mix[channel]['authorav']
-        timee = mix[channel]['time']
-        content = mix[channel]['content']
+        channel = ctx.channel
+    channel_id = str(channel.id)
+    if channel_id in mix:
+        author = mix[channel_id]['author']
+        authorav = mix[channel_id]['authorav']
+        timee = mix[channel_id]['time']
+        content = mix[channel_id]['content']
     else:
         await ctx.reply('There is no deleted message in this channel', mention_author=False)
         return
-    if 'attachment' in mix[channel]:
-        attachment = mix[channel]['attachment']
+    if 'attachment' in mix[channel_id]:
+        attachment = mix[channel_id]['attachment']
         content += f"\n:open_file_folder:[Attachment]({attachment})"
     embed = discord.Embed(description=f'{content}', colour=1752220)
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authorav}')
-    if 'img' in mix[channel]:
-        img = mix[channel]['img']
+    embed.set_footer(text=f'Deleted in {channel} ({ctx.guild.name})')
+    if 'img' in mix[channel_id]:
+        img = mix[channel_id]['img']
         embed.set_image(url=img)
     await ctx.author.send(embed=embed)
     await ctx.message.add_reaction('👍')
@@ -339,16 +339,15 @@ async def on_message_edit(oldmsg, newmsg):
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
 async def esnipe(ctx, channel: discord.TextChannel = None):
     if channel is None:
-        channel = str(ctx.channel.id)
-    else:
-        channel = str(channel.id)
-    if channel in editmsg:
-        author = editmsg[channel]['author']
-        oldmsg = editmsg[channel]['oldcontent']
-        newmsg = editmsg[channel]['newcontent']
-        authav = editmsg[channel]['authorav']
-        messageurl = editmsg[channel]['msgurl']
-        timee = editmsg[channel]['time']
+        channel = ctx.channel
+    channel_id = str(channel.id)
+    if channel_id in editmsg:
+        author = editmsg[channel_id]['author']
+        oldmsg = editmsg[channel_id]['oldcontent']
+        newmsg = editmsg[channel_id]['newcontent']
+        authav = editmsg[channel_id]['authorav']
+        messageurl = editmsg[channel_id]['msgurl']
+        timee = editmsg[channel_id]['time']
     else:
         await ctx.reply('There is no edited message in this channel', mention_author=False)
         return
@@ -357,6 +356,7 @@ async def esnipe(ctx, channel: discord.TextChannel = None):
     embed.add_field(name='Edited message', value=f'{newmsg}')
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authav}')
+    embed.set_footer(text=f'Deleted in {channel}')
     await ctx.reply(embed=embed, mention_author=False)
 
 
@@ -364,16 +364,15 @@ async def esnipe(ctx, channel: discord.TextChannel = None):
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
 async def dmesnipe(ctx, channel: discord.TextChannel = None):
     if channel is None:
-        channel = str(ctx.channel.id)
-    else:
-        channel = str(channel.id)
-    if channel in editmsg:
-        author = editmsg[channel]['author']
-        oldmsg = editmsg[channel]['oldcontent']
-        newmsg = editmsg[channel]['newcontent']
-        authav = editmsg[channel]['authorav']
-        messageurl = editmsg[channel]['msgurl']
-        timee = editmsg[channel]['time']
+        channel = ctx.channel
+    channel_id = str(channel.id)
+    if channel_id in editmsg:
+        author = editmsg[channel_id]['author']
+        oldmsg = editmsg[channel_id]['oldcontent']
+        newmsg = editmsg[channel_id]['newcontent']
+        authav = editmsg[channel_id]['authorav']
+        messageurl = editmsg[channel_id]['msgurl']
+        timee = editmsg[channel_id]['time']
     else:
         await ctx.reply('There is no edited message in this channel', mention_author=False)
         return
@@ -382,7 +381,7 @@ async def dmesnipe(ctx, channel: discord.TextChannel = None):
     embed.add_field(name='Edited message', value=f'{newmsg}')
     embed.timestamp = timee
     embed.set_author(name=f'{author}', icon_url=f'{authav}')
-    embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
+    embed.set_footer(text=f'Edited in {channel} ({ctx.guild.name})')
     await ctx.author.send(embed=embed)
     await ctx.message.add_reaction('👍')
 
