@@ -350,7 +350,7 @@ async def esnipe(ctx, channel: discord.TextChannel = None):
         messageurl = editmsg[channel]['msgurl']
         timee = editmsg[channel]['time']
     else:
-        await ctx.reply('There is no deleted message in this channel', mention_author=False)
+        await ctx.reply('There is no edited message in this channel', mention_author=False)
         return
     embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
     embed.add_field(name='Original Message', value=f'{oldmsg}')
@@ -375,7 +375,7 @@ async def dmesnipe(ctx, channel: discord.TextChannel = None):
         messageurl = editmsg[channel]['msgurl']
         timee = editmsg[channel]['time']
     else:
-        await ctx.reply('There is no deleted message in this channel', mention_author=False)
+        await ctx.reply('There is no edited message in this channel', mention_author=False)
         return
     embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
     embed.add_field(name='Original Message', value=f'{oldmsg}')
@@ -384,7 +384,7 @@ async def dmesnipe(ctx, channel: discord.TextChannel = None):
     embed.set_author(name=f'{author}', icon_url=f'{authav}')
     embed.set_footer(text=f'Edited in {ctx.channel} ({ctx.guild.name})')
     await ctx.author.send(embed=embed)
-    await ctx.add_reaction('👍')
+    await ctx.message.add_reaction('👍')
 
 
 @client.event
@@ -437,24 +437,24 @@ async def eazyblacklist(ctx, param: discord.Member or discord.TextChannel = None
             blacklist['channel_blacklist'].remove(param.id)
             with open('bl.json', 'w') as f:
                 json.dump(blacklist, f)
-            await ctx.react('👍')
+            await ctx.message.add_reaction('👍')
             return
         blacklist['channel_blacklist'].append(param.id)
         with open('bl.json', 'w') as f:
             json.dump(blacklist, f)
-        await ctx.react('👍')
+        await ctx.message.add_reaction('👍')
 
     elif isinstance(param, discord.Member):
         if param.id in blacklist['user_blacklist']:
             blacklist['user_blacklist'].remove(param.id)
             with open('bl.json', 'w') as f:
                 json.dump(blacklist, f)
-            await ctx.react('👍')
+            await ctx.message.add_reaction('👍')
             return
         blacklist['user_blacklist'].append(param.id)
         with open('bl.json', 'w') as f:
             json.dump(blacklist, f)
-        await ctx.react('👍')
+        await ctx.message.add_reaction('👍')
 
 @client.slash_command(name='blacklist')
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
