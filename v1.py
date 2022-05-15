@@ -342,7 +342,7 @@ async def esnipe(ctx, channel: discord.TextChannel = None):
         channel = str(ctx.channel.id)
     else:
         channel = str(channel.id)
-    if channel in mix:
+    if channel in editmsg:
         author = editmsg[channel]['author']
         oldmsg = editmsg[channel]['oldcontent']
         newmsg = editmsg[channel]['newcontent']
@@ -367,7 +367,7 @@ async def dmesnipe(ctx, channel: discord.TextChannel = None):
         channel = str(ctx.channel.id)
     else:
         channel = str(channel.id)
-    if channel in mix:
+    if channel in editmsg:
         author = editmsg[channel]['author']
         oldmsg = editmsg[channel]['oldcontent']
         newmsg = editmsg[channel]['newcontent']
