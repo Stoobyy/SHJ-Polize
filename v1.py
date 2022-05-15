@@ -319,7 +319,7 @@ async def on_message_edit(oldmsg, newmsg):
     author = oldmsg.author
     oldcontent = oldmsg.content
     newcontent = newmsg.content
-    channel = oldmsg.channel.id
+    channel = str(oldmsg.channel.id)
     authav = oldmsg.author.avatar
     msgurl = oldmsg.jump_url
     timee = datetime.now(tzone)
