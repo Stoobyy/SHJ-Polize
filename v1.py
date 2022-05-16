@@ -27,7 +27,7 @@ with open('bl.json', 'r') as f:
     with open('bl.json', 'w') as f:
         json.dump(blacklist, f)
 
-client = commands.Bot(command_prefix='>', help_command=None, intents=discord.Intents.all())
+client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), help_command=None, intents=discord.Intents.all())
 
 devs = (499112914578309120, 700195735689494558)
 roles = [773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989]
@@ -460,6 +460,16 @@ async def eazyblacklist(ctx, param: discord.Member or discord.TextChannel = None
 @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist', required=False)
 @discord.option(name='user', type=discord.Member, default=None, description='The user to blacklist', required=False)
 async def eazyblacklist(ctx, channel: discord.TextChannel, user: discord.Member):
+    if channel is None and user is None:
+        embed = discord.Embed(title='Blacklist', description='Shows Blacklisted Channels and Users for ez message', colour=1752220)
+        cb = '\n'.join('<#{}>'.format(x) for x in blacklist['channel_blacklist'])
+        ub = '\n'.join('<@{}>'.format(x) for x in blacklist['user_blacklist'])
+        if len(blacklist['channel_blacklist']) != 0:
+            embed.add_field(name='Channels', value=cb, inline=False)
+        if len(blacklist['user_blacklist']) != 0:
+            embed.add_field(name='Users', value=ub, inline=False)
+        await ctx.respond(embed=embed, ephemeral=True)
+
     if isinstance(channel, discord.TextChannel):
         if channel.id in blacklist['channel_blacklist']:
             blacklist['channel_blacklist'].remove(channel.id)
@@ -487,7 +497,12 @@ async def eazyblacklist(ctx, channel: discord.TextChannel, user: discord.Member)
 
 @client.event
 async def on_command_error(ctx, error):
-    if isinstance(error, discord.ext.commands.errors.MissingAnyRole):
+    if isinstance(error, commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
         await ctx.message.add_reaction('<a:nochamp:972351244700090408>')
+
+@client.event
+async def on_application_command_error(ctx, error):
+    if isinstance(error, commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
+        await ctx.respond('<a:nochamp:972351244700090408>', ephemeral=True)
 
 client.run('OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0')
