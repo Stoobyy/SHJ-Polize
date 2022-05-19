@@ -63,12 +63,10 @@ class GiveawayView(View):
 
 @client.command()
 async def ping(ctx):
-    await ctx.send(f"Pong! {round(client.latency * 1000)}ms")
+    await ctx.send(f"{round(client.latency * 1000)}ms")
 
 @client.listen('on_message')
-async def on_message(message):
-    with open('last.json', 'r') as f:
-        last = json.load(f)
+async def ez_webhook(message):
     if message.author.bot or message.guild is False:
         return
     if message.author.id in blacklist['user_blacklist'] or message.channel.id in blacklist['channel_blacklist']:
@@ -88,7 +86,13 @@ async def on_message(message):
         await message.delete()
         await asyncio.sleep(10)
         await messageid.delete()
+
+@client.listen('on_message')
+async def hl_check(message):
+    if message.author.bot or message.guild is False:
         return
+    with open('last.json', 'r') as f:
+        last = json.load(f)
     guildid = str(message.guild.id)
     current_time = datetime.now(tzone)
     unix_timestamp = current_time.timestamp()
@@ -309,8 +313,8 @@ async def dmsnipe(ctx, channel: discord.TextChannel = None):
     embed.set_footer(text=f'Deleted in {channel} ({ctx.guild.name})')
     if 'img' in mix[channel_id]:
         img = mix[channel_id]['img']
-        embed.set_image(url=img)
-    await ctx.author.send(embed=embed)
+        embed.set_image(url=f'attachment://{img.filename}')
+    await ctx.author.send(embed=embed, file=img)
     await ctx.message.add_reaction('👍')
 
 
