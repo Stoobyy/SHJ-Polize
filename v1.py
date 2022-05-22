@@ -18,14 +18,15 @@ ignore = []
 idict = {}
 ez = ["Wait... This isn't what I typed!", 'Anyone else really like Rick Astley?', 'Hey helper, how play game?', 'Sometimes I sing soppy, love songs in the car.', 'I like long walks on the beach.', 'Please go easy on me, this is my first time on discord!', "You're a great person! Do you want to chat?", 'In my free time I like to watch cat videos on Youtube', 'When I saw the witch with the potion, I knew there was trouble brewing.', 'If the Minecraft world is infinite, how is the sun spinning around it?', 'Hello everyone! I am an innocent person who loves chatting.', 'Plz give me doggo memes!', 'I heard you like Minecraft, so I built a computer in Minecraft in your Minecraft so you can Minecraft while you Minecraft', "Why can't the Ender Dragon read a book? Because he always starts at the End.", 'Maybe we can have a rematch?', 'I sometimes try to say bad things then this happens :(', 'Behold, the great and powerful, my magnificent and almighty nemisis!', 'Doin a bamboozle fren.', 'Your comebacks are godly.', 'What happens if I add chocolate milk to macaroni and cheese?', 'Can you paint with all the colors of the wind', 'Blue is greener than purple for sure', 'I had something to say, then I forgot it.', 'When nothing is right, go left.', 'I need help, teach me how to play!', 'Your personality shines brighter than the sun.', 'You are very good at the game friend.', 'I like pineapple on my pizza', 'I like pasta, do you prefer nachos?', 'I like fighting but you are truly better than me!', 'I have really enjoyed playing with you! <3', 'ILY <3', "Pineapple doesn't go on pizza!", 'Lets be friends instead of fighting okay?']
 
-with open('bl.json', 'r') as f:
-    blacklist = json.load(f)
-    if "channel_blacklist" not in blacklist:
-        blacklist["channel_blacklist"] = []
-    if "user_blacklist" not in blacklist:
-        blacklist["user_blacklist"] = []
-    with open('bl.json', 'w') as f:
-        json.dump(blacklist, f)
+with open('ez.json', 'r') as f:
+    try:
+        blacklist = json.load(f)
+    except:
+        with open('ez.json', 'w') as f:
+            print('No blacklist found, creating new one...')
+            blacklist = {}
+            json.dump(blacklist, f)
+
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), help_command=None, intents=discord.Intents.all())
 
@@ -69,8 +70,26 @@ async def ping(ctx):
 async def ez_webhook(message):
     if message.author.bot or message.guild is False:
         return
-    if message.author.id in blacklist['user_blacklist'] or message.channel.id in blacklist['channel_blacklist']:
+    guild_id = str(message.guild.id)
+    if guild_id not in blacklist:
+        blacklist[guild_id] = {}
+        b = blacklist[guild_id]
+        b['channel_blacklist'] = []
+        b['user_blacklist'] = []
+        b['serverwide_blacklist'] = False
+        b['server_deleteafter'] = 0
+        b['channel_deleteafter'] = {}
+        with open('ez.json', 'w') as f:
+            json.dump(blacklist, f)
+
+    if guild_id in blacklist:
+        b = blacklist[guild_id]
+
+    if b['serverwide_blacklist'] is True:
         return
+    if message.channel.id in b['channel_blacklist'] or message.author.id in b['user_blacklist']:
+        return
+        
     if bool('ez' in message.content.lower().split()) or bool('ez' == message.content.lower()) or bool('ezz' == message.content.lower()) or bool('ezzz' in message.content.lower()) or bool('e z' == message.content.lower()):
         hooks = await message.channel.webhooks()
         hook = discord.utils.get(hooks, name='ezz')
@@ -83,16 +102,33 @@ async def ez_webhook(message):
         raw = response.json()
         channel = await client.fetch_channel(int(raw['channel_id']))
         messageid = await channel.fetch_message(int(raw['id']))
+
+        print(b)
+
+        if message.channel.id in b['channel_deleteafter']:
+            t = b['channel_deleteafter'][message.channel.id]
+        else:
+            if b['server_deleteafter']:
+                t = b['server_deleteafter']
+                print(t)
+            else:
+                t = None
         await message.delete()
-        await asyncio.sleep(10)
-        await messageid.delete()
+        if t != None:
+            print(t)
+            await asyncio.sleep(t)
+            await messageid.delete()
 
 @client.listen('on_message')
 async def hl_check(message):
     if message.author.bot or message.guild is False:
         return
-    with open('last.json', 'r') as f:
-        last = json.load(f)
+    with open('last.json', 'w+') as f:
+        if f.read() == '' or f.read() == '{}':
+            json.dump('{}', f)
+            last = {}
+        else:
+            last = json.load(f)
     guildid = str(message.guild.id)
     current_time = datetime.now(tzone)
     unix_timestamp = current_time.timestamp()
@@ -102,8 +138,14 @@ async def hl_check(message):
         last[guildid] = {str(message.author.id): unix_timestamp}
     with open('last.json', 'w') as f:
         json.dump(last, f)
-    with open('hl.json', 'r') as f:
-        hl = json.load(f)
+    with open('hl.json', 'w+') as f:
+        try:
+            hl = json.load(f)
+        except:
+            r = f.read()
+            if r == '':
+                f.write('{}')
+                hl = {}
     for guild in hl:
         if guild == str(guildid):
             for user in hl[guild]:
@@ -438,66 +480,140 @@ async def eazyblacklist(ctx, param: discord.Member or discord.TextChannel = None
     if isinstance(param, discord.TextChannel):
         if param.id in blacklist['channel_blacklist']:
             blacklist['channel_blacklist'].remove(param.id)
-            with open('bl.json', 'w') as f:
+            with open('ez.json', 'w') as f:
                 json.dump(blacklist, f)
             await ctx.message.add_reaction('👍')
             return
         blacklist['channel_blacklist'].append(param.id)
-        with open('bl.json', 'w') as f:
+        with open('ez.json', 'w') as f:
             json.dump(blacklist, f)
         await ctx.message.add_reaction('👍')
 
     elif isinstance(param, discord.Member):
         if param.id in blacklist['user_blacklist']:
             blacklist['user_blacklist'].remove(param.id)
-            with open('bl.json', 'w') as f:
+            with open('ez.json', 'w') as f:
                 json.dump(blacklist, f)
             await ctx.message.add_reaction('👍')
             return
         blacklist['user_blacklist'].append(param.id)
-        with open('bl.json', 'w') as f:
+        with open('ez.json', 'w') as f:
             json.dump(blacklist, f)
         await ctx.message.add_reaction('👍')
 
-@client.slash_command(name='blacklist')
+@client.slash_command(name='ezblacklist')
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
 @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist', required=False)
 @discord.option(name='user', type=discord.Member, default=None, description='The user to blacklist', required=False)
-async def eazyblacklist(ctx, channel: discord.TextChannel, user: discord.Member):
-    if channel is None and user is None:
+@discord.option(name='serverwide', type=bool, default=None, description='Blacklist all channels', required=False)
+async def eazyblacklist(ctx, channel: discord.TextChannel, user: discord.Member, serverwide: bool):
+    b = blacklist[str(ctx.guild.id)]
+    if channel is None and user is None and serverwide is None:
         embed = discord.Embed(title='Blacklist', description='Shows Blacklisted Channels and Users for ez message', colour=1752220)
-        cb = '\n'.join('<#{}>'.format(x) for x in blacklist['channel_blacklist'])
-        ub = '\n'.join('<@{}>'.format(x) for x in blacklist['user_blacklist'])
-        if len(blacklist['channel_blacklist']) != 0:
+        cb = '\n'.join('<#{}>'.format(x) for x in b['channel_blacklist'])
+        ub = '\n'.join('<@{}>'.format(x) for x in b['user_blacklist'])
+        embed.add_field(name='Serverwide blacklist', value= f"{b['serverwide_blacklist']}")
+        if len(b['channel_blacklist']) != 0:
             embed.add_field(name='Channels', value=cb, inline=False)
-        if len(blacklist['user_blacklist']) != 0:
+        if len(b['user_blacklist']) != 0:
             embed.add_field(name='Users', value=ub, inline=False)
         await ctx.respond(embed=embed, ephemeral=True)
 
     if isinstance(channel, discord.TextChannel):
-        if channel.id in blacklist['channel_blacklist']:
-            blacklist['channel_blacklist'].remove(channel.id)
-            with open('bl.json', 'w') as f:
+        if channel.id in b['channel_blacklist']:
+            b['channel_blacklist'].remove(channel.id)
+            with open('ez.json', 'w') as f:
                 json.dump(blacklist, f)
             await ctx.respond(f'<#{channel.id}> is no longer blacklisted', ephemeral=True)
             return
-        blacklist['channel_blacklist'].append(channel.id)
-        with open('bl.json', 'w') as f:
+        b['channel_blacklist'].append(channel.id)
+        with open('ez.json', 'w') as f:
             json.dump(blacklist, f)
         await ctx.respond(f'<#{channel.id}> is now blacklisted', ephemeral=True)
         return
 
     if isinstance(user, discord.Member):
-        if user.id in blacklist['user_blacklist']:
-            blacklist['user_blacklist'].remove(user.id)
-            with open('bl.json', 'w') as f:
+        if user.id in b['user_blacklist']:
+            b['user_blacklist'].remove(user.id)
+            with open('ez.json', 'w') as f:
                 json.dump(blacklist, f)
             await ctx.respond(f'<@{user.id}> is no longer blacklisted', ephemeral=True)
             return
-        blacklist['user_blacklist'].append(user.id)
-        with open('bl.json', 'w') as f:
+        b['user_blacklist'].append(user.id)
+        with open('ez.json', 'w') as f:
             json.dump(blacklist, f)
         await ctx.respond(f'<@{user.id}> is now blacklisted', ephemeral=True)
+        return
+    sw = b['serverwide_blacklist']
+    if serverwide is True:
+        if sw is True:
+            await ctx.respond('Serverwide blacklist is already enabled', ephemeral=True)
+            return
+        b['serverwide_blacklist'] = True
+        with open('ez.json', 'w') as f:
+            json.dump(blacklist, f)
+        await ctx.respond(f'Serverwide blacklist is now enabled', ephemeral=True)
+    elif serverwide is False:
+        if sw is False:
+            await ctx.respond('Serverwide blacklist is already disabled', ephemeral=True)
+            return
+        b['serverwide_blacklist'] = False
+        with open('ez.json', 'w') as f:
+            json.dump(blacklist, f)
+        await ctx.respond(f'Serverwide blacklist is now disabled', ephemeral=True)
+
+@client.slash_command(name='ezbtimeout')
+@commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
+@discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist if empty changes server timeout', required=False)
+@discord.option(name='time', type=int, default=None, description='The time in seconds', required=False)
+async def deleteafter(ctx, channel: discord.TextChannel, time: int):
+    b = blacklist[str(ctx.guild.id)]
+    # print(channel.id, time)
+    print(time)
+    print(b)
+    if time is None:
+        print('inside')
+        embed = discord.Embed(title='ez Timeout', description='Shows the current timeout')
+        print(b['serverwide_deleteafter'])
+        if b['serverwide_deleteafter'] == 0:
+            embed.add_field(name='Serverwide timeout', value= 'Disabled', inline=False)
+        else:
+            embed.add_field(name='Serverwide timeout', value= f"{b['serverwide_deleteafter']} seconds")
+        print(len(b['channel_deleteafter']))
+        if len(b['channel_deleteafter']) != 0:
+            v = ''
+            for x, j in b['channel_deleteafter'].items:
+                print(x)
+                v += f'<#{x}> : {j} seconds\n'
+            print(v)
+            embed.add_field(name='Channels', value=v, inline=False)
+        await ctx.respond(embed=embed, ephemeral=True) 
+        return   
+
+    if channel is None:
+        b['server_deleteafter'] = time
+        print(blacklist[str(ctx.guild.id)]['server_deleteafter'])
+        with open('ez.json', 'w') as f:
+            json.dump(blacklist, f)
+        await ctx.respond(f'Server timeout set to {time} seconds', ephemeral=True)
+    else:
+        if str(channel.id) in b['channel_deleteafter']:
+            b['channel_deleterafter'][str(channel.id)] = time
+            print(b['channel_deleteafter'])
+            with open('ez.json', 'w') as f:
+                json.dump(blacklist, f)
+            await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
+        else:
+            if b['channel_deleteafter'] == {}:
+                b['channel_deleteafter'] = {str(channel.id) : time}
+            else:
+                b['channel_deleteafter'][str(channel.id)] = time
+            print(b['channel_deleteafter'])
+            with open('ez.json', 'w') as f:
+                json.dump(blacklist, f)
+            await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
+            
+
 
 @client.event
 async def on_command_error(ctx, error):
