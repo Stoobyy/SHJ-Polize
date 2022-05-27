@@ -352,7 +352,9 @@ async def dmsnipe(ctx, channel: discord.TextChannel = None):
     if 'img' in mix[channel_id]:
         img = mix[channel_id]['img']
         embed.set_image(url=f'attachment://{img.filename}')
-    await ctx.author.send(embed=embed, file=img)
+        await ctx.author.send(embed=embed, file=img)
+        return
+    await ctx.author.send(embed=embed)
     await ctx.message.add_reaction('👍')
 
 
