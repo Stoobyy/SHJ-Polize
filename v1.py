@@ -587,7 +587,7 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
         await ctx.respond(f'Server timeout set to {time} seconds', ephemeral=True)
     else:
         if str(channel.id) in b['channel_deleteafter']:
-            b['channel_deleterafter'][str(channel.id)] = time
+            b['channel_deleteafter'][str(channel.id)] = time
             with open('ez.json', 'w') as f:
                 json.dump(blacklist, f)
             await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
@@ -599,8 +599,6 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
             with open('ez.json', 'w') as f:
                 json.dump(blacklist, f)
             await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
-            
-
 
 @client.event
 async def on_command_error(ctx, error):
