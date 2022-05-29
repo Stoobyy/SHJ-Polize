@@ -607,6 +607,8 @@ async def on_command_error(ctx, error):
         await ctx.message.add_reaction('<a:nochamp:972351244700090408>')
     elif isinstance(error, discord.ext.commands.errors.ChannelNotFound):
         await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
+    elif isinstance(error, commands.errors.CommandNotFound):
+        pass
     else:
         await ctx.reply(f'{type(error)}\n{error}')
         raise error
