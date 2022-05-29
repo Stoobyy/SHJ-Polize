@@ -605,7 +605,7 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
         await ctx.message.add_reaction('<a:nochamp:972351244700090408>')
-    elif isinstance(error, discord.ext.commands.errors.ChannelNotFound):
+    elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
     elif isinstance(error, commands.errors.CommandNotFound):
         pass
@@ -616,7 +616,7 @@ async def on_command_error(ctx, error):
 async def on_application_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
         await ctx.respond('<a:nochamp:972351244700090408>', ephemeral=True)
-    elif isinstance(error, discord.ext.commands.errors.ChannelNotFound):
+    elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.respond('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
     else:
         await ctx.respond(f'{type(error)}\n{error}', ephemeral=True)
