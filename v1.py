@@ -305,6 +305,7 @@ async def snipe(ctx, channel: discord.TextChannel = None):
     if channel is None:
         channel = ctx.channel
     channel_id = str(channel.id)
+    print(channel, channel_id)
     if channel_id in mix:
         author = mix[channel_id]['author']
         authorav = mix[channel_id]['authorav']
@@ -602,12 +603,21 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
 
 @client.event
 async def on_command_error(ctx, error):
-    if isinstance(error, commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
+    if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
         await ctx.message.add_reaction('<a:nochamp:972351244700090408>')
-
+    elif isinstance(error, discord.ext.commands.errors.ChannelNotFound):
+        await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
+    else:
+        await ctx.reply(f'{type(error)}\n{error}')
+        raise error
 @client.event
 async def on_application_command_error(ctx, error):
-    if isinstance(error, commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
+    if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
         await ctx.respond('<a:nochamp:972351244700090408>', ephemeral=True)
+    elif isinstance(error, discord.ext.commands.errors.ChannelNotFound):
+        await ctx.respond('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
+    else:
+        await ctx.respond(f'{type(error)}\n{error}', ephemeral=True)
+        raise error
 
 client.run('OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0')
