@@ -1,3 +1,4 @@
+import os
 import asyncio
 import json
 import random
@@ -622,4 +623,8 @@ async def on_application_command_error(ctx, error):
         await ctx.respond(f'{type(error)}\n{error}', ephemeral=True)
         raise error
 
-client.run('OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0')
+try:
+    token = os.environ['TOKEN']
+except KeyError:
+    token = 'OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0'
+client.run(token)
