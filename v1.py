@@ -133,8 +133,6 @@ async def hl_check(message):
         last[guildid][str(message.author.id)] = unix_timestamp
     else:
         last[guildid] = {str(message.author.id): unix_timestamp}
-    with open('last.json', 'w') as f:
-        json.dump(last, f)
     with open('hl.json', 'r+') as f:
         try:
             hl = json.load(f)
