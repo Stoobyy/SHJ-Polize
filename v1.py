@@ -19,6 +19,7 @@ ignore = []
 idict = {}
 ez = ["Wait... This isn't what I typed!", 'Anyone else really like Rick Astley?', 'Hey helper, how play game?', 'Sometimes I sing soppy, love songs in the car.', 'I like long walks on the beach.', 'Please go easy on me, this is my first time on discord!', "You're a great person! Do you want to chat?", 'In my free time I like to watch cat videos on Youtube', 'When I saw the witch with the potion, I knew there was trouble brewing.', 'If the Minecraft world is infinite, how is the sun spinning around it?', 'Hello everyone! I am an innocent person who loves chatting.', 'Plz give me doggo memes!', 'I heard you like Minecraft, so I built a computer in Minecraft in your Minecraft so you can Minecraft while you Minecraft', "Why can't the Ender Dragon read a book? Because he always starts at the End.", 'Maybe we can have a rematch?', 'I sometimes try to say bad things then this happens :(', 'Behold, the great and powerful, my magnificent and almighty nemisis!', 'Doin a bamboozle fren.', 'Your comebacks are godly.', 'What happens if I add chocolate milk to macaroni and cheese?', 'Can you paint with all the colors of the wind', 'Blue is greener than purple for sure', 'I had something to say, then I forgot it.', 'When nothing is right, go left.', 'I need help, teach me how to play!', 'Your personality shines brighter than the sun.', 'You are very good at the game friend.', 'I like pineapple on my pizza', 'I like pasta, do you prefer nachos?', 'I like fighting but you are truly better than me!', 'I have really enjoyed playing with you! <3', 'ILY <3', "Pineapple doesn't go on pizza!", 'Lets be friends instead of fighting okay?']
 
+last = {}
 try:
     with open('ez.json', 'r+') as f:
         try:
@@ -125,12 +126,6 @@ async def ez_webhook(message):
 async def hl_check(message):
     if message.author.bot or message.guild is False:
         return
-    with open('last.json', 'r+') as f:
-        try:
-            last = json.load(f)
-        except:
-            json.dump('{}', f)
-            last = {}
     guildid = str(message.guild.id)
     current_time = datetime.now(tzone)
     unix_timestamp = current_time.timestamp()
@@ -156,13 +151,10 @@ async def hl_check(message):
                         message1 = []
                         async for i in message.channel.history(limit=5):
                             timee = i.created_at
-                            message1.append(
-                                f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
+                            message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
                         message1.reverse()
-                        embed = discord.Embed(
-                            title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
-                        embed.set_footer(
-                            text=f'Message ID: {message.id} | Author ID: {message.author.id}')
+                        embed = discord.Embed(title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
+                        embed.set_footer(text=f'Message ID: {message.id} | Author ID: {message.author.id}')
                         member = message.guild.get_member(int(str(user)))
                         timee = datetime.now(tzone).timestamp()
                         lastt = last[guild][user] if user in last[guild] else 0
