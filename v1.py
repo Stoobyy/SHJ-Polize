@@ -5,10 +5,20 @@ import random
 from datetime import *
 
 import discord
+from pygments import highlight
 import requests
 from discord.commands import slash_command
 from discord.ext import commands, tasks
 from discord.ui import View
+
+import pymongo
+from pymongo import MongoClient
+
+cluster = MongoClient("mongodb+srv://nalin:shjpolize@shj-polize.53wo6.mongodb.net/?retryWrites=true&w=majority")
+db = cluster["shj-polize"]
+highlightdb = db["hl"]
+ezdb = db["ez"]
+
 
 tzone = timezone(timedelta(hours=4))
 
@@ -32,6 +42,9 @@ except:
     with open('ez.json', 'w') as f:
         blacklist = {}
         json.dump(blacklist, f)
+
+# blacklist = ezdb.find()
+hl = highlightdb.find()
 
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), help_command=None, intents=discord.Intents.all())
@@ -126,25 +139,26 @@ async def ez_webhook(message):
 async def hl_check(message):
     if message.author.bot or message.guild is False:
         return
-    guildid = str(message.guild.id)
+    guildid = message.guild.id
     current_time = datetime.now(tzone)
     unix_timestamp = current_time.timestamp()
     if guildid in last:
         last[guildid][str(message.author.id)] = unix_timestamp
     else:
         last[guildid] = {str(message.author.id): unix_timestamp}
-    with open('hl.json', 'r+') as f:
-        try:
-            hl = json.load(f)
-        except:
-            r = f.read()
-            if r == '':
-                f.write('{}')
-                hl = {}
-    for guild in hl:
-        if guild == str(guildid):
-            for user in hl[guild]:
-                for msg in hl[guild][user]:
+    # with open('hl.json', 'r+') as f:
+    #     try:
+    #         hl = json.load(f)
+    #     except:
+    #         r = f.read()
+    #         if r == '':
+    #             f.write('{}')
+    #             hl = {}
+
+    for i in hl:
+        if i['_id'] == guildid:
+            for user in i["hl"]:
+                for msg in i["hl"][user]:
                     if msg.upper() in message.content.upper().split():
                         message1 = []
                         async for i in message.channel.history(limit=5):
@@ -155,17 +169,33 @@ async def hl_check(message):
                         embed.set_footer(text=f'Message ID: {message.id} | Author ID: {message.author.id}')
                         member = message.guild.get_member(int(str(user)))
                         timee = datetime.now(tzone).timestamp()
-                        lastt = last[guild][user] if user in last[guild] else 0
+                        lastt = last[guildid][user] if user in last[guildid] else 0
                         if lastt == 0 or timee - lastt > 300:
                             await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
+
+    # for guild in hl:
+    #     if guild == str(guildid):
+    #         for user in hl[guild]:
+    #             for msg in hl[guild][user]:
+    #                 if msg.upper() in message.content.upper().split():
+    #                     message1 = []
+    #                     async for i in message.channel.history(limit=5):
+    #                         timee = i.created_at
+    #                         message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
+    #                     message1.reverse()
+    #                     embed = discord.Embed(title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
+    #                     embed.set_footer(text=f'Message ID: {message.id} | Author ID: {message.author.id}')
+    #                     member = message.guild.get_member(int(str(user)))
+    #                     timee = datetime.now(tzone).timestamp()
+    #                     lastt = last[guild][user] if user in last[guild] else 0
+    #                     if lastt == 0 or timee - lastt > 300:
+    #                         await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
 
 
 @client.slash_command(name='hl')
 async def hl(ctx, word=None):
 
     guildid = str(ctx.guild.id)
-    with open('hl.json', 'r') as f:
-        hl = json.load(f)
     if word != None:
         if guildid not in hl:
             hl[guildid] = {}
