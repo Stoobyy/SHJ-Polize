@@ -5,7 +5,6 @@ import random
 from datetime import *
 
 import discord
-from pygments import highlight
 import requests
 from discord.commands import slash_command
 from discord.ext import commands, tasks
@@ -27,7 +26,8 @@ mix = {}
 editmsg = {}
 ignore = []
 idict = {}
-ez = ["Wait... This isn't what I typed!", 'Anyone else really like Rick Astley?', 'Hey helper, how play game?', 'Sometimes I sing soppy, love songs in the car.', 'I like long walks on the beach.', 'Please go easy on me, this is my first time on discord!', "You're a great person! Do you want to chat?", 'In my free time I like to watch cat videos on Youtube', 'When I saw the witch with the potion, I knew there was trouble brewing.', 'If the Minecraft world is infinite, how is the sun spinning around it?', 'Hello everyone! I am an innocent person who loves chatting.', 'Plz give me doggo memes!', 'I heard you like Minecraft, so I built a computer in Minecraft in your Minecraft so you can Minecraft while you Minecraft', "Why can't the Ender Dragon read a book? Because he always starts at the End.", 'Maybe we can have a rematch?', 'I sometimes try to say bad things then this happens :(', 'Behold, the great and powerful, my magnificent and almighty nemisis!', 'Doin a bamboozle fren.', 'Your comebacks are godly.', 'What happens if I add chocolate milk to macaroni and cheese?', 'Can you paint with all the colors of the wind', 'Blue is greener than purple for sure', 'I had something to say, then I forgot it.', 'When nothing is right, go left.', 'I need help, teach me how to play!', 'Your personality shines brighter than the sun.', 'You are very good at the game friend.', 'I like pineapple on my pizza', 'I like pasta, do you prefer nachos?', 'I like fighting but you are truly better than me!', 'I have really enjoyed playing with you! <3', 'ILY <3', "Pineapple doesn't go on pizza!", 'Lets be friends instead of fighting okay?']
+ez = ["Wait... This isn't what I typed!", 'Anyone else really like Rick Astley?', 'Hey helper, how play game?', 'Sometimes I sing soppy, love songs in the car.', 'I like long walks on the beach.', 'Please go easy on me, this is my first time on discord!', "You're a great person! Do you want to chat?", 'In my free time I like to watch cat videos on Youtube', 'When I saw the witch with the potion, I knew there was trouble brewing.', 'If the Minecraft world is infinite, how is the sun spinning around it?', 'Hello everyone! I am an innocent person who loves chatting.', 'Plz give me doggo memes!', 'I heard you like Minecraft, so I built a computer in Minecraft in your Minecraft so you can Minecraft while you Minecraft', "Why can't the Ender Dragon read a book? Because he always starts at the End.", 'Maybe we can have a rematch?',
+      'I sometimes try to say bad things then this happens :(', 'Behold, the great and powerful, my magnificent and almighty nemisis!', 'Doin a bamboozle fren.', 'Your comebacks are godly.', 'What happens if I add chocolate milk to macaroni and cheese?', 'Can you paint with all the colors of the wind', 'Blue is greener than purple for sure', 'I had something to say, then I forgot it.', 'When nothing is right, go left.', 'I need help, teach me how to play!', 'Your personality shines brighter than the sun.', 'You are very good at the game friend.', 'I like pineapple on my pizza', 'I like pasta, do you prefer nachos?', 'I like fighting but you are truly better than me!', 'I have really enjoyed playing with you! <3', 'ILY <3', "Pineapple doesn't go on pizza!", 'Lets be friends instead of fighting okay?']
 
 last = {}
 try:
@@ -43,20 +43,18 @@ except:
         blacklist = {}
         json.dump(blacklist, f)
 
-# blacklist = ezdb.find()
-hl = highlightdb.find()
-
-
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), help_command=None, intents=discord.Intents.all())
 
 devs = (499112914578309120, 700195735689494558)
 roles = [773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989]
+
 
 def is_dev(ctx):
     if ctx.author.id in devs:
         return True
     else:
         return False
+
 
 @client.event
 async def on_ready():
@@ -85,6 +83,7 @@ class GiveawayView(View):
 async def ping(ctx):
     await ctx.send(f"{round(client.latency * 1000)}ms")
 
+
 @client.listen('on_message')
 async def ez_webhook(message):
     if message.author.bot or message.guild is False:
@@ -108,7 +107,7 @@ async def ez_webhook(message):
         return
     if message.channel.id in b['channel_blacklist'] or message.author.id in b['user_blacklist']:
         return
-        
+
     if bool('ez' in message.content.lower().split()) or bool('ez' == message.content.lower()) or bool('ezz' == message.content.lower()) or bool('ezzz' in message.content.lower()) or bool('e z' == message.content.lower()):
         hooks = await message.channel.webhooks()
         hook = discord.utils.get(hooks, name='ezz')
@@ -122,7 +121,6 @@ async def ez_webhook(message):
         channel = await client.fetch_channel(int(raw['channel_id']))
         messageid = await channel.fetch_message(int(raw['id']))
 
-
         if message.channel.id in b['channel_deleteafter']:
             t = b['channel_deleteafter'][message.channel.id]
         else:
@@ -135,6 +133,7 @@ async def ez_webhook(message):
             await asyncio.sleep(t)
             await messageid.delete()
 
+
 @client.listen('on_message')
 async def hl_check(message):
     if message.author.bot or message.guild is False:
@@ -146,132 +145,99 @@ async def hl_check(message):
         last[guildid][str(message.author.id)] = unix_timestamp
     else:
         last[guildid] = {str(message.author.id): unix_timestamp}
-    # with open('hl.json', 'r+') as f:
-    #     try:
-    #         hl = json.load(f)
-    #     except:
-    #         r = f.read()
-    #         if r == '':
-    #             f.write('{}')
-    #             hl = {}
 
-    for i in hl:
-        if i['_id'] == guildid:
-            for user in i["hl"]:
-                for msg in i["hl"][user]:
-                    if msg.upper() in message.content.upper().split():
-                        message1 = []
-                        async for i in message.channel.history(limit=5):
-                            timee = i.created_at
-                            message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
-                        message1.reverse()
-                        embed = discord.Embed(title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
-                        embed.set_footer(text=f'Message ID: {message.id} | Author ID: {message.author.id}')
-                        member = message.guild.get_member(int(str(user)))
-                        timee = datetime.now(tzone).timestamp()
-                        lastt = last[guildid][user] if user in last[guildid] else 0
-                        if lastt == 0 or timee - lastt > 300:
-                            await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
 
-    # for guild in hl:
-    #     if guild == str(guildid):
-    #         for user in hl[guild]:
-    #             for msg in hl[guild][user]:
-    #                 if msg.upper() in message.content.upper().split():
-    #                     message1 = []
-    #                     async for i in message.channel.history(limit=5):
-    #                         timee = i.created_at
-    #                         message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
-    #                     message1.reverse()
-    #                     embed = discord.Embed(title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
-    #                     embed.set_footer(text=f'Message ID: {message.id} | Author ID: {message.author.id}')
-    #                     member = message.guild.get_member(int(str(user)))
-    #                     timee = datetime.now(tzone).timestamp()
-    #                     lastt = last[guild][user] if user in last[guild] else 0
-    #                     if lastt == 0 or timee - lastt > 300:
-    #                         await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
+    ghl = highlightdb.find_one({'_id': guildid})
+    if ghl is None:
+        highlightdb.insert_one({'_id': guildid, 'hl': {}})
+        guildhl = highlightdb.find_one({'_id': guildid})
+    else:
+        guildhl = ghl['hl']
 
+    for user in guildhl:
+        for msg in guildhl[user]:
+            if msg.upper() in message.content.upper().split():
+                message1 = []
+                async for i in message.channel.history(limit=5):
+                    timee = i.created_at
+                    message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
+                message1.reverse()
+                embed = discord.Embed(title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
+                embed.set_footer(text=f'Message ID: {message.id} | Author ID: {message.author.id}')
+                member = message.guild.get_member(int(str(user)))
+                timee = datetime.now(tzone).timestamp()
+                lastt = last[guildid][user] if user in last[guildid] else 0
+                if lastt == 0 or timee - lastt > 300:
+                    await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
+                            
 
 @client.slash_command(name='hl')
 async def hl(ctx, word=None):
 
-    guildid = str(ctx.guild.id)
-    if word != None:
-        if guildid not in hl:
-            hl[guildid] = {}
-            hl[guildid][str(ctx.author.id)] = [word]
-            await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
-        else:
-            if str(ctx.author.id) not in hl[guildid]:
-                hl[guildid][str(ctx.author.id)] = [word]
-                await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
-            else:
-                if word in hl[guildid][str(ctx.author.id)]:
-                    hl[guildid][str(ctx.author.id)].remove(word)
-                    await ctx.respond(f'{word} removed from your highlight list', ephemeral=True)
-                else:
-                    hl[guildid][str(ctx.author.id)].append(word)
-                    await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
-        with open('hl.json', 'w') as f:
-            json.dump(hl, f)
+    guildid = ctx.guild.id
+    ghl = highlightdb.find_one({'_id': guildid})
+    if ghl is None:
+        highlightdb.insert_one({'_id': guildid, 'hl': {}})
+        guildhl = highlightdb.find_one({'_id': guildid})
     else:
-        if guildid not in hl:
-            hl[guildid] = {}
+        guildhl = ghl['hl']
 
-        if str(ctx.author.id) not in hl[guildid]:
-            embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun -hl [word] to add some', color=1752220)
+    if word != None:
+        if str(ctx.author.id) in guildhl:
+            guildhl[str(ctx.author.id)].append(word)
+        else:
+            guildhl[str(ctx.author.id)] = [word]
+        highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+
+        await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
+    else:
+        if str(ctx.author.id) not in guildhl:
+            embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
             await ctx.respond(embed=embed, ephemeral=True)
         else:
-            if len(hl[guildid][str(ctx.author.id)]) == 0:
-                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun -hl [word] to add some', color=1752220)
+            if len(guildhl[str(ctx.author.id)]) == 0:
+                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
                 await ctx.respond(embed=embed, ephemeral=True)
             else:
                 str1 = ''
-                for i in hl[guildid][str(ctx.author.id)]:
+                for i in guildhl[str(ctx.author.id)]:
                     str1 += f'{i}\n'
                 embed = discord.Embed(title='You\'re currently tracking the following words', description=str1, color=1752220)
                 await ctx.respond(embed=embed, ephemeral=True)
+
 
 @client.command()
 async def hl(ctx, word=None):
-    guildid = str(ctx.guild.id)
-    with open('hl.json', 'r') as f:
-        hl = json.load(f)
-    if word != None:
-        if guildid not in hl:
-            hl[guildid] = {}
-            hl[guildid][str(ctx.author.id)] = [word]
-            await ctx.reply(f'{word} has been added to your highlight list')
-        else:
-            if str(ctx.author.id) not in hl[guildid]:
-                hl[guildid][str(ctx.author.id)] = [word]
-                await ctx.reply(f'{word} has been added to your highlight list')
-            else:
-                if word in hl[guildid][str(ctx.author.id)]:
-                    hl[guildid][str(ctx.author.id)].remove(word)
-                    await ctx.reply(f'{word} removed from your highlight list')
-                else:
-                    hl[guildid][str(ctx.author.id)].append(word)
-                    await ctx.reply(f'{word} has been added to your highlight list')
-        with open('hl.json', 'w') as f:
-            json.dump(hl, f)
+    guildid = ctx.guild.id
+    ghl = highlightdb.find_one({'_id': guildid})
+    if ghl is None:
+        highlightdb.insert_one({'_id': guildid, 'hl': {}})
+        guildhl = highlightdb.find_one({'_id': guildid})
     else:
-        if guildid not in hl:
-            hl[guildid] = {}
+        guildhl = ghl['hl']
 
-        if str(ctx.author.id) not in hl[guildid]:
-            embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun -hl [word] to add some', color=1752220)
+    if word != None:
+        if str(ctx.author.id) in guildhl:
+            guildhl[str(ctx.author.id)].append(word)
+        else:
+            guildhl[str(ctx.author.id)] = [word]
+        highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+        await ctx.reply(f'{word} has been added to your highlight list')
+    else:
+        if str(ctx.author.id) not in guildhl:
+            embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
             await ctx.reply(embed=embed)
         else:
-            if len(hl[guildid][str(ctx.author.id)]) == 0:
-                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun -hl [word] to add some', color=1752220)
+            if len(guildhl[str(ctx.author.id)]) == 0:
+                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
                 await ctx.reply(embed=embed)
             else:
                 str1 = ''
-                for i in hl[guildid][str(ctx.author.id)]:
+                for i in guildhl[str(ctx.author.id)]:
                     str1 += f'{i}\n'
                 embed = discord.Embed(title='You\'re currently tracking the following words', description=str1, color=1752220)
                 await ctx.reply(embed=embed)
+
 
 @client.slash_command(name='giveaway')
 @commands.check_any(commands.has_permissions(administrator=True), commands.has_permissions(manage_guild=True), commands.check(is_dev))
@@ -302,7 +268,6 @@ async def on_message_delete(message):
     # remove if you want to snipe nqn messages
     if message.author.discriminator == '0000':
         return
-    
 
     content = message.content
     author = str(message.author)
@@ -475,6 +440,7 @@ async def on_reaction_add(reaction, user):
                     await snipemsg.delete()
     del m1['DontSnipe']
 
+
 @client.command(aliases=['d'])
 async def delete(ctx):
     m1 = mix[str(ctx.channel.id)]
@@ -496,12 +462,13 @@ async def delete(ctx):
         await ctx.react('<a:nochamp:972351244700090408>')
         del m1['DontSnipe']
 
+
 @client.command(aliases=['eb'])
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
 async def eazyblacklist(ctx, param: discord.Member or discord.TextChannel = None):
     if param is None:
         param = ctx.channel
-    
+
     if isinstance(param, discord.TextChannel):
         if param.id in blacklist['channel_blacklist']:
             blacklist['channel_blacklist'].remove(param.id)
@@ -526,6 +493,7 @@ async def eazyblacklist(ctx, param: discord.Member or discord.TextChannel = None
             json.dump(blacklist, f)
         await ctx.message.add_reaction('👍')
 
+
 @client.slash_command(name='ezblacklist')
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
 @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist', required=False)
@@ -537,7 +505,7 @@ async def eazyblacklist(ctx, channel: discord.TextChannel, user: discord.Member,
         embed = discord.Embed(title='Blacklist', description='Shows Blacklisted Channels and Users for ez message', colour=1752220)
         cb = '\n'.join('<#{}>'.format(x) for x in b['channel_blacklist'])
         ub = '\n'.join('<@{}>'.format(x) for x in b['user_blacklist'])
-        embed.add_field(name='Serverwide blacklist', value= f"{b['serverwide_blacklist']}")
+        embed.add_field(name='Serverwide blacklist', value=f"{b['serverwide_blacklist']}")
         if len(b['channel_blacklist']) != 0:
             embed.add_field(name='Channels', value=cb, inline=False)
         if len(b['user_blacklist']) != 0:
@@ -587,6 +555,7 @@ async def eazyblacklist(ctx, channel: discord.TextChannel, user: discord.Member,
             json.dump(blacklist, f)
         await ctx.respond(f'Serverwide blacklist is now disabled', ephemeral=True)
 
+
 @client.slash_command(name='ezbtimeout')
 @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
 @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist if empty changes server timeout', required=False)
@@ -596,16 +565,16 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
     if time is None:
         embed = discord.Embed(title='ez Timeout', description='Shows the current timeout')
         if b['server_deleteafter'] == 0:
-            embed.add_field(name='Serverwide timeout', value= 'Disabled', inline=False)
+            embed.add_field(name='Serverwide timeout', value='Disabled', inline=False)
         else:
-            embed.add_field(name='Serverwide timeout', value= f"{b['server_deleteafter']} seconds")
+            embed.add_field(name='Serverwide timeout', value=f"{b['server_deleteafter']} seconds")
         if len(b['channel_deleteafter']) != 0:
             v = ''
             for x, j in b['channel_deleteafter'].items():
                 v += f'<#{x}> : {j} seconds\n'
             embed.add_field(name='Channels', value=v, inline=False)
-        await ctx.respond(embed=embed, ephemeral=True) 
-        return   
+        await ctx.respond(embed=embed, ephemeral=True)
+        return
 
     if channel is None:
         b['server_deleteafter'] = time
@@ -620,12 +589,13 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
             await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
         else:
             if b['channel_deleteafter'] == {}:
-                b['channel_deleteafter'] = {str(channel.id) : time}
+                b['channel_deleteafter'] = {str(channel.id): time}
             else:
                 b['channel_deleteafter'][str(channel.id)] = time
             with open('ez.json', 'w') as f:
                 json.dump(blacklist, f)
             await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
+
 
 @client.event
 async def on_command_error(ctx, error):
@@ -638,6 +608,8 @@ async def on_command_error(ctx, error):
     else:
         await ctx.reply(f'{type(error)}\n{error}')
         raise error
+
+
 @client.event
 async def on_application_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
