@@ -184,12 +184,18 @@ async def hl(ctx, word=None):
 
     if word != None:
         if str(ctx.author.id) in guildhl:
-            guildhl[str(ctx.author.id)].append(word)
+            if word in guildhl[str(ctx.author.id)]:
+                guildhl[str(ctx.author.id)].remove(word)
+                highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+                await ctx.respond(f'{word} has been removed from your highlight list', ephemeral=True)
+            else:
+                guildhl[str(ctx.author.id)].append(word)
+                highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+                await ctx.reply(f'{word} has been added to your highlight list')
         else:
             guildhl[str(ctx.author.id)] = [word]
-        highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-
-        await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
+            highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+            await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
     else:
         if str(ctx.author.id) not in guildhl:
             embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
@@ -218,11 +224,18 @@ async def hl(ctx, word=None):
 
     if word != None:
         if str(ctx.author.id) in guildhl:
-            guildhl[str(ctx.author.id)].append(word)
+            if word in guildhl[str(ctx.author.id)]:
+                guildhl[str(ctx.author.id)].remove(word)
+                highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+                await ctx.reply(f'{word} has been removed from your highlight list')
+            else:
+                guildhl[str(ctx.author.id)].append(word)
+                highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+                await ctx.reply(f'{word} has been added to your highlight list')
         else:
             guildhl[str(ctx.author.id)] = [word]
-        highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-        await ctx.reply(f'{word} has been added to your highlight list')
+            highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+            await ctx.reply(f'{word} has been added to your highlight list')
     else:
         if str(ctx.author.id) not in guildhl:
             embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
