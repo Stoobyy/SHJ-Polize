@@ -170,7 +170,7 @@ async def hl(ctx, word=None):
             else:
                 guildhl[str(ctx.author.id)].append(word)
                 highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-                await ctx.reply(f'{word} has been added to your highlight list')
+                await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
         else:
             guildhl[str(ctx.author.id)] = [word]
             highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
