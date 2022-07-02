@@ -591,7 +591,7 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
             await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
 
 @client.command()
-async def server(ctx, ip):
+async def server(ctx, ip=None):
     if ip is None:
         if ctx.guild.id == '723259592800206940':
             ip = 'funfishmc.aternos.me'
