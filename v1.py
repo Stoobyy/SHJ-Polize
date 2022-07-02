@@ -590,7 +590,7 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
             ezdb.update_one({'_id': guildid}, {'$set': {'channel_deleteafter': b['channel_deleteafter']}})
             await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
 
-@client.command
+@client.command()
 async def server(ctx, ip):
     if ip is None:
         if ctx.guild.id == '723259592800206940':
