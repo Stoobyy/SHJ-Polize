@@ -619,7 +619,7 @@ async def server(ctx, ip=None):
         embed.add_field(name='IP', value=f"{data['ip']}:{data['port']}", inline=False)
         embed.add_field(name='MOTD', value="\n ".join(data['motd']['clean']), inline=False)
         embed.add_field(name='Version', value=data['version'], inline=False)
-        embed.add_field(mame='Server Type', value=data['software'], inline=False)
+        embed.add_field(name='Server Type', value=data['software'], inline=False)
         embed.add_field(name='Players Online', value=f"{data['players']['online']}/{data['players']['max']}", inline=False)
         if data['players']['online'] != 0:
             embed.add_field(name='Players', value='\n '.join(data['players']['list']), inline=False)
