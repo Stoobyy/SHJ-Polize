@@ -611,18 +611,18 @@ async def server(ctx, ip=None):
         name = data['ip']
     if data['online'] is False:
         embed = discord.Embed(title=f"{name}'s status", description='Server is offline')
-        embed.add_field(title='IP', value=f"{data['ip']}:{data['port']}", inline=False)
+        embed.add_field(name='IP', value=f"{data['ip']}:{data['port']}", inline=False)
         await ctx.reply(embed=embed)
     else:
         embed = discord.Embed(title=f"{name}'s status", description='Server is online')
         embed.set_thumbnail(url=f"https://api.mcsrvstat.us/icon/{data['ip']}")
-        embed.add_field(title='IP', value=f"{data['ip']}:{data['port']}", inline=False)
-        embed.add_field(title='MOTD', value="\n ".join(data['motd']['clean']), inline=False)
-        embed.add_field(title='Version', value=data['version'], inline=False)
-        embed.add_field(title='Server Type', value=data['software'], inline=False)
-        embed.add_field(title='Players Online', value=f"{data['players']['online']}/{data['players']['max']}", inline=False)
+        embed.add_field(name='IP', value=f"{data['ip']}:{data['port']}", inline=False)
+        embed.add_field(name='MOTD', value="\n ".join(data['motd']['clean']), inline=False)
+        embed.add_field(name='Version', value=data['version'], inline=False)
+        embed.add_field(mame='Server Type', value=data['software'], inline=False)
+        embed.add_field(name='Players Online', value=f"{data['players']['online']}/{data['players']['max']}", inline=False)
         if data['players']['online'] != 0:
-            embed.add_field(title='Players', value='\n '.join(data['players']['list']), inline=False)
+            embed.add_field(name='Players', value='\n '.join(data['players']['list']), inline=False)
         await ctx.reply(embed=embed)
 
 
