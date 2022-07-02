@@ -590,6 +590,42 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
             ezdb.update_one({'_id': guildid}, {'$set': {'channel_deleteafter': b['channel_deleteafter']}})
             await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
 
+@client.command
+async def server(ctx, ip):
+    if ip is None:
+        if ctx.guild.id == '723259592800206940':
+            ip = 'funfishmc.aternos.me'
+        else:
+            await ctx.reply('Please specify an IP')
+            return
+    data = requests.get(f'https://api.mcsrvstat.us/2/{ip}')
+    try:
+        data = data.json()
+    except:
+        await ctx.reply(f'Something went wrong please try again later\n ||{data.text}||')
+        return
+
+    try:
+        name = data['hostname']
+    except KeyError:
+        name = data['ip']
+    if data['online'] is False:
+        embed = discord.Embed(title=f"{name}'s status", description='Server is offline')
+        embed.add_field(title='IP', value=f"{data['ip']}:{data['port']}", inline=False)
+        await ctx.reply(embed=embed)
+    else:
+        embed = discord.Embed(title=f"{name}'s status", description='Server is online')
+        embed.set_thumbnail(url=f"https://api.mcsrvstat.us/icon/{data['ip']}")
+        embed.add_field(title='IP', value=f"{data['ip']}:{data['port']}", inline=False)
+        embed.add_field(title='MOTD', value="\n ".join(data['motd']['clean']), inline=False)
+        embed.add_field(title='Version', value=data['version'], inline=False)
+        embed.add_field(title='Server Type', value=data['software'], inline=False)
+        embed.add_field(title='Players Online', value=f"{data['players']['online']}/{data['players']['max']}", inline=False)
+        if data['players']['online'] != 0:
+            embed.add_field(title='Players', value='\n '.join(data['players']['list']), inline=False)
+        await ctx.reply(embed=embed)
+
+
 
 @client.event
 async def on_command_error(ctx, error):
