@@ -587,7 +587,8 @@ async def server(ctx, ip=None):
         embed.add_field(name='Players Online', value=f"{data['players']['online']}/{data['players']['max']}", inline=True)
         if data['players']['online'] != 0:
             try:
-                embed.add_field(name='Players', value=f"`{'\n'.join(data['players']['list'])}`", inline=True)
+                players = '\n'.join(data['players']['list'])
+                embed.add_field(name='Players', value=f"`{players}`", inline=True)
             except:
                 pass
         await ctx.reply(embed=embed)
