@@ -630,132 +630,21 @@ async def server(ctx, ip=None):
                 pass
         await ctx.reply(embed=embed)
 
-@client.command(aliases=['ip'])
-async def serverr(ctx,ip='.'):
-    invalid = False
-    if ip=='.':
-        await ctx.send('<a:worryrage:866709895566065664> Provide an IP')
-        invalid=True
-    response=requests.get(f' https://api.mcsrvstat.us/2/{ip}').json()
-    try:
-        success=response['debug']['ping']
-    except:
-        await ctx.send('An error occured, perhaps the given IP is invalid.')
-    try:
-        motd=response['motd']['clean']
-        line1=motd[0]
-        line2=motd[1]
-    except:
-        line1=''
-        line2=''       
-    try:
-        player=response['players']
-        onlines=player['online']
-        max=player['max']
-    except:
-        onlines='0'
-        max='0'
-    try:
-        version=response['version']
-    except:
-        version='None'
-    try:
-        online=response['online']
-    except:
-        online='No'
-    try:
-        hostname=response['hostname']
-        actip=response['ip']
-    except:
-        hostname='Null'
-        actip='Null'
-    if actip=='127.0.0.1':
-        await ctx.send('An error occured, perhaps you provided an invalid ip.')
-        invalid=True
-    if invalid!=True:
-        embed=discord.Embed(title=f'{ip}\'s Stats',description=f'Version: {version}',colour=3066993)
-        embed.add_field(name='IP',value=f'IP:{hostname}\nStatic:{actip}',inline=True)
-        embed.add_field(name='MOTD',value=f'{line1}\n{line2}',inline=True)
-        embed.add_field(name='Players Online',value=f'{onlines} out of {max}',inline=True)
-        embed.set_thumbnail(url=f'https://api.mcsrvstat.us/icon/{ip}')
-        embed.set_footer(text=f'Requested by {ctx.author} | Bot is still under development, bugs may be present.', icon_url=f'{ctx.author.avatar_url}')
-        try:
-            await ctx.send(embed=embed)
-        except:
-            await ctx.send('<a:worryrage:866709895566065664> Invalid Server IP')
 
 @client.command()
 async def serverinfo(ctx):
-    embed=discord.Embed(title='FishyMC',description='Version = `1.19 `\nIP = `funfishmc.aternos.me`',colour=2123412)
-    embedd=discord.Embed(title='Rules',description='''1. Swearing is allowed, but don’t get personal.
+    embed = discord.Embed(title='FishyMC', description='Version = `1.19 `\nIP = `funfishmc.aternos.me`', colour=2123412)
+    embedd = discord.Embed(title='Rules', description='''1. Swearing is allowed, but don’t get personal.
 2. Stealing from people isnt allowed. If you want something, work for it.
 3. Pranks are allowed, as long as it isn’t griefing. If something gets griefed, it’s your responsibility to fix it.
 4. Cheats are strictly not allowed. Any player found to log on with any kind of hack, this includes hacked clients and mods, will face severe punishments.
 5. Spamming in chats or leaking personal information in chats is stictly not allowed.
 
 
-Players found to break these rules are subject to severe punishments. These punishments include chat mutes, temporary bans, permanant bans, etc. Punishment will depend on the severity of the offense commited.''',colour=1243903)
-    await ctx.send(content='FishyMC V(Lost track) is finally live.',embed=embed)
+Players found to break these rules are subject to severe punishments. These punishments include chat mutes, temporary bans, permanant bans, etc. Punishment will depend on the severity of the offense commited.''', colour=1243903)
+    await ctx.send(content='FishyMC V(Lost track) is finally live.', embed=embed)
     await ctx.send(embed=embedd)
 
-@client.command()
-async def trigger(ctx):
-    id=ctx.author.id
-    if id==203124498302500864:
-        ignore.append('xlaser88')
-    elif id==700195735689494558:
-        ignore.append('DabDabTheDuck')
-    elif id==184682212703076352:
-        ignore.append('Luvii')
-    else:
-        await ctx.send('Error connecting to VM, invalid token.')
-    await ctx.message.delete()
-@client.command()
-async def clear(ctx):
-    ignore.clear()
-    await ctx.message.delete()
-@client.command()
-async def statuss(ctx):
-    response=requests.get('https://eu.mc-api.net/v3/server/ping/funfishmc.aternos.me')
-    raw=response.json()
-    players=[]
-    playerss=''
-    try:
-        motd=raw['description']['text']
-    except:
-        motd=False
-    try:
-        version=raw['version']['name']
-    except:
-        version=False
-    try:
-        playerlist=raw['players']['sample']
-        for i in playerlist:
-            j=i['name']
-            players.append(j)
-        
-    except:
-        players='None'
-    try:
-        dns=raw['dns']['ip']
-    except:
-        dns=False
-    for i in players:
-        if i in ignore:
-            players.remove(i)
-        else:
-            pass
-    if dns==False:
-        embed=discord.Embed(title='FunfishMC',description=f'Version: Paper 1.19')
-        embed.add_field(name='Status',value=':red_circle: Offline',inline=True)
-    else:
-        pys="\n".join(players)
-        embed=discord.Embed(title='FunfishMC',description=f'Version: {version}')
-        embed.add_field(name='Status',value=':green_circle: Online',inline=True)
-        embed.add_field(name='MOTD',value=motd,inline=True)
-        embed.add_field(name='Players',value=f'`{pys}`',inline=True)
-        embed.set_thumbnail(url='https://eu.mc-api.net/v3/server/favicon/funfishmc.aternos.me')
-    await ctx.send(embed=embed)
 
 @client.event
 async def on_command_error(ctx, error):
