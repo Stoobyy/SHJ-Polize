@@ -590,6 +590,7 @@ async def deleteafter(ctx, channel: discord.TextChannel, time: int):
             ezdb.update_one({'_id': guildid}, {'$set': {'channel_deleteafter': b['channel_deleteafter']}})
             await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
 
+
 @client.command()
 async def server(ctx, ip=None):
     if ip is None:
@@ -619,12 +620,15 @@ async def server(ctx, ip=None):
         embed.add_field(name='IP', value=f"{data['ip']}:{data['port']}", inline=True)
         embed.add_field(name='MOTD', value="\n".join(data['motd']['clean']), inline=True)
         embed.add_field(name='Version', value=data['version'], inline=True)
-        embed.add_field(name='Server Type', value=data['software'], inline=True)
+        if 'software' in data:
+            embed.add_field(name='Server Type', value=data['software'], inline=True)
         embed.add_field(name='Players Online', value=f"{data['players']['online']}/{data['players']['max']}", inline=True)
         if data['players']['online'] != 0:
-            embed.add_field(name='Players', value='\n'.join(data['players']['list']), inline=True)
+            try:
+                embed.add_field(name='Players', value='\n'.join(data['players']['list']), inline=True)
+            except:
+                pass
         await ctx.reply(embed=embed)
-
 
 
 @client.event
