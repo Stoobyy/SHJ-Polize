@@ -21,11 +21,11 @@ ezdb = db["ez"]
 
 tzone = timezone(timedelta(hours=4))
 
-giveawaytags = []
 mix = {}
 editmsg = {}
 ignore = []
 idict = {}
+
 ez = ["Wait... This isn't what I typed!", 'Anyone else really like Rick Astley?', 'Hey helper, how play game?', 'Sometimes I sing soppy, love songs in the car.', 'I like long walks on the beach.', 'Please go easy on me, this is my first time on discord!', "You're a great person! Do you want to chat?", 'In my free time I like to watch cat videos on Youtube', 'When I saw the witch with the potion, I knew there was trouble brewing.', 'If the Minecraft world is infinite, how is the sun spinning around it?', 'Hello everyone! I am an innocent person who loves chatting.', 'Plz give me doggo memes!', 'I heard you like Minecraft, so I built a computer in Minecraft in your Minecraft so you can Minecraft while you Minecraft', "Why can't the Ender Dragon read a book? Because he always starts at the End.", 'Maybe we can have a rematch?',
       'I sometimes try to say bad things then this happens :(', 'Behold, the great and powerful, my magnificent and almighty nemisis!', 'Doin a bamboozle fren.', 'Your comebacks are godly.', 'What happens if I add chocolate milk to macaroni and cheese?', 'Can you paint with all the colors of the wind', 'Blue is greener than purple for sure', 'I had something to say, then I forgot it.', 'When nothing is right, go left.', 'I need help, teach me how to play!', 'Your personality shines brighter than the sun.', 'You are very good at the game friend.', 'I like pineapple on my pizza', 'I like pasta, do you prefer nachos?', 'I like fighting but you are truly better than me!', 'I have really enjoyed playing with you! <3', 'ILY <3', "Pineapple doesn't go on pizza!", 'Lets be friends instead of fighting okay?']
 
@@ -48,23 +48,6 @@ def is_dev(ctx):
 async def on_ready():
     print(f"Logged in as {client.user}")
     await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
-
-
-class GiveawayView(View):
-
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(label="🎉", style=discord.ButtonStyle.primary, custom_id="gaw_button")
-    async def greyu(self, button: discord.ui.Button, interaction: discord.Interaction):
-        if interaction.user.id in giveawaytags:
-            giveawaytags.remove(interaction.user.id)
-            embed = discord.Embed(description="You have successfully been removed from the giveaway!", color=15158332)
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-        else:
-            giveawaytags.append(interaction.user.id)
-            embed = discord.Embed(title="Success!", description="You have entered the giveaway!", color=2067276)
-            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 @client.command()
@@ -229,27 +212,6 @@ async def hl(ctx, word=None):
                     str1 += f'{i}\n'
                 embed = discord.Embed(title='You\'re currently tracking the following words', description=str1, color=1752220)
                 await ctx.reply(embed=embed)
-
-
-@client.slash_command(name='giveaway')
-@commands.check_any(commands.has_permissions(administrator=True), commands.has_permissions(manage_guild=True), commands.check(is_dev))
-async def giveaway(ctx, time, prize):
-    embed = discord.Embed(color=15844367)
-    current_time = datetime.now(timezone.utc)
-    unix_timestamp = current_time.timestamp()
-    unix_timestamp_plus_5_min = unix_timestamp + (int(time) * 60)
-    unix_timestamp_plus_5_min = int(unix_timestamp_plus_5_min)
-    embed.add_field(name=f"{prize}", value=f'React with 🎉 to enter!\nEnds: <t:{unix_timestamp_plus_5_min}:R>\nHosted by: {ctx.author.mention}', inline=False)
-    message = await ctx.send(':tada: **GIVEAWAY** :tada:', embed=embed, view=GiveawayView())
-    await ctx.respond(f'Giveaway has been created successfully!', ephemeral=True)
-    await asyncio.sleep(int(time) * 60)
-    winner = random.choice(giveawaytags)
-    winner = await client.fetch_user(winner)
-    await ctx.send(f"{winner.mention} won the giveaway for {prize}!")
-    embed = discord.Embed(color=15844367)
-    embed.add_field(name=f"{prize}", value=f'~~React with 🎉 to enter!\nEnds: <t:{unix_timestamp_plus_5_min}:R>\nHosted by: {ctx.author.mention}\nWinner: {winner.mention}~~', inline=False)
-    await message.edit('~~:tada: **GIVEAWAY** :tada:~~', embed=embed, view=None)
-    giveawaytags.clear()
 
 
 @client.event
