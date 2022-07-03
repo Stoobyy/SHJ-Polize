@@ -611,11 +611,11 @@ async def server(ctx, ip=None):
     except KeyError:
         name = data['ip']
     if data['online'] is False:
-        embed = discord.Embed(title=f"{name}'s status", description='Server is offline')
+        embed = discord.Embed(title=f"{name}'s status", description=':red_circle: Server is offline', color=15158332)
         embed.add_field(name='IP', value=f"{data['ip']}:{data['port']}", inline=True)
         await ctx.reply(embed=embed)
     else:
-        embed = discord.Embed(title=f"{name}'s status", description='Server is online')
+        embed = discord.Embed(title=f"{name}'s status", description=':green_circle: Server is online', color=3066993)
         embed.set_thumbnail(url=f"https://api.mcsrvstat.us/icon/{name}")
         embed.add_field(name='IP', value=f"{data['ip']}:{data['port']}", inline=True)
         embed.add_field(name='MOTD', value="\n".join(data['motd']['clean']), inline=True)
@@ -625,7 +625,7 @@ async def server(ctx, ip=None):
         embed.add_field(name='Players Online', value=f"{data['players']['online']}/{data['players']['max']}", inline=True)
         if data['players']['online'] != 0:
             try:
-                embed.add_field(name='Players', value='\n'.join(data['players']['list']), inline=True)
+                embed.add_field(name='Players', value=f"`{'\n'.join(data['players']['list'])}`", inline=True)
             except:
                 pass
         await ctx.reply(embed=embed)
