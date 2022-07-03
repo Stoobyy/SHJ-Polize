@@ -17,10 +17,6 @@ cluster = MongoClient("mongodb+srv://nalin:shjpolize@shj-polize.53wo6.mongodb.ne
 db = cluster["shj-polize"]
 highlightdb = db["hl"]
 ezdb = db["ez"]
-mix={}
-editmsg={}
-ignore=[]
-idict={}
 
 
 tzone = timezone(timedelta(hours=4))
