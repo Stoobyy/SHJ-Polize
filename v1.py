@@ -588,7 +588,7 @@ async def server(ctx, ip=None):
         if data['players']['online'] != 0:
             try:
                 players = '\n'.join(data['players']['list'])
-                embed.add_field(name='Players', value=f"`{players}`", inline=True)
+                embed.add_field(name='Players', value=f"`{players}`")
             except:
                 pass
         await ctx.reply(embed=embed)
