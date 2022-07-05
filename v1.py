@@ -565,8 +565,14 @@ async def server(ctx, ip=None):
     try:
         data = data.json()
     except:
-        await ctx.reply(f'Something went wrong please try again later\n ||{data.text}||')
-        return
+        if ip.endswith('.aternos.me'):
+            embed = discord.Embed(title=f"{ip}'s status", description=':red_circle: Server is offline', color=15158332)
+            embed.add_field(name='Server IP', value=ip, inline=False)
+            await ctx.reply(embed=embed)
+            return
+        else:
+            await ctx.reply(f'Something went wrong please try again later\n ||{data.text}||')
+            return
 
     try:
         name = data['hostname']
