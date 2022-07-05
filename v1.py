@@ -565,8 +565,13 @@ async def server(ctx, ip=None):
     try:
         data = data.json()
     except:
-        await ctx.reply(f'Something went wrong please try again later\n ||{data.text}||')
-        return
+        if data.text == '429 Too Many Requests - If you believe this is an error, please contact: api@mcsrvstat.us':
+            embed = discord.Embed(title=f"{ip}'s status", description=':red_circle: Server is offline', color=15158332)
+            await ctx.reply(embed=embed)
+            return
+        else:
+            await ctx.reply(f'Something went wrong please try again later\n ||{data.text}||')
+            return
 
     try:
         name = data['hostname']
