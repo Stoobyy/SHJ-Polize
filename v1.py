@@ -638,7 +638,7 @@ async def cape(ctx, username):
         capeurl = minecraft['frontImageUrl']
         response = requests.get(capeurl)
         cape = Image.open(BytesIO(response.content))
-        cape = cape.resize((135, 216))
+        cape = cape.resize((636, 1024))
 
         with BytesIO() as capeimg:
             cape.save(capeimg, format="png")
@@ -655,7 +655,7 @@ async def cape(ctx, username):
         capeurl = optifine['frontImageUrl']
         response = requests.get(capeurl)
         cape = Image.open(BytesIO(response.content))
-        cape = cape.resize((135, 216))
+        cape = cape.resize((636, 1024))
 
         with BytesIO() as capeimg:
             cape.save(capeimg, format="png")
