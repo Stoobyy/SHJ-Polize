@@ -1,3 +1,5 @@
 requests
-py-cord==2.0.0rc1
+py-cord
 pymongo[srv]
+mojang
+pillow

@@ -3,6 +3,9 @@ import asyncio
 import json
 import random
 from datetime import *
+from mojang import MojangAPI
+from PIL import Image, ImageFilter
+from io import BytesIO
 
 import discord
 import requests
@@ -613,6 +616,65 @@ async def serverinfo(ctx):
 Players found to break these rules are subject to severe punishments. These punishments include chat mutes, temporary bans, permanant bans, etc. Punishment will depend on the severity of the offense commited.''', colour=1243903)
     await ctx.send(content='FishyMC V(Lost track) is finally live.', embed=embed)
     await ctx.send(embed=embedd)
+
+
+@client.command()
+async def cape(ctx, username):
+    uuid = MojangAPI.get_uuid(username)
+    name = MojangAPI.get_username(uuid)
+    if name is None:
+        await ctx.reply('Invalid username')
+        return
+
+    response = requests.get(f'https://api.capes.dev/load/{name}')
+    raw = response.json()
+
+    embeds = []
+    files=[]
+    minecraft = raw['minecraft']
+    optifine = raw['optifine']
+
+    if minecraft['exists'] == True:
+        capeurl = minecraft['frontImageUrl']
+        response = requests.get(capeurl)
+        cape = Image.open(BytesIO(response.content))
+        cape = cape.resize((135, 216))
+
+        with BytesIO() as capeimg:
+            cape.save(capeimg, format="png")
+            capeimg.seek(0)
+            mc_cape = discord.File(capeimg, filename="cape.png")
+
+        embed = discord.Embed(title=f'{name}\'s Mojang cape', description=f'[Click here for cape]({capeurl})', colour=15105570)
+        embed.set_image(url=f'attachment://cape.png')
+        embed.set_thumbnail(url=f'https://crafatar.com/avatars/{uuid}?overlay')
+        embeds.append(embed)
+        files.append(mc_cape)
+
+    if optifine['exists'] == True:
+        capeurl = optifine['frontImageUrl']
+        response = requests.get(capeurl)
+        cape = Image.open(BytesIO(response.content))
+        cape = cape.resize((135, 216))
+
+        with BytesIO() as capeimg:
+            cape.save(capeimg, format="png")
+            capeimg.seek(0)
+            of_cape = discord.File(capeimg, filename="optifine.png")
+
+        embed = discord.Embed(title=f'{name}\'s Optifine cape', description=f'[Click here for cape]({capeurl})', colour=15105570)
+        embed.set_image(url=f'attachment://optifine.png')
+        embed.set_thumbnail(url=f'https://crafatar.com/avatars/{uuid}?overlay')
+        embeds.append(embed)
+        files.append(of_cape)
+        
+    if len(embeds) == 0:
+        await ctx.send(f'{username} has no capes.')
+        return
+    await ctx.reply(embeds=embeds, files=files,  mention_author=False)
+
+
+
 
 
 @client.event
