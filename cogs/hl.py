@@ -54,8 +54,7 @@ class Highlight(commands.Cog):
 
 
     @commands.slash_command(name='hl')
-    async def hl(self, ctx, word=None):
-
+    async def slash_hl(self, ctx, word=None):
         guildid = ctx.guild.id
         ghl = highlightdb.find_one({'_id': guildid})
         if ghl is None:
