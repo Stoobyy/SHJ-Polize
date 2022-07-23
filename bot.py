@@ -18,7 +18,15 @@ async def on_ready():
 async def ping(ctx):
     await ctx.send(f"{round(client.latency * 1000)}ms")
 
+@client.command(hidden=True)
+async def load(ctx, extension):
+    client.load_extension(f'cogs.{extension}')
+    await ctx.send(f'Loaded {extension}')
 
+@client.command(hidden=True)
+async def unload(ctx, extension):
+    client.unload_extension(f'cogs.{extension}')
+    await ctx.send(f'Unloaded {extension}')
 
 
 @client.event
