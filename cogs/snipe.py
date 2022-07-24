@@ -230,10 +230,10 @@ class Snipe(commands.Cog):
 
     @commands.command(aliases=['d'])
     async def delete(self, ctx):
+        message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
         if message.author.id == self.client.user.id:
             msg = deletemsg[str(ctx.channel.id)]
             msg['DontSnipe'] = True
-            message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
             try:
                 snipemsg = await ctx.channel.fetch_message(message.reference.message_id)
                 s_user = snipemsg.author.id
