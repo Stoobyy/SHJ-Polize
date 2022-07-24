@@ -69,7 +69,7 @@ class Ez(commands.Cog):
 
     @commands.command(aliases=['eb'])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
-    async def ezblacklist(self, ctx, param: discord.Member or discord.TextChannel = None):
+    async def blacklist(self, ctx, param: discord.Member or discord.TextChannel = None):
         if param is None:
             param = ctx.channel
 
