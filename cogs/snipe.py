@@ -209,31 +209,37 @@ class Snipe(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        try:
-            msg = deletemsg[str(reaction.message.channel.id)]
-        except KeyError:
-            return
-        msg['DontSnipe'] = True
-        message = await reaction.message.channel.fetch_message(reaction.message.id)
-        try:
-            snipemsg = await reaction.message.channel.fetch_message(message.reference.message_id)
-            s_user = snipemsg.author.id
-        except:
-            s_user = None
-        if message.author.id == self.client.user.id:
-            if reaction.emoji == '❌':
+        if reaction.emoji == '❌':
+            try:
+                msg = deletemsg[str(reaction.message.channel.id)]
+                msg['DontSnipe'] = True
+            except KeyError:
+                pass
+            message = await reaction.message.channel.fetch_message(reaction.message.id)
+            try:
+                snipemsg = await reaction.message.channel.fetch_message(message.reference.message_id)
+                s_user = snipemsg.author.id
+            except:
+                s_user = None
+            if message.author.id == self.client.user.id:
                 if user.id == s_user or user.id in devs:
                     await message.delete()
                     if s_user != None:
                         await snipemsg.delete()
-        del msg['DontSnipe']
+            try:
+                del msg['DontSnipe']
+            except KeyError:
+                pass
 
     @commands.command(aliases=['d'])
     async def delete(self, ctx):
         message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
         if message.author.id == self.client.user.id:
-            msg = deletemsg[str(ctx.channel.id)]
-            msg['DontSnipe'] = True
+            try:
+                msg = deletemsg[str(ctx.channel.id)]
+                msg['DontSnipe'] = True
+            except KeyError:
+                pass
             try:
                 snipemsg = await ctx.channel.fetch_message(message.reference.message_id)
                 s_user = snipemsg.author.id
@@ -244,9 +250,12 @@ class Snipe(commands.Cog):
                 await ctx.message.delete()
                 if s_user != None:
                     await snipemsg.delete()
+            else:
+                await ctx.react('<a:nochamp:972351244700090408>')
+            try:
                 del msg['DontSnipe']
-        else:
-            await ctx.react('<a:nochamp:972351244700090408>')
+            except KeyError:
+                pass
 
     @commands.slash_command()
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
