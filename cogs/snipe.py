@@ -17,10 +17,11 @@ def is_dev(ctx):
     else:
         return False
 
+
 class Snipe(commands.Cog):
     def __init__(self, client):
         self.client = client
-    
+
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         if message.author.bot:
@@ -50,7 +51,6 @@ class Snipe(commands.Cog):
             else:
                 deletemsg[channel]['attachment'] = attachment.url
 
-
     @commands.command(aliases=['s'])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
     async def snipe(self, ctx,  channel: discord.TextChannel = None):
@@ -78,7 +78,6 @@ class Snipe(commands.Cog):
             await ctx.reply(embed=embed, file=img, mention_author=False)
             return
         await ctx.reply(embed=embed, mention_author=False)
-
 
     @commands.command(aliases=['dms'])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
@@ -109,6 +108,35 @@ class Snipe(commands.Cog):
         await ctx.author.send(embed=embed)
         await ctx.message.add_reaction('👍')
 
+    @commands.slash_command(name='snipe')
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
+    @discord.option(name='channel', type=discord.TextChannel, required=False, default=None)
+    @discord.option(name='ephemeral', type=bool, required=False, default=True)
+    async def ssnipe(self, ctx, channel: discord.TextChannel, ephemeral):
+        if channel is None:
+            channel = ctx.channel
+        channel_id = str(channel.id)
+        if channel_id in deletemsg:
+            author = deletemsg[channel_id]['author']
+            authorav = deletemsg[channel_id]['authorav']
+            timee = deletemsg[channel_id]['time']
+            content = deletemsg[channel_id]['content']
+        else:
+            await ctx.respond('There is no deleted message in this channel', ephemeral=True)
+            return
+        if 'attachment' in deletemsg[channel_id]:
+            attachment = deletemsg[channel_id]['attachment']
+            content += f"\n:open_file_folder:[Attachment]({attachment})"
+        embed = discord.Embed(description=f'{content}', colour=1752220)
+        embed.timestamp = timee
+        embed.set_author(name=f'{author}', icon_url=f'{authorav}')
+        embed.set_footer(text=f'Deleted in {channel}')
+        if 'img' in deletemsg[channel_id]:
+            img = deletemsg[channel_id]['img']
+            embed.set_image(url=f'attachment://{img.filename}')
+            await ctx.respond(embed=embed, file=img, ephemeral=ephemeral)
+            return
+        await ctx.reply(embed=embed, ephemeral=ephemeral)
 
     @commands.Cog.listener()
     async def on_message_edit(self, oldmsg, newmsg):
@@ -129,7 +157,6 @@ class Snipe(commands.Cog):
 
         else:
             editmsg[channel] = {'author': author, 'oldcontent': oldcontent, 'newcontent': newcontent, 'authorav': authav, 'msgurl': msgurl, 'time': timee}
-
 
     @commands.command(aliases=['es'])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
@@ -154,7 +181,6 @@ class Snipe(commands.Cog):
         embed.set_author(name=f'{author}', icon_url=f'{authav}')
         embed.set_footer(text=f'Deleted in {channel}')
         await ctx.reply(embed=embed, mention_author=False)
-
 
     @commands.command(aliases=['dmes'])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
@@ -181,7 +207,6 @@ class Snipe(commands.Cog):
         await ctx.author.send(embed=embed)
         await ctx.message.add_reaction('👍')
 
-
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         try:
@@ -203,7 +228,6 @@ class Snipe(commands.Cog):
                         await snipemsg.delete()
         del msg['DontSnipe']
 
-
     @commands.command(aliases=['d'])
     async def delete(self, ctx):
         if message.author.id == self.client.user.id:
@@ -223,6 +247,33 @@ class Snipe(commands.Cog):
                 del msg['DontSnipe']
         else:
             await ctx.react('<a:nochamp:972351244700090408>')
+
+    @commands.slash_command()
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
+    @discord.option(name='channel', type=discord.TextChannel, required=False, default=None)
+    @discord.option(name='ephemeral', type=bool, required=False, default=True)
+    async def editsnipe(self, ctx, channel: discord.TextChannel, ephemeral):
+        if channel is None:
+            channel = ctx.channel
+        channel_id = str(channel.id)
+        if channel_id in editmsg:
+            author = editmsg[channel_id]['author']
+            oldmsg = editmsg[channel_id]['oldcontent']
+            newmsg = editmsg[channel_id]['newcontent']
+            authav = editmsg[channel_id]['authorav']
+            messageurl = editmsg[channel_id]['msgurl']
+            timee = editmsg[channel_id]['time']
+        else:
+            await ctx.respond('There is no edited message in this channel', ephemeral=True)
+            return
+        embed = discord.Embed(description=f'[Jump to message]({messageurl})', colour=1752220)
+        embed.add_field(name='Original Message', value=f'{oldmsg}')
+        embed.add_field(name='Edited message', value=f'{newmsg}')
+        embed.timestamp = timee
+        embed.set_author(name=f'{author}', icon_url=f'{authav}')
+        embed.set_footer(text=f'Deleted in {channel}')
+        await ctx.respond(embed=embed, ephemeral=ephemeral)
+
 
 def setup(client):
     client.add_cog(Snipe(client))
