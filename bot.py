@@ -1,6 +1,6 @@
 import os
 from datetime import *
-
+startup_time = datetime.now().timestamp()
 
 import discord
 from discord.ext import commands
@@ -10,13 +10,15 @@ client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=di
 
 @client.event
 async def on_ready():
+    global startup_time
+    startup_time = datetime.now().timestamp()
     print(f"Logged in as {client.user}")
     await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
 
 
 @client.command()
 async def ping(ctx):
-    await ctx.send(f"{round(client.latency * 1000)}ms")
+    await ctx.reply(f"{round(client.latency * 1000)}ms", mention_author=False)
 
 @client.command(hidden=True)
 async def load(ctx, extension):
@@ -28,17 +30,34 @@ async def unload(ctx, extension):
     client.unload_extension(f'cogs.{extension}')
     await ctx.send(f'Unloaded {extension}')
 
-
+@client.command()
+async def status(ctx):
+    current_time = datetime.now().timestamp()
+    time = current_time - startup_time
+    time = str(timedelta(seconds=time))
+    value = ""
+    if "," in time:
+        time = time.split(",")
+        value += time[0] + " , "
+        time = time[1]
+    else:
+        value += "0 days , "
+    time = time.split(":")
+    value += f"{time[0]} hours , {time[1]} minutes and {int(float(time[2]))} seconds"
+    await ctx.reply(f"I have been online for `{value}`", mention_author=False)
+    
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
         await ctx.message.add_reaction('<a:nochamp:972351244700090408>')
     elif isinstance(error, commands.errors.ChannelNotFound):
-        await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
+        await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(', mention_author=False)
     elif isinstance(error, commands.errors.CommandNotFound):
         pass
+    elif isinstance(error, commands.errors.MissingRequiredArgument):
+        pass
     else:
-        await ctx.reply(f'{type(error)}\n{error}')
+        await ctx.reply(f'{type(error)}\n{error}', mention_author=False)
         raise error
 
 
