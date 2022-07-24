@@ -136,7 +136,7 @@ class Snipe(commands.Cog):
             embed.set_image(url=f'attachment://{img.filename}')
             await ctx.respond(embed=embed, file=img, ephemeral=ephemeral)
             return
-        await ctx.reply(embed=embed, ephemeral=ephemeral)
+        await ctx.respond(embed=embed, ephemeral=ephemeral)
 
     @commands.Cog.listener()
     async def on_message_edit(self, oldmsg, newmsg):
