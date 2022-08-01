@@ -20,12 +20,6 @@ class Ez(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    def is_dev(ctx):
-        if ctx.author.id in (499112914578309120, 700195735689494558):
-            return True
-        else:
-            return False
-
     @commands.Cog.listener('on_message')
     async def ez_webhook(self, message):
         if message.author.bot or message.guild is False:
@@ -68,7 +62,7 @@ class Ez(commands.Cog):
                 await messageid.delete()
 
     @commands.command(aliases=['eb'])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     async def blacklist(self, ctx, param: discord.Member or discord.TextChannel = None):
         if param is None:
             param = ctx.channel
@@ -100,7 +94,7 @@ class Ez(commands.Cog):
             await ctx.message.add_reaction('👍')
 
     @commands.slash_command(name='ezblacklist')
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist', required=False)
     @discord.option(name='user', type=discord.Member, default=None, description='The user to blacklist', required=False)
     @discord.option(name='serverwide', type=bool, default=None, description='Blacklist all channels', required=False)
@@ -159,7 +153,7 @@ class Ez(commands.Cog):
             await ctx.respond(f'Serverwide blacklist is now disabled', ephemeral=True)
 
     @commands.slash_command(name='ezbtimeout')
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist if empty changes server timeout', required=False)
     @discord.option(name='time', type=int, default=None, description='The time in seconds', required=False)
     async def deleteafter(self, ctx, channel: discord.TextChannel, time: int):

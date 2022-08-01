@@ -5,7 +5,7 @@ startup_time = datetime.now().timestamp()
 import discord
 from discord.ext import commands
 
-client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all())
+client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all(), owner_ids=[499112914578309120, 700195735689494558])
 
 
 @client.event
@@ -76,6 +76,7 @@ for cog in os.listdir('./cogs'):
     if cog.endswith('.py'):
         client.load_extension(f'cogs.{cog[:-3]}', store=False)
 
+client.load_extension('jishaku')
 
 try:
     token = os.environ['TOKEN']

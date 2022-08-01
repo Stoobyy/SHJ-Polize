@@ -3,3 +3,4 @@ py-cord
 pymongo[srv]
 mojang
 pillow
+jishaku

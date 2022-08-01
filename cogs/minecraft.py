@@ -18,7 +18,7 @@ class Minecraft(commands.Cog):
             if ctx.guild.id == 723259592800206940:
                 ip = 'funfishmc.aternos.me'
             else:
-                await ctx.reply('Please specify an IP')
+                await ctx.reply('Please specify an IP', mention_author=False)
                 return
         data = requests.get(f'https://api.mcsrvstat.us/2/{ip}')
         try:
@@ -27,10 +27,10 @@ class Minecraft(commands.Cog):
             if ip.endswith('.aternos.me'):
                 embed = discord.Embed(title=f"{ip}'s status", description=':red_circle: Server is offline', color=15158332)
                 embed.add_field(name='Server IP', value=ip, inline=False)
-                await ctx.reply(embed=embed)
+                await ctx.reply(embed=embed, mention_author=False)
                 return
             else:
-                await ctx.reply(f'Something went wrong please try again later\n ||{data.text}||')
+                await ctx.reply(f'Something went wrong please try again later\n ||{data.text}||', mention_author=False)
                 return
 
         try:
@@ -40,7 +40,7 @@ class Minecraft(commands.Cog):
         if data['online'] is False:
             embed = discord.Embed(title=f"{name}'s status", description=':red_circle: Server is offline', color=15158332)
             embed.add_field(name='IP', value=f"{data['ip']}:{data['port']}", inline=True)
-            await ctx.reply(embed=embed)
+            await ctx.reply(embed=embed, mention_author=False)
         else:
             embed = discord.Embed(title=f"{name}'s status", description=':green_circle: Server is online', color=3066993)
             embed.set_thumbnail(url=f"https://api.mcsrvstat.us/icon/{name}")
@@ -56,7 +56,7 @@ class Minecraft(commands.Cog):
                     embed.add_field(name='Players', value=f"`{players}`")
                 except:
                     pass
-            await ctx.reply(embed=embed)
+            await ctx.reply(embed=embed, mention_author=False)
 
 
     @commands.command(hidden=True)
@@ -79,7 +79,7 @@ class Minecraft(commands.Cog):
         uuid = MojangAPI.get_uuid(username)
         name = MojangAPI.get_username(uuid)
         if name is None:
-            await ctx.reply('Invalid username')
+            await ctx.reply('Invalid username', mention_author=False)
             return
 
         response = requests.get(f'https://api.capes.dev/load/{name}')

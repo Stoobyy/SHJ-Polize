@@ -11,13 +11,6 @@ devs = (499112914578309120, 700195735689494558)
 roles = [773245326747500604, 734307591630356530, 734304865794392094, 888692319447023636, 888461103250669608, 861175306127933470, 874272681124589629, 860431948236587059, 960209393339731989]
 
 
-def is_dev(ctx):
-    if ctx.author.id in devs:
-        return True
-    else:
-        return False
-
-
 class Snipe(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -52,7 +45,7 @@ class Snipe(commands.Cog):
                 deletemsg[channel]['attachment'] = attachment.url
 
     @commands.command(aliases=['s'])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     async def snipe(self, ctx,  channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
@@ -80,7 +73,7 @@ class Snipe(commands.Cog):
         await ctx.reply(embed=embed, mention_author=False)
 
     @commands.command(aliases=['dms'])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     async def dmsnipe(self, ctx,  channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
@@ -109,7 +102,7 @@ class Snipe(commands.Cog):
         await ctx.message.add_reaction('👍')
 
     @commands.slash_command(name='snipe')
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, required=False, default=None)
     @discord.option(name='ephemeral', type=bool, required=False, default=True)
     async def ssnipe(self, ctx, channel: discord.TextChannel, ephemeral):
@@ -159,7 +152,7 @@ class Snipe(commands.Cog):
             editmsg[channel] = {'author': author, 'oldcontent': oldcontent, 'newcontent': newcontent, 'authorav': authav, 'msgurl': msgurl, 'time': timee}
 
     @commands.command(aliases=['es'])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     async def esnipe(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
@@ -183,7 +176,7 @@ class Snipe(commands.Cog):
         await ctx.reply(embed=embed, mention_author=False)
 
     @commands.command(aliases=['dmes'])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     async def dmesnipe(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
@@ -258,7 +251,7 @@ class Snipe(commands.Cog):
                 pass
 
     @commands.slash_command()
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.check(is_dev))
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, required=False, default=None)
     @discord.option(name='ephemeral', type=bool, required=False, default=True)
     async def editsnipe(self, ctx, channel: discord.TextChannel, ephemeral):
