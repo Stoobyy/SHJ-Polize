@@ -125,46 +125,6 @@ class Highlight(commands.Cog):
 
 
 
-    @commands.command()
-    async def hl(self, ctx, word=None):
-        guildid = ctx.guild.id
-        ghl = highlightdb.find_one({'_id': guildid})
-        if ghl is None:
-            highlightdb.insert_one({'_id': guildid, 'hl': {}})
-            guildhl = highlightdb.find_one({'_id': guildid})
-        else:
-            guildhl = ghl['hl']
-
-        if word != None:
-            if str(ctx.author.id) in guildhl:
-                if word in guildhl[str(ctx.author.id)]:
-                    guildhl[str(ctx.author.id)].remove(word)
-                    highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-                    await ctx.reply(f'{word} has been removed from your highlight list', mention_author=False)
-                else:
-                    guildhl[str(ctx.author.id)].append(word)
-                    highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-                    await ctx.reply(f'{word} has been added to your highlight list', mention_author=False)
-            else:
-                guildhl[str(ctx.author.id)] = [word]
-                highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-                await ctx.reply(f'{word} has been added to your highlight list', mention_author=False)
-        else:
-            if str(ctx.author.id) not in guildhl:
-                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
-                await ctx.reply(embed=embed, mention_author=False)
-            else:
-                if len(guildhl[str(ctx.author.id)]) == 0:
-                    embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
-                    await ctx.reply(embed=embed, mention_author=False)
-                else:
-                    str1 = ''
-                    for i in guildhl[str(ctx.author.id)]:
-                        str1 += f'{i}\n'
-                    embed = discord.Embed(title='You\'re currently tracking the following words', description=str1, color=1752220)
-                    await ctx.reply(embed=embed, mention_author=False)
-
-
 def setup(client):
     client.add_cog(Highlight(client))
     print('Highlight cog loaded')
