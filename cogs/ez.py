@@ -37,7 +37,7 @@ class Ez(commands.Cog):
         if message.channel.id in blacklist['channel_blacklist'] or message.author.id in blacklist['user_blacklist']:
             return
 
-        if 'ez' in message.content.lower().split() or 'ez' == message.content.lower() or 'ezz' == message.content.lower() or 'ezzz' in message.content.lower() or 'e z' == message.content.lower():
+        if "ez" in message.content.lower().replace(" ", ""):
             hooks = await message.channel.webhooks()
             hook = discord.utils.get(hooks, name='ezz')
             if hook is None:
