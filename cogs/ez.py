@@ -94,7 +94,7 @@ class Ez(commands.Cog):
             ezdb.update_one({'_id': guildid}, {'$set': {'user_blacklist': blacklist['user_blacklist']}})
             await ctx.message.add_reaction('👍')
 
-    ez = SlashCommandGroup("ez")
+    ez = SlashCommandGroup(name="ez")
 
     ez.command(name="blacklist", description="Blacklist a channel or user")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
