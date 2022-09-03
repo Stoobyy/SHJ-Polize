@@ -18,7 +18,7 @@ async def on_ready():
 
 @client.command()
 async def ping(ctx):
-    await ctx.reply(f"{client.latency * 100 : .2f}ms", mention_author=False)
+    await ctx.reply(f"{client.latency * 1000 : .2f}ms", mention_author=False)
 
 @client.slash_command()
 async def ping(ctx):
