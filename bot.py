@@ -18,11 +18,11 @@ async def on_ready():
 
 @client.command()
 async def ping(ctx):
-    await ctx.reply(f"{client.latency * 1000 : .2f }ms", mention_author=False)
+    await ctx.reply(f"{client.latency * 100 : .2f}ms", mention_author=False)
 
 @client.slash_command()
 async def ping(ctx):
-    await ctx.respond(f"{client.latency * 1000 : .2f }ms")
+    await ctx.respond(f"{client.latency * 1000 : .2f}ms")
 
 @client.command(hidden=True)
 async def load(ctx, extension):
@@ -91,5 +91,6 @@ client.load_extension('jishaku')
 try:
     token = os.environ['TOKEN']
 except KeyError:
-    token = 'OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0'
+    # token = 'OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0'
+    token = os.environ["NIGESH_TOKEN"]
 client.run(token)
