@@ -177,7 +177,7 @@ class Ez(commands.Cog):
                 ezdb.update_one({'_id': guildid}, {'$set': {'serverwide_blacklist': blacklist['serverwide_blacklist']}})
                 await ctx.respond(f'Serverwide blacklist is now enabled', ephemeral=True)
         
-    @ez.slash_command(name='timeout')
+    @ez.command(name='timeout')
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist if empty changes server timeout', required=False)
     @discord.option(name='time', type=int, default=None, description='The time in seconds', required=False)
