@@ -53,7 +53,7 @@ class Highlight(commands.Cog):
                     if lastt == 0 or timee - lastt > 300:
                         await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
 
-    hl = SlashCommandGroup(name="highlight")
+    hl = SlashCommandGroup(name="highlight", description="Highlight commands")
 
     @hl.command(name="list")
     async def hl_list(self, ctx):
