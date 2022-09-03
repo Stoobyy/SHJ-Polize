@@ -5,6 +5,7 @@ from datetime import *
 import discord
 import requests
 from discord.ext import commands
+from discord.commands import SlashCommandGroup
 from pymongo import MongoClient
 
 cluster = MongoClient("mongodb+srv://nalin:shjpolize@shj-polize.53wo6.mongodb.net/?retryWrites=true&w=majority")
@@ -93,27 +94,18 @@ class Ez(commands.Cog):
             ezdb.update_one({'_id': guildid}, {'$set': {'user_blacklist': blacklist['user_blacklist']}})
             await ctx.message.add_reaction('👍')
 
-    @commands.slash_command(name='ezblacklist')
+    ez = SlashCommandGroup("ez")
+
+    ez.command(name="blacklist", description="Blacklist a channel or user")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist', required=False)
     @discord.option(name='user', type=discord.Member, default=None, description='The user to blacklist', required=False)
-    @discord.option(name='serverwide', type=bool, default=None, description='Blacklist all channels', required=False)
-    async def eazyblacklist(self, ctx, channel: discord.TextChannel, user: discord.Member, serverwide: bool):
+    async def eazyblacklist(self, ctx, channel: discord.TextChannel, user: discord.Member):
         guildid = ctx.guild.id
         blacklist = ezdb.find_one({'_id': guildid})
         if blacklist is None:
             ezdb.insert_one({'_id': guildid, 'channel_blacklist': [], 'user_blacklist': [], 'serverwide_blacklist': False, "server_deleteafter": 0, "channel_deleteafter": {}})
             blacklist = ezdb.find_one({'_id': guildid})
-        if channel is None and user is None and serverwide is None:
-            embed = discord.Embed(title='Blacklist', description='Shows Blacklisted Channels and Users for ez message', colour=1752220)
-            cb = '\n'.join('<#{}>'.format(x) for x in blacklist['channel_blacklist'])
-            ub = '\n'.join('<@{}>'.format(x) for x in blacklist['user_blacklist'])
-            embed.add_field(name='Serverwide blacklist', value=f"{blacklist['serverwide_blacklist']}")
-            if len(blacklist['channel_blacklist']) != 0:
-                embed.add_field(name='Channels', value=cb, inline=False)
-            if len(blacklist['user_blacklist']) != 0:
-                embed.add_field(name='Users', value=ub, inline=False)
-            await ctx.respond(embed=embed, ephemeral=True)
 
         if isinstance(channel, discord.TextChannel):
             if channel.id in blacklist['channel_blacklist']:
@@ -136,23 +128,56 @@ class Ez(commands.Cog):
             ezdb.update_one({'_id': guildid}, {'$set': {'user_blacklist': blacklist['user_blacklist']}})
             await ctx.respond(f'<@{user.id}> is now blacklisted', ephemeral=True)
             return
+        if channel is None and user is None:
+            await ctx.respond(f'You need to specify a channel or user', ephemeral=True)
+            return
+
+    ez.command("list", description="List blacklisted channels and users")
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
+    async def eazyblacklistlist(self, ctx):
+        guildid = ctx.guild.id
+        blacklist = ezdb.find_one({'_id': guildid})
+        if blacklist is None:
+            ezdb.insert_one({'_id': guildid, 'channel_blacklist': [], 'user_blacklist': [], 'serverwide_blacklist': False, "server_deleteafter": 0, "channel_deleteafter": {}})
+            blacklist = ezdb.find_one({'_id': guildid})
+            embed = discord.Embed(title='Blacklist', description='Shows Blacklisted Channels and Users for ez message', colour=1752220)
+            cb = '\n'.join('<#{}>'.format(x) for x in blacklist['channel_blacklist'])
+            ub = '\n'.join('<@{}>'.format(x) for x in blacklist['user_blacklist'])
+            embed.add_field(name='Serverwide blacklist', value=f"{blacklist['serverwide_blacklist']}")
+            if len(blacklist['channel_blacklist']) != 0:
+                embed.add_field(name='Channels', value=cb, inline=False)
+            if len(blacklist['user_blacklist']) != 0:
+                embed.add_field(name='Users', value=ub, inline=False)
+            await ctx.respond(embed=embed, ephemeral=True)
+
+    ez.command("disable", description="Disable serverwide blacklist")
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
+    @discord.option(name="disabled", type=bool, description="Disable serverwide blacklist", required=True)
+    async def eazyblacklistdisable(self, ctx, disabled):
+        guildid = ctx.guild.id
+        blacklist = ezdb.find_one({'_id': guildid})
+        if blacklist is None:
+            ezdb.insert_one({'_id': guildid, 'channel_blacklist': [], 'user_blacklist': [], 'serverwide_blacklist': False, "server_deleteafter": 0, "channel_deleteafter": {}})
+            blacklist = ezdb.find_one({'_id': guildid})
         sw = blacklist['serverwide_blacklist']
-        if serverwide is True:
-            if sw is True:
+        if sw is True:
+            if disabled is True:
                 await ctx.respond('Serverwide blacklist is already enabled', ephemeral=True)
                 return
-            blacklist['serverwide_blacklist'] = True
-            ezdb.update_one({'_id': guildid}, {'$set': {'serverwide_blacklist': blacklist['serverwide_blacklist']}})
-            await ctx.respond(f'Serverwide blacklist is now enabled', ephemeral=True)
-        elif serverwide is False:
-            if sw is False:
+            else:
+                blacklist['serverwide_blacklist'] = False
+                ezdb.update_one({'_id': guildid}, {'$set': {'serverwide_blacklist': blacklist['serverwide_blacklist']}})
+                await ctx.respond(f'Serverwide blacklist is now disabled', ephemeral=True)
+        else:
+            if disabled is False:
                 await ctx.respond('Serverwide blacklist is already disabled', ephemeral=True)
                 return
-            blacklist['serverwide_blacklist'] = False
-            ezdb.update_one({'_id': guildid}, {'$set': {'serverwide_blacklist': blacklist['serverwide_blacklist']}})
-            await ctx.respond(f'Serverwide blacklist is now disabled', ephemeral=True)
-
-    @commands.slash_command(name='ezbtimeout')
+            else:
+                blacklist['serverwide_blacklist'] = True
+                ezdb.update_one({'_id': guildid}, {'$set': {'serverwide_blacklist': blacklist['serverwide_blacklist']}})
+                await ctx.respond(f'Serverwide blacklist is now enabled', ephemeral=True)
+        
+    @ez.slash_command(name='timeout')
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist if empty changes server timeout', required=False)
     @discord.option(name='time', type=int, default=None, description='The time in seconds', required=False)
