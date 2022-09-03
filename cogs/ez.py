@@ -140,15 +140,15 @@ class Ez(commands.Cog):
         if blacklist is None:
             ezdb.insert_one({'_id': guildid, 'channel_blacklist': [], 'user_blacklist': [], 'serverwide_blacklist': False, "server_deleteafter": 0, "channel_deleteafter": {}})
             blacklist = ezdb.find_one({'_id': guildid})
-            embed = discord.Embed(title='Blacklist', description='Shows Blacklisted Channels and Users for ez message', colour=1752220)
-            cb = '\n'.join('<#{}>'.format(x) for x in blacklist['channel_blacklist'])
-            ub = '\n'.join('<@{}>'.format(x) for x in blacklist['user_blacklist'])
-            embed.add_field(name='Serverwide blacklist', value=f"{blacklist['serverwide_blacklist']}")
-            if len(blacklist['channel_blacklist']) != 0:
-                embed.add_field(name='Channels', value=cb, inline=False)
-            if len(blacklist['user_blacklist']) != 0:
-                embed.add_field(name='Users', value=ub, inline=False)
-            await ctx.respond(embed=embed, ephemeral=True)
+        embed = discord.Embed(title='Blacklist', description='Shows Blacklisted Channels and Users for ez message', colour=1752220)
+        cb = '\n'.join('<#{}>'.format(x) for x in blacklist['channel_blacklist'])
+        ub = '\n'.join('<@{}>'.format(x) for x in blacklist['user_blacklist'])
+        embed.add_field(name='Serverwide blacklist', value=f"{blacklist['serverwide_blacklist']}")
+        if len(blacklist['channel_blacklist']) != 0:
+            embed.add_field(name='Channels', value=cb, inline=False)
+        if len(blacklist['user_blacklist']) != 0:
+            embed.add_field(name='Users', value=ub, inline=False)
+        await ctx.respond(embed=embed, ephemeral=True)
 
     @ez.command(name="disable", description="disable serverwide blacklist")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
