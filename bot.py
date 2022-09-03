@@ -88,9 +88,6 @@ for cog in os.listdir('./cogs'):
 
 client.load_extension('jishaku')
 
-try:
-    token = os.environ['TOKEN']
-except KeyError:
-    # token = 'OTUyODM0MTMzMzg4ODI4NzMy.Yi7x8A.NJUC1KhacvrodNbMOQncj219lp0'
-    token = os.environ["NIGESH_TOKEN"]
+token = os.environ['TOKEN']
+
 client.run(token)
