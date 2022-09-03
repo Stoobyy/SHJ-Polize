@@ -96,7 +96,7 @@ class Ez(commands.Cog):
 
     ez = SlashCommandGroup(name="ez", description="ez commands")
 
-    ez.command(name="blacklist", description="Blacklist a channel or user")
+    ez.command(name="blacklist")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist', required=False)
     @discord.option(name='user', type=discord.Member, default=None, description='The user to blacklist', required=False)
@@ -132,7 +132,7 @@ class Ez(commands.Cog):
             await ctx.respond(f'You need to specify a channel or user', ephemeral=True)
             return
 
-    ez.command(name="list", description="List blacklisted channels and users")
+    ez.command(name="list")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     async def eazyblacklistlist(self, ctx):
         guildid = ctx.guild.id
@@ -150,7 +150,7 @@ class Ez(commands.Cog):
                 embed.add_field(name='Users', value=ub, inline=False)
             await ctx.respond(embed=embed, ephemeral=True)
 
-    ez.command(name="disable", description="Disable serverwide blacklist")
+    ez.command(name="disable")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name="disabled", type=bool, description="Disable serverwide blacklist", required=True)
     async def eazyblacklistdisable(self, ctx, disabled):
