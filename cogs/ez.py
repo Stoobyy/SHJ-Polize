@@ -8,7 +8,7 @@ from discord.ext import commands
 from discord.commands import SlashCommandGroup
 from pymongo import MongoClient
 
-cluster = MongoClient("bruh")
+cluster = MongoClient("mongodb+srv://nalin:shjpolize@shj-polize.53wo6.mongodb.net/?retryWrites=true&w=majority")
 db = cluster["shj-polize"]
 ezdb = db["ez"]
 
