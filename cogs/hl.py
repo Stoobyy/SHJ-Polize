@@ -55,7 +55,7 @@ class Highlight(commands.Cog):
 
     hl = SlashCommandGroup(name="highlight", description="Highlight commands")
 
-    @hl.command(name="list")
+    @hl.command(name="list", description="List all highlights")
     async def hl_list(self, ctx):
         guildid = ctx.guild.id
         ghl = highlightdb.find_one({'_id': guildid})
@@ -79,7 +79,7 @@ class Highlight(commands.Cog):
                 embed = discord.Embed(title='You\'re currently tracking the following words', description=str1, color=1752220)
                 await ctx.respond(embed=embed, ephemeral=True)
 
-    @hl.command(name="add")
+    @hl.command(name="add", description="Add a highlight word")
     @discord.option(name="word", required=True)
     async def hl_add(self, ctx, word):
         guildid = ctx.guild.id
@@ -102,7 +102,7 @@ class Highlight(commands.Cog):
             highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
             await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
         
-    @hl.command(name="remove")
+    @hl.command(name="remove", description="Remove a highlight word")
     @discord.option(name="word", required=True)
     async def hl_remove(self, ctx, word):
         guildid = ctx.guild.id
