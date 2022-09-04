@@ -37,7 +37,7 @@ class Ez(commands.Cog):
         if message.channel.id in blacklist['channel_blacklist'] or message.author.id in blacklist['user_blacklist']:
             return
 
-        if "ez" in message.content.lower().replace(" ", ""):
+        if "ez" in message.content.lower().split():
             hooks = await message.channel.webhooks()
             hook = discord.utils.get(hooks, name='ezz')
             if hook is None:
@@ -100,7 +100,7 @@ class Ez(commands.Cog):
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist', required=False)
     @discord.option(name='user', type=discord.Member, default=None, description='The user to blacklist', required=False)
-    async def eazyblacklist(self, ctx, channel: discord.TextChannel, user: discord.Member):
+    async def ez_blacklist(self, ctx, channel: discord.TextChannel, user: discord.Member):
         guildid = ctx.guild.id
         blacklist = ezdb.find_one({'_id': guildid})
         if blacklist is None:
@@ -132,9 +132,9 @@ class Ez(commands.Cog):
             await ctx.respond(f'You need to specify a channel or user', ephemeral=True)
             return
 
-    @ez.command(name="list", description="list blacklisted channels and users")
+    @ez.command(name="info", description="list blacklisted channels and users and shows deleteafter")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    async def eazyblacklistlist(self, ctx):
+    async def ez_info(self, ctx):
         guildid = ctx.guild.id
         blacklist = ezdb.find_one({'_id': guildid})
         if blacklist is None:
@@ -148,12 +148,23 @@ class Ez(commands.Cog):
             embed.add_field(name='Channels', value=cb, inline=False)
         if len(blacklist['user_blacklist']) != 0:
             embed.add_field(name='Users', value=ub, inline=False)
-        await ctx.respond(embed=embed, ephemeral=True)
+    
+        embed1 = discord.Embed(title='ez Timeout', description='Shows the current timeout')
+        if blacklist['server_deleteafter'] == 0:
+            embed1.add_field(name='Serverwide timeout', value='Disabled', inline=False)
+        else:
+            embed1.add_field(name='Serverwide timeout', value=f"{blacklist['server_deleteafter']} seconds")
+        if len(blacklist['channel_deleteafter']) != 0:
+            v = ''
+            for x, j in blacklist['channel_deleteafter'].items():
+                v += f'<#{x}> : {j} seconds\n'
+            embed1.add_field(name='Channels', value=v, inline=False)
+        await ctx.respond(embeds=[embed,embed1], ephemeral=True)
 
     @ez.command(name="disable", description="disable serverwide blacklist")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     @discord.option(name="disabled", type=bool, description="Disable serverwide blacklist", required=True)
-    async def eazyblacklistdisable(self, ctx, disabled):
+    async def ez_disable(self, ctx, disabled):
         guildid = ctx.guild.id
         blacklist = ezdb.find_one({'_id': guildid})
         if blacklist is None:
@@ -177,30 +188,16 @@ class Ez(commands.Cog):
                 ezdb.update_one({'_id': guildid}, {'$set': {'serverwide_blacklist': blacklist['serverwide_blacklist']}})
                 await ctx.respond(f'Serverwide blacklist is now enabled', ephemeral=True)
         
-    @ez.command(name='timeout', description='Set the timeout for the server')
+    @ez.command(name='deleteafter', description='Set the deleteafter time for ez messages in channels and server')
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist if empty changes server timeout', required=False)
-    @discord.option(name='time', type=int, default=None, description='The time in seconds', required=False)
-    async def deleteafter(self, ctx, channel: discord.TextChannel, time: int):
+    @discord.option(name='channel', type=discord.TextChannel, default=None, description='The channel to blacklist if empty changes server deleteafter', required=False)
+    @discord.option(name='time', type=int, default=None, description='The time in seconds', required=True)
+    async def ez_deleteafter(self, ctx, channel: discord.TextChannel, time: int):
         guildid = ctx.guild.id
         blacklist = ezdb.find_one({'_id': guildid})
         if blacklist is None:
             ezdb.insert_one({'_id': guildid, 'channel_blacklist': [], 'user_blacklist': [], 'serverwide_blacklist': False, "server_deleteafter": 0, "channel_deleteafter": {}})
             blacklist = ezdb.find_one({'_id': guildid})
-
-        if time is None:
-            embed = discord.Embed(title='ez Timeout', description='Shows the current timeout')
-            if blacklist['server_deleteafter'] == 0:
-                embed.add_field(name='Serverwide timeout', value='Disabled', inline=False)
-            else:
-                embed.add_field(name='Serverwide timeout', value=f"{blacklist['server_deleteafter']} seconds")
-            if len(blacklist['channel_deleteafter']) != 0:
-                v = ''
-                for x, j in blacklist['channel_deleteafter'].items():
-                    v += f'<#{x}> : {j} seconds\n'
-                embed.add_field(name='Channels', value=v, inline=False)
-            await ctx.respond(embed=embed, ephemeral=True)
-            return
 
         if channel is None:
             blacklist['server_deleteafter'] = time
