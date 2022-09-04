@@ -50,8 +50,8 @@ class Ez(commands.Cog):
             channel = await self.client.fetch_channel(int(raw['channel_id']))
             messageid = await channel.fetch_message(int(raw['id']))
 
-            if message.channel.id in blacklist['channel_deleteafter']:
-                time = blacklist['channel_deleteafter'][message.channel.id]
+            if str(message.channel.id) in blacklist['channel_deleteafter']:
+                time = blacklist['channel_deleteafter'][str(message.channel.id)]
             else:
                 if blacklist['server_deleteafter']:
                     time = blacklist['server_deleteafter']
@@ -149,7 +149,7 @@ class Ez(commands.Cog):
         if len(blacklist['user_blacklist']) != 0:
             embed.add_field(name='Users', value=ub, inline=False)
     
-        embed1 = discord.Embed(title='ez Timeout', description='Shows the current timeout')
+        embed1 = discord.Embed(title='Timeout', description='Shows the current timeout', colour=1752220)
         if blacklist['server_deleteafter'] == 0:
             embed1.add_field(name='Serverwide timeout', value='Disabled', inline=False)
         else:
@@ -200,21 +200,30 @@ class Ez(commands.Cog):
             blacklist = ezdb.find_one({'_id': guildid})
 
         if channel is None:
-            blacklist['server_deleteafter'] = time
-            ezdb.update_one({'_id': guildid}, {'$set': {'server_deleteafter': blacklist['server_deleteafter']}})
-            await ctx.respond(f'Server timeout set to {time} seconds', ephemeral=True)
-        else:
-            if str(channel.id) in blacklist['channel_deleteafter']:
-                blacklist['channel_deleteafter'][str(channel.id)] = time
-                ezdb.update_one({'_id': guildid}, {'$set': {'channel_deleteafter': blacklist['channel_deleteafter']}})
-                await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
+            if time != None:
+                blacklist['server_deleteafter'] = time
+                ezdb.update_one({'_id': guildid}, {'$set': {'server_deleteafter': blacklist['server_deleteafter']}})
+                await ctx.respond(f'Server timeout set to {time} seconds', ephemeral=True)
             else:
-                if blacklist['channel_deleteafter'] == {}:
-                    blacklist['channel_deleteafter'] = {str(channel.id): time}
-                else:
+                await ctx.respond('You need to specify a time', ephemeral=True)
+
+        else:
+            if time != None:
+                if str(channel.id) in blacklist['channel_deleteafter']:
                     blacklist['channel_deleteafter'][str(channel.id)] = time
+                    ezdb.update_one({'_id': guildid}, {'$set': {'channel_deleteafter': blacklist['channel_deleteafter']}})
+                    await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
+                else:
+                    if blacklist['channel_deleteafter'] == {}:
+                        blacklist['channel_deleteafter'] = {str(channel.id): time}
+                    else:
+                        blacklist['channel_deleteafter'][str(channel.id)] = time
+                    ezdb.update_one({'_id': guildid}, {'$set': {'channel_deleteafter': blacklist['channel_deleteafter']}})
+                    await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
+            else:
+                blacklist['channel_deleteafter'].pop(str(channel.id))
                 ezdb.update_one({'_id': guildid}, {'$set': {'channel_deleteafter': blacklist['channel_deleteafter']}})
-                await ctx.respond(f'Timeout set to {time} seconds for <#{channel.id}>', ephemeral=True)
+                await ctx.respond(f'Channel timeout removed', ephemeral=True)
 
 
 def setup(client):
