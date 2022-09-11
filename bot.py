@@ -10,8 +10,6 @@ client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=di
 
 @client.event
 async def on_ready():
-    global startup_time
-    startup_time = datetime.now().timestamp()
     print(f"Logged in as {client.user}")
     await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
 
