@@ -1,14 +1,15 @@
 import asyncio
+import os
 import random
 from datetime import *
 
 import discord
 import requests
-from discord.ext import commands
 from discord.commands import SlashCommandGroup
+from discord.ext import commands
 from pymongo import MongoClient
 
-cluster = MongoClient("mongodb+srv://nalin:shjpolize@shj-polize.53wo6.mongodb.net/?retryWrites=true&w=majority")
+cluster = MongoClient(os.environ['MONGO'])
 db = cluster["shj-polize"]
 ezdb = db["ez"]
 

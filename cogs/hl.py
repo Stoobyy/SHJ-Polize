@@ -1,11 +1,12 @@
-import discord
-from discord.ext import commands
+import os
 from datetime import datetime, timedelta, timezone
-from discord.commands import SlashCommandGroup
 
+import discord
+from discord.commands import SlashCommandGroup
+from discord.ext import commands
 from pymongo import MongoClient
 
-cluster = MongoClient("mongodb+srv://nalin:shjpolize@shj-polize.53wo6.mongodb.net/?retryWrites=true&w=majority")
+cluster = MongoClient(os.environ['MONGO'])
 db = cluster["shj-polize"]
 highlightdb = db["hl"]
 
