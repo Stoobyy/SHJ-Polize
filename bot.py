@@ -5,7 +5,7 @@ startup_time = datetime.now().timestamp()
 import discord
 from discord.ext import commands
 
-client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all(), owner_ids=[499112914578309120, 700195735689494558])
+client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all())
 
 
 @client.event
