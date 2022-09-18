@@ -67,11 +67,11 @@ class Highlight(commands.Cog):
             guildhl = ghl['hl']
 
         if str(ctx.author.id) not in guildhl:
-            embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
+            embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun /hl add [word] to add some', color=1752220)
             await ctx.respond(embed=embed)
         else:
             if len(guildhl[str(ctx.author.id)]) == 0:
-                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
+                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun /hl add [word] to add some', color=1752220)
                 await ctx.respond(embed=embed)
             else:
                 str1 = ''
