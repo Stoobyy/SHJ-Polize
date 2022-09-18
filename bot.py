@@ -56,7 +56,7 @@ async def status(ctx):
     
 @client.event
 async def on_command_error(ctx, error):
-    if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
+    if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions or commands.errors.NotOwner):
         await ctx.message.add_reaction('<a:nochamp:1021040710142668870>')
     elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(', mention_author=False)
