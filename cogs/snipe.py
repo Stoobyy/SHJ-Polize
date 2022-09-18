@@ -104,7 +104,7 @@ class Snipe(commands.Cog):
     @commands.slash_command(name='snipe')
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, required=False, default=None)
-    @discord.option(name='ephemeral', type=bool, required=False, default=True)
+    @discord.option(name='ephemeral', type=bool, required=False, default=False)
     async def ssnipe(self, ctx, channel: discord.TextChannel, ephemeral):
         if channel is None:
             channel = ctx.channel
@@ -213,11 +213,18 @@ class Snipe(commands.Cog):
                 snipemsg = await reaction.message.channel.fetch_message(message.reference.message_id)
                 s_user = snipemsg.author.id
             except:
+                snipemsg = None
                 s_user = None
+
+            try:
+                s_user = message.interaction.user.id
+            except:
+                s_user = None
+
             if message.author.id == self.client.user.id:
                 if user.id == s_user or user.id in devs:
                     await message.delete()
-                    if s_user != None:
+                    if snipemsg != None:
                         await snipemsg.delete()
             try:
                 del msg['DontSnipe']
@@ -237,7 +244,14 @@ class Snipe(commands.Cog):
                 snipemsg = await ctx.channel.fetch_message(message.reference.message_id)
                 s_user = snipemsg.author.id
             except:
+                snipemsg = None
                 s_user = None
+
+            try:
+                s_user = message.interaction.user.id
+            except:
+                s_user = None
+                
             if ctx.author.id in devs or ctx.author.id == s_user:
                 await message.delete()
                 await ctx.message.delete()
@@ -253,7 +267,7 @@ class Snipe(commands.Cog):
     @commands.slash_command()
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     @discord.option(name='channel', type=discord.TextChannel, required=False, default=None)
-    @discord.option(name='ephemeral', type=bool, required=False, default=True)
+    @discord.option(name='ephemeral', type=bool, required=False, default=False)
     async def editsnipe(self, ctx, channel: discord.TextChannel, ephemeral):
         if channel is None:
             channel = ctx.channel
