@@ -57,7 +57,7 @@ async def status(ctx):
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
-        await ctx.message.add_reaction('<a:nochamp:972351244700090408>')
+        await ctx.message.add_reaction('<a:nochamp:1021040710142668870>')
     elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(', mention_author=False)
     elif isinstance(error, commands.errors.CommandNotFound):
@@ -72,7 +72,7 @@ async def on_command_error(ctx, error):
 @client.event
 async def on_application_command_error(ctx, error):
     if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
-        await ctx.respond('<a:nochamp:972351244700090408>', ephemeral=True)
+        await ctx.respond('<a:nochamp:1021040710142668870>', ephemeral=True)
     elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.respond('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
     else:
