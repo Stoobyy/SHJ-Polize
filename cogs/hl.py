@@ -68,17 +68,17 @@ class Highlight(commands.Cog):
 
         if str(ctx.author.id) not in guildhl:
             embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
-            await ctx.respond(embed=embed, ephemeral=True)
+            await ctx.respond(embed=embed)
         else:
             if len(guildhl[str(ctx.author.id)]) == 0:
                 embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun >hl [word] to add some', color=1752220)
-                await ctx.respond(embed=embed, ephemeral=True)
+                await ctx.respond(embed=embed)
             else:
                 str1 = ''
                 for i in guildhl[str(ctx.author.id)]:
                     str1 += f'{i}\n'
                 embed = discord.Embed(title='You\'re currently tracking the following words', description=str1, color=1752220)
-                await ctx.respond(embed=embed, ephemeral=True)
+                await ctx.respond(embed=embed)
 
     @hl.command(name="add", description="Add a highlight word")
     @discord.option(name="word", required=True)
@@ -93,15 +93,15 @@ class Highlight(commands.Cog):
         
         if str(ctx.author.id) in guildhl:
             if word in guildhl[str(ctx.author.id)]:
-                await ctx.respond(f'{word} is already in your highlight list', ephemeral=True)
+                await ctx.respond(f'{word} is already in your highlight list')
             else:
                 guildhl[str(ctx.author.id)].append(word)
                 highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-                await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
+                await ctx.respond(f'{word} has been added to your highlight list')
         else:
             guildhl[str(ctx.author.id)] = [word]
             highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-            await ctx.respond(f'{word} has been added to your highlight list', ephemeral=True)
+            await ctx.respond(f'{word} has been added to your highlight list')
         
     @hl.command(name="remove", description="Remove a highlight word")
     @discord.option(name="word", required=True)
@@ -118,11 +118,11 @@ class Highlight(commands.Cog):
             if word in guildhl[str(ctx.author.id)]:
                 guildhl[str(ctx.author.id)].remove(word)
                 highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-                await ctx.respond(f'{word} has been removed from your highlight list', ephemeral=True)
+                await ctx.respond(f'{word} has been removed from your highlight list')
             else:
-                await ctx.respond(f'{word} is not in your highlight list', ephemeral=True)
+                await ctx.respond(f'{word} is not in your highlight list')
         else:
-            await ctx.respond(f'You currently have no highlight words', ephemeral=True)
+            await ctx.respond(f'You currently have no highlight words')
 
 
 
