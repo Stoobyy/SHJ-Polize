@@ -14,6 +14,7 @@ tzone = timezone(timedelta(hours=4))
 
 last = {}
 
+hllist = {}
 class Highlight(commands.Cog):
 
     def __init__(self, client):
@@ -31,12 +32,16 @@ class Highlight(commands.Cog):
         else:
             last[guildid] = {str(message.author.id): unix_timestamp}
 
-        ghl = highlightdb.find_one({'_id': guildid})
-        if ghl is None:
-            highlightdb.insert_one({'_id': guildid, 'hl': {}})
-            guildhl = highlightdb.find_one({'_id': guildid})
+        if guildid in hllist:
+            guildhl = hllist[guildid]
         else:
-            guildhl = ghl['hl']
+            ghl = highlightdb.find_one({'_id': guildid})
+            if ghl is None:
+                highlightdb.insert_one({'_id': guildid, 'hl': {}})
+                guildhl = highlightdb.find_one({'_id': guildid})
+            else:
+                guildhl = ghl['hl']
+            hllist[guildid] = guildhl
 
         for user in guildhl:
             for msg in guildhl[user]:
@@ -59,12 +64,16 @@ class Highlight(commands.Cog):
     @hl.command(name="list", description="List all highlights")
     async def hl_list(self, ctx):
         guildid = ctx.guild.id
-        ghl = highlightdb.find_one({'_id': guildid})
-        if ghl is None:
-            highlightdb.insert_one({'_id': guildid, 'hl': {}})
-            guildhl = highlightdb.find_one({'_id': guildid})
+        if guildid in hllist:
+            guildhl = hllist[guildid]
         else:
-            guildhl = ghl['hl']
+            ghl = highlightdb.find_one({'_id': guildid})
+            if ghl is None:
+                highlightdb.insert_one({'_id': guildid, 'hl': {}})
+                guildhl = highlightdb.find_one({'_id': guildid})
+            else:
+                guildhl = ghl['hl']
+            hllist[guildid] = guildhl
 
         if str(ctx.author.id) not in guildhl:
             embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun /hl add [word] to add some', color=1752220)
@@ -84,12 +93,16 @@ class Highlight(commands.Cog):
     @discord.option(name="word", required=True)
     async def hl_add(self, ctx, word):
         guildid = ctx.guild.id
-        ghl = highlightdb.find_one({'_id': guildid})
-        if ghl is None:
-            highlightdb.insert_one({'_id': guildid, 'hl': {}})
-            guildhl = highlightdb.find_one({'_id': guildid})
+        if guildid in hllist:
+            guildhl = hllist[guildid]
         else:
-            guildhl = ghl['hl']
+            ghl = highlightdb.find_one({'_id': guildid})
+            if ghl is None:
+                highlightdb.insert_one({'_id': guildid, 'hl': {}})
+                guildhl = highlightdb.find_one({'_id': guildid})
+            else:
+                guildhl = ghl['hl']
+            hllist[guildid] = guildhl
         
         if str(ctx.author.id) in guildhl:
             if word in guildhl[str(ctx.author.id)]:
@@ -97,28 +110,35 @@ class Highlight(commands.Cog):
             else:
                 guildhl[str(ctx.author.id)].append(word)
                 highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+                hllist[guildid] = guildhl
                 await ctx.respond(f'{word} has been added to your highlight list')
         else:
             guildhl[str(ctx.author.id)] = [word]
             highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+            hllist[guildid] = guildhl
             await ctx.respond(f'{word} has been added to your highlight list')
         
     @hl.command(name="remove", description="Remove a highlight word")
     @discord.option(name="word", required=True)
     async def hl_remove(self, ctx, word):
         guildid = ctx.guild.id
-        ghl = highlightdb.find_one({'_id': guildid})
-        if ghl is None:
-            highlightdb.insert_one({'_id': guildid, 'hl': {}})
-            guildhl = highlightdb.find_one({'_id': guildid})
+        if guildid in hllist:
+            guildhl = hllist[guildid]
         else:
-            guildhl = ghl['hl']
+            ghl = highlightdb.find_one({'_id': guildid})
+            if ghl is None:
+                highlightdb.insert_one({'_id': guildid, 'hl': {}})
+                guildhl = highlightdb.find_one({'_id': guildid})
+            else:
+                guildhl = ghl['hl']
+            hllist[guildid] = guildhl
 
         if str(ctx.author.id) in guildhl:
             if word in guildhl[str(ctx.author.id)]:
                 guildhl[str(ctx.author.id)].remove(word)
                 highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
                 await ctx.respond(f'{word} has been removed from your highlight list')
+                hllist[guildid] = guildhl
             else:
                 await ctx.respond(f'{word} is not in your highlight list')
         else:
