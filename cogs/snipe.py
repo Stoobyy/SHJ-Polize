@@ -115,8 +115,16 @@ class Snipe(commands.Cog):
             timee = deletemsg[channel_id]['time']
             content = deletemsg[channel_id]['content']
         else:
-            await ctx.respond('There is no deleted message in this channel', ephemeral=True)
-            return
+            try:
+                c = await ctx.fetch_channel(channel_id)
+                await ctx.respond('There is no deleted message in this channel', ephemeral=True)
+                return
+            except discord.errors.NotFound:
+                await ctx.respond('This channel does not exist', ephemeral=True)
+                return
+            except discord.errors.Forbidden:
+                await ctx.respond('I do not have permission to view this channel', ephemeral=True)
+                return
         if 'attachment' in deletemsg[channel_id]:
             attachment = deletemsg[channel_id]['attachment']
             content += f"\n:open_file_folder:[Attachment]({attachment})"
