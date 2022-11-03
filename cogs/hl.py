@@ -6,7 +6,7 @@ from discord.commands import SlashCommandGroup
 from discord.ext import commands
 from pymongo import MongoClient
 
-cluster = MongoClient(os.environ['MONGO'])
+cluster = MongoClient(os.environ["MONGO"])
 db = cluster["shj-polize"]
 highlightdb = db["hl"]
 
@@ -15,12 +15,13 @@ tzone = timezone(timedelta(hours=4))
 last = {}
 
 hllist = {}
-class Highlight(commands.Cog):
 
+
+class Highlight(commands.Cog):
     def __init__(self, client):
         self.client = client
-    
-    @commands.Cog.listener('on_message')
+
+    @commands.Cog.listener("on_message")
     async def hl_check(self, message):
         if message.author.bot or message.guild is False:
             return
@@ -35,12 +36,12 @@ class Highlight(commands.Cog):
         if guildid in hllist:
             guildhl = hllist[guildid]
         else:
-            ghl = highlightdb.find_one({'_id': guildid})
+            ghl = highlightdb.find_one({"_id": guildid})
             if ghl is None:
-                highlightdb.insert_one({'_id': guildid, 'hl': {}})
-                guildhl = highlightdb.find_one({'_id': guildid})
+                highlightdb.insert_one({"_id": guildid, "hl": {}})
+                guildhl = highlightdb.find_one({"_id": guildid})
             else:
-                guildhl = ghl['hl']
+                guildhl = ghl["hl"]
             hllist[guildid] = guildhl
 
         for user in guildhl:
@@ -51,14 +52,20 @@ class Highlight(commands.Cog):
                         timee = i.created_at
                         message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
                     message1.reverse()
-                    embed = discord.Embed(title=f'**{msg}**', description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})', color=1752220)
-                    embed.set_footer(text=f'Message ID: {message.id} | Author ID: {message.author.id}')
+                    embed = discord.Embed(
+                        title=f"**{msg}**",
+                        description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})',
+                        color=1752220,
+                    )
+                    embed.set_footer(text=f"Message ID: {message.id} | Author ID: {message.author.id}")
                     member = message.guild.get_member(int(str(user)))
                     timee = datetime.now(tzone).timestamp()
                     lastt = last[guildid][user] if user in last[guildid] else 0
                     if lastt == 0 or timee - lastt > 300:
-                        await member.send(f"In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word \"{msg}\"", embed=embed)
-
+                        try:
+                            await member.send(f'In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word "{msg}"', embed=embed)
+                        except discord.Forbidden:
+                            pass
     hl = SlashCommandGroup(name="highlight", description="Highlight commands")
 
     @hl.command(name="list", description="List all highlights")
@@ -67,26 +74,26 @@ class Highlight(commands.Cog):
         if guildid in hllist:
             guildhl = hllist[guildid]
         else:
-            ghl = highlightdb.find_one({'_id': guildid})
+            ghl = highlightdb.find_one({"_id": guildid})
             if ghl is None:
-                highlightdb.insert_one({'_id': guildid, 'hl': {}})
-                guildhl = highlightdb.find_one({'_id': guildid})
+                highlightdb.insert_one({"_id": guildid, "hl": {}})
+                guildhl = highlightdb.find_one({"_id": guildid})
             else:
-                guildhl = ghl['hl']
+                guildhl = ghl["hl"]
             hllist[guildid] = guildhl
 
         if str(ctx.author.id) not in guildhl:
-            embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun /hl add [word] to add some', color=1752220)
+            embed = discord.Embed(title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220)
             await ctx.respond(embed=embed)
         else:
             if len(guildhl[str(ctx.author.id)]) == 0:
-                embed = discord.Embed(title='Highlight List', description=f'You currently have no highlight words\nRun /hl add [word] to add some', color=1752220)
+                embed = discord.Embed(title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220)
                 await ctx.respond(embed=embed)
             else:
-                str1 = ''
+                str1 = ""
                 for i in guildhl[str(ctx.author.id)]:
-                    str1 += f'{i}\n'
-                embed = discord.Embed(title='You\'re currently tracking the following words', description=str1, color=1752220)
+                    str1 += f"{i}\n"
+                embed = discord.Embed(title="You're currently tracking the following words", description=str1, color=1752220)
                 await ctx.respond(embed=embed)
 
     @hl.command(name="add", description="Add a highlight word")
@@ -96,28 +103,28 @@ class Highlight(commands.Cog):
         if guildid in hllist:
             guildhl = hllist[guildid]
         else:
-            ghl = highlightdb.find_one({'_id': guildid})
+            ghl = highlightdb.find_one({"_id": guildid})
             if ghl is None:
-                highlightdb.insert_one({'_id': guildid, 'hl': {}})
-                guildhl = highlightdb.find_one({'_id': guildid})
+                highlightdb.insert_one({"_id": guildid, "hl": {}})
+                guildhl = highlightdb.find_one({"_id": guildid})
             else:
-                guildhl = ghl['hl']
+                guildhl = ghl["hl"]
             hllist[guildid] = guildhl
-        
+
         if str(ctx.author.id) in guildhl:
             if word in guildhl[str(ctx.author.id)]:
-                await ctx.respond(f'{word} is already in your highlight list')
+                await ctx.respond(f"{word} is already in your highlight list")
             else:
                 guildhl[str(ctx.author.id)].append(word)
-                highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+                highlightdb.update_one({"_id": guildid}, {"$set": {"hl": guildhl}})
                 hllist[guildid] = guildhl
-                await ctx.respond(f'{word} has been added to your highlight list')
+                await ctx.respond(f"{word} has been added to your highlight list")
         else:
             guildhl[str(ctx.author.id)] = [word]
-            highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
+            highlightdb.update_one({"_id": guildid}, {"$set": {"hl": guildhl}})
             hllist[guildid] = guildhl
-            await ctx.respond(f'{word} has been added to your highlight list')
-        
+            await ctx.respond(f"{word} has been added to your highlight list")
+
     @hl.command(name="remove", description="Remove a highlight word")
     @discord.option(name="word", required=True)
     async def hl_remove(self, ctx, word):
@@ -125,27 +132,26 @@ class Highlight(commands.Cog):
         if guildid in hllist:
             guildhl = hllist[guildid]
         else:
-            ghl = highlightdb.find_one({'_id': guildid})
+            ghl = highlightdb.find_one({"_id": guildid})
             if ghl is None:
-                highlightdb.insert_one({'_id': guildid, 'hl': {}})
-                guildhl = highlightdb.find_one({'_id': guildid})
+                highlightdb.insert_one({"_id": guildid, "hl": {}})
+                guildhl = highlightdb.find_one({"_id": guildid})
             else:
-                guildhl = ghl['hl']
+                guildhl = ghl["hl"]
             hllist[guildid] = guildhl
 
         if str(ctx.author.id) in guildhl:
             if word in guildhl[str(ctx.author.id)]:
                 guildhl[str(ctx.author.id)].remove(word)
-                highlightdb.update_one({'_id': guildid}, {'$set': {'hl': guildhl}})
-                await ctx.respond(f'{word} has been removed from your highlight list')
+                highlightdb.update_one({"_id": guildid}, {"$set": {"hl": guildhl}})
+                await ctx.respond(f"{word} has been removed from your highlight list")
                 hllist[guildid] = guildhl
             else:
-                await ctx.respond(f'{word} is not in your highlight list')
+                await ctx.respond(f"{word} is not in your highlight list")
         else:
-            await ctx.respond(f'You currently have no highlight words')
-
+            await ctx.respond(f"You currently have no highlight words")
 
 
 def setup(client):
     client.add_cog(Highlight(client))
-    print('Highlight cog loaded')
+    print("Highlight cog loaded")
