@@ -116,7 +116,7 @@ class Snipe(commands.Cog):
             content = deletemsg[channel_id]['content']
         else:
             try:
-                c = await ctx.fetch_channel(channel_id)
+                c = await self.client.fetch_channel(channel_id)
                 await ctx.respond('There is no deleted message in this channel', ephemeral=True)
                 return
             except discord.errors.NotFound:
