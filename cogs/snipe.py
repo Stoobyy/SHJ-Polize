@@ -26,7 +26,7 @@ class Snipe(commands.Cog):
 
         content = message.content
         author = str(message.author)
-        message_author_avatar = str(message.author.avatar)
+        message_author_avatar = message.author.display_avatar.url
         channel = str(message.channel.id)
         timee = datetime.now(tzone)
 
@@ -161,7 +161,7 @@ class Snipe(commands.Cog):
         oldcontent = oldmsg.content
         newcontent = newmsg.content
         channel = str(oldmsg.channel.id)
-        authav = oldmsg.author.avatar
+        authav = oldmsg.author.display_avatar.url
         msgurl = oldmsg.jump_url
         timee = datetime.now(tzone)
 
@@ -274,7 +274,10 @@ class Snipe(commands.Cog):
                 if user.id == s_user or user.id in devs:
                     await message.delete()
                     if snipemsg != None:
-                        await snipemsg.delete()
+                        try:
+                            await snipemsg.delete()
+                        except discord.Forbidden:
+                            pass
             try:
                 del msg["DontSnipe"]
             except KeyError:
@@ -303,11 +306,17 @@ class Snipe(commands.Cog):
 
             if ctx.author.id in devs or ctx.author.id == s_user:
                 await message.delete()
-                await ctx.message.delete()
-                if s_user != None:
-                    await snipemsg.delete()
+                try:
+                    await ctx.message.delete()
+                    if s_user != None:
+                        await snipemsg.delete()
+                except discord.Forbidden:
+                    pass
             else:
-                await ctx.react("<a:nochamp:972351244700090408>")
+                try:
+                    await ctx.react("<a:nochamp:972351244700090408>")
+                except discord.Forbidden:
+                    pass
             try:
                 del msg["DontSnipe"]
             except KeyError:

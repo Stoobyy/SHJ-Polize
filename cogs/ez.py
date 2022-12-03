@@ -91,7 +91,10 @@ class Ez(commands.Cog):
             hook = discord.utils.get(hooks, name="ezz")
             if hook is None:
                 hook = await message.channel.create_webhook(name="ezz", avatar=None, reason=None)
-
+            try:
+                await message.delete()
+            except discord.Forbidden:
+                return
             data = {"content": random.choice(ez_list), "username": message.author.name, "avatar_url": message.author.avatar.url}
             hookurl = hook.url + "?wait=true"
             response = requests.post(hookurl, json=data)
@@ -106,7 +109,6 @@ class Ez(commands.Cog):
                     time = blacklist["server_deleteafter"]
                 else:
                     time = None
-            await message.delete()
             if time != None:
                 await asyncio.sleep(time)
                 await messageid.delete()
