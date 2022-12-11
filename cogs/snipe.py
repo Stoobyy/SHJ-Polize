@@ -1,6 +1,14 @@
-import discord
-from discord.ext import commands
+import os
 from datetime import datetime, timedelta, timezone
+
+import discord
+from discord.commands import SlashCommandGroup
+from discord.ext import commands, tasks
+from pymongo import MongoClient
+
+cluster = MongoClient(os.environ["MONGO"])
+db = cluster["shj-polize"]
+snipedb = db["snipe"]
 
 deletemsg = {}
 editmsg = {}
@@ -14,7 +22,18 @@ roles = [752180974590361652, 734302384032841759]
 class Snipe(commands.Cog):
     def __init__(self, client):
         self.client = client
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        s = snipedb.find_one({"_id": "1"})
+        global deletemsg, editmsg
+        deletemsg = s["deletemsg"]
+        editmsg = s["editmsg"]
 
+    @tasks.loop(minutes=5)
+    async def save(self):
+        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": deletemsg, "editmsg": editmsg}})
+    
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         if message.author.bot:
