@@ -11,7 +11,7 @@ client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=di
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
-    await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
 
 
 @client.command()
@@ -56,7 +56,7 @@ async def status(ctx):
     
 @client.event
 async def on_command_error(ctx, error):
-    if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions or commands.errors.NotOwner):
+    if isinstance(error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions, commands.errors.NotOwner)):
         await ctx.message.add_reaction('<a:nochamp:1021040710142668870>')
     elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(', mention_author=False)
@@ -71,7 +71,7 @@ async def on_command_error(ctx, error):
 
 @client.event
 async def on_application_command_error(ctx, error):
-    if isinstance(error, commands.errors.CheckAnyFailure or commands.errors.MissingAnyRole or commands.errors.MissingPermissions):
+    if isinstance(error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions)):
         await ctx.respond('<a:nochamp:1021040710142668870>', ephemeral=True)
     elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.respond('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
