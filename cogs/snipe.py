@@ -32,7 +32,9 @@ class Snipe(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def save(self):
+        print("Saving")
         a = snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": deletemsg, "editmsg": editmsg}})
+        print(a.raw_result)
         if a.modified_count == 0:
             snipedb.insert_one({"_id": "1", "deletemsg": deletemsg, "editmsg": editmsg})
         print("Saved")
