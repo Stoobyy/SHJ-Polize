@@ -29,19 +29,11 @@ class Snipe(commands.Cog):
         global deletemsg, editmsg
         deletemsg = s["deletemsg"]
         editmsg = s["editmsg"]
+        self.save.start()
 
     @tasks.loop(minutes=5)
     async def save(self):
-        print("Saving")
-        a = snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": deletemsg, "editmsg": editmsg}})
-        print(a.raw_result)
-        if a.modified_count == 0:
-            snipedb.insert_one({"_id": "1", "deletemsg": deletemsg, "editmsg": editmsg})
-        print("Saved")
-
-    @save.before_loop
-    async def before_save(self):
-        await self.client.wait_until_ready()
+        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": deletemsg, "editmsg": editmsg}})
     
     @commands.Cog.listener()
     async def on_message_delete(self, message):
