@@ -32,7 +32,10 @@ class Snipe(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def save(self):
-        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": deletemsg, "editmsg": editmsg}})
+        a = snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": deletemsg, "editmsg": editmsg}})
+        if a.modified_count == 0:
+            snipedb.insert_one({"_id": "1", "deletemsg": deletemsg, "editmsg": editmsg})
+        print("Saved")
     
     @commands.Cog.listener()
     async def on_message_delete(self, message):
