@@ -4,7 +4,7 @@ import datetime
 from datetime import timedelta
 
 
-class Test(commands.Cog):
+class Moderation(commands.Cog):
     def __init__(self, client):
         self.client = client
     
