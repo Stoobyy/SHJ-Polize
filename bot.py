@@ -6,9 +6,10 @@ import discord
 from discord.ext import commands
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all())
-dxb_status = True
 
 
+def dxb_status():
+    return client.get_guild(723259592800206940).get_member(763642116953604098).status == discord.Status.online
 
 @client.event
 async def on_ready():
@@ -83,7 +84,7 @@ async def on_application_command_error(ctx, error):
 
 @client.event
 async def on_member_join(member):
-    if dxb_status:
+    if dxb_status():
         return
     channel = await client.fetch_channel(734011317798830111)
     await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
