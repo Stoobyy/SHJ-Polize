@@ -8,9 +8,6 @@ from discord.ext import commands
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all())
 
 
-def dxb_status():
-    return client.get_guild(723259592800206940).get_member(763642116953604098).status == discord.Status.online
-
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
@@ -81,13 +78,6 @@ async def on_application_command_error(ctx, error):
     else:
         await ctx.respond(f'{type(error)}\n{error}', ephemeral=True)
         raise error
-
-@client.event
-async def on_member_join(member):
-    if dxb_status():
-        return
-    channel = await client.fetch_channel(734011317798830111)
-    await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
 
 for cog in os.listdir('./cogs'):
     if cog.endswith('.py'):
