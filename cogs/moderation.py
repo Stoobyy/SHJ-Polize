@@ -20,5 +20,5 @@ class Moderation(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Test(client))
+    client.add_cog(Moderation(client))
     print("Moderation cog loaded")
