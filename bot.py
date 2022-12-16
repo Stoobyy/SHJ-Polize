@@ -6,12 +6,15 @@ import discord
 from discord.ext import commands
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all())
+roles = {0:734056569041322066, 3:756979356332589117, 5:734302084350083166, 10:734305511759151144, 25:757698628360863876, 35:734302384032841759, 50:734304865794392094, 65:808060262179012658, 70:734306269430677515}
+startroles = [767016755809091654,767029516769689601,767017209389252658,767017558095429649,767017041319428107]
+
 
 
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
+    await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
 
 
 @client.command()
@@ -78,6 +81,14 @@ async def on_application_command_error(ctx, error):
     else:
         await ctx.respond(f'{type(error)}\n{error}', ephemeral=True)
         raise error
+
+@client.event
+async def on_member_join(member):
+    for role in startroles:
+        await member.add_roles(get(member.guild.roles, id=role))
+    channel = await client.fetch_channel(734011317798830111)
+    await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
+
 
 
 for cog in os.listdir('./cogs'):
