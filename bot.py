@@ -84,8 +84,7 @@ async def on_application_command_error(ctx, error):
 
 @client.event
 async def on_member_join(member):
-    for role in startroles:
-        await member.add_roles(get(member.guild.roles, id=role))
+    
     channel = await client.fetch_channel(734011317798830111)
     await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
 
