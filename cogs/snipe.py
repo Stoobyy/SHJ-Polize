@@ -28,8 +28,8 @@ class Snipe(commands.Cog):
     async def on_ready(self):
         s = snipedb.find_one({"_id": "1"})
         global deletemsg, editmsg
-        deletemsg = s["deletemsg"]
-        editmsg = s["editmsg"]
+        deletemsg = pickle.loads(s["deletemsg"]["$binary"])
+        editmsg = pickle.loads(s["editmsg"]["$binary"])
         self.save.start()
 
     @tasks.loop(minutes=5)
