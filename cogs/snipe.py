@@ -34,6 +34,7 @@ class Snipe(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def save(self):
+        global deletemsg, editmsg
         snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
     
     
