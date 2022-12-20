@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta, timezone
 
+import pickle
 import discord
 from discord.commands import SlashCommandGroup
 from discord.ext import commands, tasks
@@ -33,7 +34,8 @@ class Snipe(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def save(self):
-        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": deletemsg, "editmsg": editmsg}})
+        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
+        print("Saved")
     
     @commands.Cog.listener()
     async def on_message_delete(self, message):
