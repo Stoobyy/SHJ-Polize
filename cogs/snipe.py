@@ -35,7 +35,7 @@ class Snipe(commands.Cog):
     @tasks.loop(minutes=5)
     async def save(self):
         snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
-        print("Saved")
+    
     
     @commands.Cog.listener()
     async def on_message_delete(self, message):
