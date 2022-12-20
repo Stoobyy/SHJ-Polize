@@ -65,6 +65,7 @@ class Snipe(commands.Cog):
                 img = await attachment.read()
                 deletemsg[channel]["img"] = img
                 deletemsg[channel]["filename"] = attachment.filename
+                print("Image - " + attachment.filename)
             else:
                 deletemsg[channel]["attachment"] = attachment.url
 
