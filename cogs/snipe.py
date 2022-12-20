@@ -24,7 +24,7 @@ roles = [752180974590361652, 734302384032841759]
 class Snipe(commands.Cog):
     def __init__(self, client):
         self.client = client
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         s = snipedb.find_one({"_id": "1"})
@@ -36,10 +36,9 @@ class Snipe(commands.Cog):
     @tasks.loop(minutes=5)
     async def save(self):
         snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
-        print("Saved")
-    
+
     @commands.Cog.listener()
-    async def on_message_delete(self, message : discord.Message):
+    async def on_message_delete(self, message: discord.Message):
         if message.author.bot:
             return
 
