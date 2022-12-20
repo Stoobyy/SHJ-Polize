@@ -34,12 +34,11 @@ class Snipe(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def save(self):
-        global deletemsg, editmsg
         snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
-    
+        print("Saved")
     
     @commands.Cog.listener()
-    async def on_message_delete(self, message):
+    async def on_message_delete(self, message : discord.Message):
         if message.author.bot:
             return
 
@@ -62,7 +61,7 @@ class Snipe(commands.Cog):
         if message.attachments:
             attachment = message.attachments[0]
             if attachment.url.endswith((".png", ".jpg", ".jpeg", ".gif")):
-                img = await attachment.to_file()
+                img = await attachment.read()
                 deletemsg[channel]["img"] = img
             else:
                 deletemsg[channel]["attachment"] = attachment.url
@@ -134,6 +133,7 @@ class Snipe(commands.Cog):
         embed.set_footer(text=f"Deleted in {channel} ({ctx.guild.name})")
         if "img" in deletemsg[channel_id]:
             img = deletemsg[channel_id]["img"]
+            img = discord.File(img)
             embed.set_image(url=f"attachment://{img.filename}")
             await ctx.author.send(embed=embed, file=img)
             return
