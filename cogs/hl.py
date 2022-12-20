@@ -23,7 +23,7 @@ class Highlight(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def hl_check(self, message):
-        if message.author.bot or message.guild is False:
+        if message.author.bot or not message.guild:
             return
         guildid = message.guild.id
         current_time = datetime.now(tzone)

@@ -59,7 +59,7 @@ class Ez(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def ez_webhook(self, message):
-        if message.author.bot or message.guild is False:
+        if message.author.bot or not message.guild:
             return
 
         guildid = message.guild.id
