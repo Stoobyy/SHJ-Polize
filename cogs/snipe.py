@@ -65,7 +65,6 @@ class Snipe(commands.Cog):
                 img = await attachment.read()
                 deletemsg[channel]["img"] = img
                 deletemsg[channel]["filename"] = attachment.filename
-                print("Image - " + attachment.filename)
             else:
                 deletemsg[channel]["attachment"] = attachment.url
 
@@ -100,9 +99,8 @@ class Snipe(commands.Cog):
         embed.set_footer(text=f"Deleted in {channel}")
         if "img" in deletemsg[channel_id]:
             img = deletemsg[channel_id]["img"]
-            filename = deletemsg[channel_id]["filename"]
-            img = discord.File(io.BytesIO(img))
-            embed.set_image(url=f"attachment://{filename}")
+            img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
+            embed.set_image(url=f"attachment://{img.filename}")
             await ctx.reply(embed=embed, file=img, mention_author=False)
             return
         await ctx.reply(embed=embed, mention_author=False)
@@ -138,9 +136,8 @@ class Snipe(commands.Cog):
         embed.set_footer(text=f"Deleted in {channel} ({ctx.guild.name})")
         if "img" in deletemsg[channel_id]:
             img = deletemsg[channel_id]["img"]
-            filename = deletemsg[channel_id]["filename"]
-            img = discord.File(io.BytesIO(img))
-            embed.set_image(url=f"attachment://{filename}")
+            img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
+            embed.set_image(url=f"attachment://{img.filename}")
             await ctx.author.send(embed=embed, file=img)
             return
         await ctx.author.send(embed=embed)
@@ -179,9 +176,8 @@ class Snipe(commands.Cog):
         embed.set_footer(text=f"Deleted in {channel}")
         if "img" in deletemsg[channel_id]:
             img = deletemsg[channel_id]["img"]
-            filename = deletemsg[channel_id]["filename"]
-            img = discord.File(io.BytesIO(img))
-            embed.set_image(url=f"attachment://{filename}")
+            img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
+            embed.set_image(url=f"attachment://{img.filename}")
             await ctx.respond(embed=embed, file=img, ephemeral=ephemeral)
             return
         await ctx.respond(embed=embed, ephemeral=ephemeral)
