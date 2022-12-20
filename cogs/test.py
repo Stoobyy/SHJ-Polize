@@ -6,9 +6,9 @@ class Test(commands.Cog):
     def __init__(self, client):
         self.client = client
     
-    @commands.command()
-    async def test(self, ctx):
-        await ctx.send("Test")
+    @commands.slash_command()
+    async def test(self, ctx, role: discord.Role):
+        await ctx.respond(role.id)
 
     @commands.command()
     async def snowflake(self, ctx, snowflake, snowflake2=None):
