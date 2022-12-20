@@ -62,7 +62,10 @@ class Snipe(commands.Cog):
         if message.attachments:
             attachment = message.attachments[0]
             if attachment.url.endswith((".png", ".jpg", ".jpeg", ".gif")):
-                img = await attachment.read()
+                img = io.BytesIO()
+                await attachment.save(img)
+                img.seek(0)
+                img = img.read()
                 deletemsg[channel]["img"] = img
             else:
                 deletemsg[channel]["attachment"] = attachment.url
