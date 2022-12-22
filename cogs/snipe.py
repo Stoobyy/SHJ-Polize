@@ -143,6 +143,7 @@ class Snipe(commands.Cog):
         await ctx.author.send(embed=embed)
         await ctx.message.add_reaction("👍") """
         await ctx.author.send(":clown:")
+        await ctx.message.add_reaction("👍")
 
     @commands.slash_command(name="snipe")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
