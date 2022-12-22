@@ -107,7 +107,7 @@ class Snipe(commands.Cog):
     @commands.command(aliases=["dms"])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     async def dmsnipe(self, ctx, channel: discord.TextChannel = None):
-        """ if channel is None:
+        if channel is None:
             channel = ctx.channel
         channel_id = str(channel.id)
         if channel_id in deletemsg:
@@ -139,8 +139,7 @@ class Snipe(commands.Cog):
             embed.set_image(url=f"attachment://{img.filename}")
             await ctx.author.send(embed=embed, file=img)
             return
-        await ctx.author.send(embed=embed) """
-        await ctx.author.send(':clown:')
+        await ctx.author.send(embed=embed)
         await ctx.message.add_reaction("👍")
 
     @commands.slash_command(name="snipe")
