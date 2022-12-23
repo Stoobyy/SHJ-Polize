@@ -12,19 +12,19 @@ async def on_bot_vote(vote_data: topgg.BotVoteData, client : commands.Bot):
         user = await client.fetch_user(vote_data.user)
         await user.send("Thanks for voting for SHJ-Polize on top.gg!")
 
-@topgg.endpoint("/dblwebhook", topgg.WebhookType.SERVER)
-async def on_server_vote(vote_data: topgg.ServerVoteData, client : commands.Bot):
+@topgg.endpoint("/dblwebhook", topgg.WebhookType.GUILD)
+async def on_guild_vote(vote_data: topgg.GuildVoteData, client : commands.Bot):
     if vote_data.type == "test":
         print(f"Received a test vote by:\n{vote_data.user}")
     else:
         print(f"Received a vote by:\n{vote_data.user}")
         user = await client.fetch_user(vote_data.user)
-        server : discord.Guild = await client.fetch_guild(vote_data.guild)
-        await user.send(f"Thanks for voting for {server.name} on top.gg!")
+        guild : discord.Guild = await client.fetch_guild(vote_data.guild)
+        await user.send(f"Thanks for voting for {guild.name} on top.gg!")
 class Topgg(commands.Cog):
     def __init__(self, client : commands.Bot):
         self.client = client
-        self.webhook_manager = topgg.WebhookManager().set_data(self.client).endpoint(on_bot_vote).endpoint(on_server_vote)
+        self.webhook_manager = topgg.WebhookManager().set_data(self.client).endpoint(on_bot_vote).endpoint(on_guild_vote)
         
 
         if not self.webhook_manager.is_running:
