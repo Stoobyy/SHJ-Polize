@@ -24,7 +24,7 @@ roles = [752180974590361652, 734302384032841759]
 class Snipe(commands.Cog):
     def __init__(self, client):
         self.client = client
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         s = snipedb.find_one({"_id": "1"})
@@ -36,10 +36,9 @@ class Snipe(commands.Cog):
     @tasks.loop(minutes=5)
     async def save(self):
         snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
-        print("Saved")
-    
+
     @commands.Cog.listener()
-    async def on_message_delete(self, message : discord.Message):
+    async def on_message_delete(self, message: discord.Message):
         if message.author.bot:
             return
 
@@ -108,7 +107,7 @@ class Snipe(commands.Cog):
     @commands.command(aliases=["dms"])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
     async def dmsnipe(self, ctx, channel: discord.TextChannel = None):
-        """ if channel is None:
+        if channel is None:
             channel = ctx.channel
         channel_id = str(channel.id)
         if channel_id in deletemsg:
@@ -141,8 +140,6 @@ class Snipe(commands.Cog):
             await ctx.author.send(embed=embed, file=img)
             return
         await ctx.author.send(embed=embed)
-        await ctx.message.add_reaction("👍") """
-        await ctx.author.send(":clown:")
         await ctx.message.add_reaction("👍")
 
     @commands.slash_command(name="snipe")
