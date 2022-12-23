@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import asyncio
 import topgg
 
 @topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT)
@@ -30,7 +31,7 @@ class Topgg(commands.Cog):
         
 
         if not self.webhook_manager.is_running:
-            self.webhook_manager.start(port = 5000)
+            asyncio.run(self.webhook_manager.start(port = 5000))
 
 
 def setup(client):
