@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import topgg
-import asyncio
 
 @topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT)
 async def on_bot_vote(vote_data: topgg.BotVoteData, client : commands.Bot):
@@ -12,7 +11,7 @@ async def on_bot_vote(vote_data: topgg.BotVoteData, client : commands.Bot):
         user = await client.fetch_user(vote_data.user)
         await user.send("Thanks for voting for SHJ-Polize on top.gg!")
 
-@topgg.endpoint("/dblwebhook", topgg.WebhookType.GUILD)
+@topgg.endpoint("/dslwebhook", topgg.WebhookType.GUILD)
 async def on_guild_vote(vote_data: topgg.GuildVoteData, client : commands.Bot):
     if vote_data.type == "test":
         print(f"Received a test vote by:\n{vote_data.user}")
@@ -21,6 +20,9 @@ async def on_guild_vote(vote_data: topgg.GuildVoteData, client : commands.Bot):
         user = await client.fetch_user(vote_data.user)
         guild : discord.Guild = await client.fetch_guild(vote_data.guild)
         await user.send(f"Thanks for voting for {guild.name} on top.gg!")
+
+
+
 class Topgg(commands.Cog):
     def __init__(self, client : commands.Bot):
         self.client = client
