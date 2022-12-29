@@ -18,8 +18,17 @@ editmsg = {}
 tzone = timezone(timedelta(hours=4))
 
 devs = (499112914578309120, 700195735689494558)
-roles = [752180974590361652, 734302384032841759]
+snipedata = []
 
+async def snipe_check(ctx):
+    if str(ctx.guild.id) in snipedata:
+        if ctx.author.id in snipedata[str(ctx.guild.id)]["users"]:
+            return True
+        else:
+            for role in ctx.author.roles:
+                if role.id in snipedata[str(ctx.guild.id)]["roles"]:
+                    return True
+    return False
 
 class Snipe(commands.Cog):
     def __init__(self, client):
@@ -31,6 +40,10 @@ class Snipe(commands.Cog):
         global deletemsg, editmsg
         deletemsg = pickle.loads(s["deletemsg"])
         editmsg = pickle.loads(s["editmsg"])
+        d = snipedb.find({})
+        for i in d:
+            if i["_id"] != "1":
+                snipedata.append(i["_id"], i["data"])
         self.save.start()
 
     @tasks.loop(minutes=5)
@@ -67,8 +80,34 @@ class Snipe(commands.Cog):
             else:
                 deletemsg[channel]["attachment"] = attachment.url
 
+    @commands.slash_command(name="snipe_whitelist", description="Whitelist a role or user to snipe messages")
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
+    async def snipe_whitelist(self, ctx, role: discord.Role = None, user: discord.User = None):
+        if str(ctx.guild.id) not in snipedata:
+            snipedata[str(ctx.guild.id)] = {"roles": [], "users": []}
+            snipedb.insert_one({"_id": str(ctx.guild.id), "data": snipedata[str(ctx.guild.id)]})
+        if role is None and user is None:
+            await ctx.respond("You need to specify a role or a user", hidden=True)
+            return
+        if role is not None:
+            if role.id in snipedata[str(ctx.guild.id)]["roles"]:
+                await ctx.respond("This role is already whitelisted", hidden=True)
+                return
+            snipedata[str(ctx.guild.id)]["roles"].append(role.id)
+            snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
+            await ctx.respond(f"Whitelisted role {role.mention}", hidden=True)
+            return
+        if user is not None:
+            if user.id in snipedata[str(ctx.guild.id)]["users"]:
+                await ctx.respond("This user is already whitelisted", hidden=True)
+                return
+            snipedata[str(ctx.guild.id)]["users"].append(user.id)
+            snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
+            await ctx.respond(f"Whitelisted user {user.mention}", hidden=True)
+            return
+
     @commands.command(aliases=["s"])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     async def snipe(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
@@ -105,7 +144,7 @@ class Snipe(commands.Cog):
         await ctx.reply(embed=embed, mention_author=False)
 
     @commands.command(aliases=["dms"])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     async def dmsnipe(self, ctx, channel: discord.TextChannel = None): 
         if channel is None:
             channel = ctx.channel
@@ -143,7 +182,7 @@ class Snipe(commands.Cog):
         await ctx.message.add_reaction("👍")
 
     @commands.slash_command(name="snipe")
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     @discord.option(name="channel", type=discord.TextChannel, required=False, default=None)
     @discord.option(name="ephemeral", type=bool, required=False, default=False)
     async def ssnipe(self, ctx, channel: discord.TextChannel, ephemeral):
@@ -209,7 +248,7 @@ class Snipe(commands.Cog):
             }
 
     @commands.command(aliases=["es"])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     async def esnipe(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
@@ -242,7 +281,7 @@ class Snipe(commands.Cog):
         await ctx.reply(embed=embed, mention_author=False)
 
     @commands.command(aliases=["dmes"])
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     async def dmesnipe(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
@@ -349,7 +388,7 @@ class Snipe(commands.Cog):
                 pass
 
     @commands.slash_command()
-    @commands.check_any(commands.has_permissions(manage_messages=True), commands.has_any_role(*roles), commands.is_owner())
+    @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     @discord.option(name="channel", type=discord.TextChannel, required=False, default=None)
     @discord.option(name="ephemeral", type=bool, required=False, default=False)
     async def editsnipe(self, ctx, channel: discord.TextChannel, ephemeral):
