@@ -80,8 +80,7 @@ class Snipe(commands.Cog):
             else:
                 deletemsg[channel]["attachment"] = attachment.url
 
-    snipe_ = SlashCommandGroup("snipe", "Snipe commands")
-    @snipe_.command(name="whitelist", description="Whitelist a role or user to snipe messages")
+    @commands.slash_command(name="whitelist", description="Whitelist a role or user to snipe messages")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
     async def snipe_whitelist(self, ctx : discord.ApplicationContext, role: discord.Role = None, user: discord.User = None):
         if str(ctx.guild.id) not in snipedata:
