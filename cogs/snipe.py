@@ -43,7 +43,7 @@ class Snipe(commands.Cog):
         d = snipedb.find({})
         for i in d:
             if i["_id"] != "1":
-                snipedata.append(i["_id"], i["data"])
+                snipedata[i["_id"]] : i["data"]
         self.save.start()
 
     @tasks.loop(minutes=5)
