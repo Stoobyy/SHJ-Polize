@@ -23,7 +23,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if message.content == client.user.mention:
-        await message.channel.send(f"My prefix is `{client.command_prefix}`")
+        await message.channel.send(f"My prefix is `>`")
     await client.process_commands(message)
 
 @client.command()
