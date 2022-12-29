@@ -82,28 +82,34 @@ class Snipe(commands.Cog):
 
     @commands.slash_command(name="snipe_whitelist", description="Whitelist a role or user to snipe messages")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    async def snipe_whitelist(self, ctx, role: discord.Role = None, user: discord.User = None):
+    async def snipe_whitelist(self, ctx : discord.ApplicationContext, role: discord.Role = None, user: discord.User = None):
         if str(ctx.guild.id) not in snipedata:
             snipedata[str(ctx.guild.id)] = {"roles": [], "users": []}
             snipedb.insert_one({"_id": str(ctx.guild.id), "data": snipedata[str(ctx.guild.id)]})
         if role is None and user is None:
-            await ctx.respond("You need to specify a role or a user", hidden=True)
-            return
+            d = snipedata[str(ctx.guild.id)]
+            embed = discord.Embed(title="Snipe Whitelist")
+            r = "\n".join("<@&{}>".format(x) for x in d["roles"])
+            u = "\n".join("<@{}>".format(x) for x in d["users"])
+            embed.add_field(name="Roles", value=r)
+            embed.add_field(name="Users", value=u)
+            await ctx.respond(embed=embed, allowed_mentions=False)
+
         if role is not None:
             if role.id in snipedata[str(ctx.guild.id)]["roles"]:
-                await ctx.respond("This role is already whitelisted", hidden=True)
+                await ctx.respond("This role is already whitelisted", ephemeral=True)
                 return
             snipedata[str(ctx.guild.id)]["roles"].append(role.id)
             snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
-            await ctx.respond(f"Whitelisted role {role.mention}", hidden=True)
+            await ctx.respond(f"Whitelisted role {role.mention}", allowed_mentions=False)
             return
         if user is not None:
             if user.id in snipedata[str(ctx.guild.id)]["users"]:
-                await ctx.respond("This user is already whitelisted", hidden=True)
+                await ctx.respond("This user is already whitelisted")
                 return
             snipedata[str(ctx.guild.id)]["users"].append(user.id)
             snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
-            await ctx.respond(f"Whitelisted user {user.mention}", hidden=True)
+            await ctx.respond(f"Whitelisted user {user.mention}", allowed_mentions=False)
             return
 
     @commands.command(aliases=["s"])
