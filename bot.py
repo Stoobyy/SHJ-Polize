@@ -4,6 +4,13 @@ startup_time = datetime.now().timestamp()
 
 import discord
 from discord.ext import commands
+from pymongo import MongoClient
+
+cluster = MongoClient(os.environ['MONGO'])
+db = cluster['SHJ-Polize']
+collection = db['prefixes']
+
+prefixes = {}
 
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all())
 
@@ -13,6 +20,11 @@ async def on_ready():
     print(f"Logged in as {client.user}")
     await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
 
+@client.event
+async def on_message(message):
+    if message.content == client.user.mention:
+        await message.channel.send(f"My prefix is `{client.command_prefix}`")
+    await client.process_commands(message)
 
 @client.command()
 async def ping(ctx):
