@@ -91,6 +91,10 @@ class Snipe(commands.Cog):
             embed = discord.Embed(title="Snipe Whitelist")
             r = "\n".join("<@&{}>".format(x) for x in d["roles"])
             u = "\n".join("<@{}>".format(x) for x in d["users"])
+            if r == "":
+                r = "None"
+            if u == "":
+                u = "None"
             embed.add_field(name="Roles", value=r)
             embed.add_field(name="Users", value=u)
             await ctx.respond(embed=embed)
