@@ -183,7 +183,7 @@ class Snipe(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_edit(self, oldmsg, newmsg):
-        author = oldmsg.author
+        author = str(oldmsg.author)
         oldcontent = oldmsg.content
         newcontent = newmsg.content
         channel = str(oldmsg.channel.id)
