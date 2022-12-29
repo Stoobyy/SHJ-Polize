@@ -93,7 +93,7 @@ class Snipe(commands.Cog):
             u = "\n".join("<@{}>".format(x) for x in d["users"])
             embed.add_field(name="Roles", value=r)
             embed.add_field(name="Users", value=u)
-            await ctx.respond(embed=embed, allowed_mentions=False)
+            await ctx.respond(embed=embed)
 
         if role is not None:
             if role.id in snipedata[str(ctx.guild.id)]["roles"]:
@@ -101,7 +101,7 @@ class Snipe(commands.Cog):
                 return
             snipedata[str(ctx.guild.id)]["roles"].append(role.id)
             snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
-            await ctx.respond(f"Whitelisted role {role.mention}", allowed_mentions=False)
+            await ctx.respond(f"Whitelisted role {role.mention}", allowed_mentions=discord.AllowedMentions.none())
             return
         if user is not None:
             if user.id in snipedata[str(ctx.guild.id)]["users"]:
@@ -109,7 +109,7 @@ class Snipe(commands.Cog):
                 return
             snipedata[str(ctx.guild.id)]["users"].append(user.id)
             snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
-            await ctx.respond(f"Whitelisted user {user.mention}", allowed_mentions=False)
+            await ctx.respond(f"Whitelisted user {user.mention}", allowed_mentions=discord.AllowedMentions.none())
             return
 
     @commands.command(aliases=["s"])
