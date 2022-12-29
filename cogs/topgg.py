@@ -6,7 +6,7 @@ import topgg
 
 
 @topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, auth=os.environ['BOT_AUTH'])
-async def on_bot_vote(vote_data: topgg.BotVoteData, client: discord.Bot = topgg.data(discord.Bot)):
+async def on_bot_vote(vote_data: topgg.BotVoteData, client: commands.Bot = topgg.data(commands.Bot)):
     if vote_data.type == "test":
         print(f"Received a test vote by:\n{vote_data.user}")
     else:
@@ -16,7 +16,7 @@ async def on_bot_vote(vote_data: topgg.BotVoteData, client: discord.Bot = topgg.
 
 
 @topgg.endpoint("/dslwebhook", topgg.WebhookType.GUILD, auth=os.environ['SERVER_AUTH'])
-async def on_guild_vote(vote_data: topgg.GuildVoteData, client: discord.Bot = topgg.data(discord.Bot)):
+async def on_guild_vote(vote_data: topgg.GuildVoteData, client: commands.Bot = topgg.data(commands.Bot)):
     if vote_data.type == "test":
         print(f"Received a test vote by:\n{vote_data.user}")
     else:
