@@ -18,7 +18,7 @@ editmsg = {}
 tzone = timezone(timedelta(hours=4))
 
 devs = (499112914578309120, 700195735689494558)
-snipedata = []
+snipedata = {}
 
 async def snipe_check(ctx):
     if str(ctx.guild.id) in snipedata:
