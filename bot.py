@@ -7,7 +7,7 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 cluster = MongoClient(os.environ['MONGO'])
-db = cluster['SHJ-Polize']
+db = cluster['shj-polize']
 collection = db['prefixes']
 
 prefixes = {}
