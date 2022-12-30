@@ -80,8 +80,7 @@ async def prefix(ctx, prefix: str):
 @client.slash_command()
 async def about(ctx):
     embed = discord.Embed(title=f"About SHJ Polize", color=discord.Color.blurple())
-    owners = [await client.get_user(i) for i in client.owner_ids]
-    print(owners)
+    owners = [client.get_user(i) for i in client.owner_ids]
     embed.description = "I am made by `{}` and `{}`".format(owners[0], owners[1])
     embed.add_field(name="Source Code", value="[Click Here](https://github.com/Stoobyy/SHJ-Polize)")
     embed.add_field(name="Support sever", value="[Click Here](https://discord.gg/z62AMMKVnX)")
