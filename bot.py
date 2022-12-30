@@ -81,6 +81,7 @@ async def prefix(ctx, prefix: str):
 async def about(ctx : discord.ApplicationContext):
     embed = discord.Embed(title=f"About SHJ Polize", color=discord.Color.blurple())
     owners = [ctx.bot.get_user(i) for i in ctx.bot.owner_ids]
+    print(owners)
     embed.description = "I am made by `{}` and `{}`".format(owners[0], owners[1])
     embed.add_field(name="Source Code", value="[Click Here](https://github.com/Stoobyy/SHJ-Polize)")
     embed.add_field(name="Support sever", value="[Click Here](https://discord.gg/z62AMMKVnX)")
