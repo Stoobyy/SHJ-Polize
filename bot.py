@@ -14,7 +14,10 @@ prefixes = {}
 
 
 async def get_prefix(client, message):
-    prefix = prefixes.get(str(message.guild.id), ">")
+    if message.guild is None:
+        prefix = '>'
+    else:
+        prefix = prefixes.get(str(message.guild.id), ">")
     return commands.when_mentioned_or(prefix)(client, message)
 
 client = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all())
