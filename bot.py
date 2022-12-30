@@ -14,10 +14,7 @@ prefixes = {}
 
 
 async def get_prefix(client, message):
-    if message.guild is None:
-        prefix = '>'
-    else:
-        prefix = prefixes.get(str(message.guild.id), ">")
+    prefix = prefixes.get(str(message.guild.id if message.guild else None), ">")
     return commands.when_mentioned_or(prefix)(client, message)
 
 client = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all())
@@ -33,7 +30,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    prefix = prefixes.get(str(message.guild.id), ">")
+    prefix = prefixes.get(str(message.guild.id if message.guild else None), ">")
     if message.content == client.user.mention:
         await message.reply(f"My prefix is `{prefix}`")
     await client.process_commands(message)
@@ -47,6 +44,7 @@ async def ping(ctx):
     await ctx.respond(f"{client.latency * 1000 : .2f}ms")
 
 @client.slash_command()
+@commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 async def prefix(ctx, prefix: str):
     if len(prefix) > 5:
@@ -64,6 +62,7 @@ async def prefix(ctx, prefix: str):
 
 @client.command()
 @commands.has_permissions(manage_guild=True)
+@commands.guild_only()
 async def prefix(ctx, prefix: str):
     if len(prefix) > 5:
         await ctx.reply("Prefix cannot be longer than 5 characters", mention_author=False)
@@ -78,6 +77,14 @@ async def prefix(ctx, prefix: str):
     prefixes[str(ctx.guild.id)] = prefix
     await ctx.reply(f"Prefix set to `{prefix}`", mention_author=False)
 
+@client.slash_command()
+async def about(ctx):
+    embed = discord.Embed(title=f"About {client.user.mention}", color=0x00ff00)
+    owners = [await client.fetch_user(i).name for i in client.owner_ids]
+    embed.description = "I am made by `{}` and `{}`".format(*owners)
+    embed.add_field(name="Source Code", value="[Click Here](https://github.com/Stoobyy/SHJ-Polize)")
+    await ctx.respond(embed=embed)
+    
 @client.command(hidden=True)
 async def load(ctx, extension):
     client.load_extension(f'cogs.{extension}')
