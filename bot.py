@@ -80,6 +80,7 @@ async def prefix(ctx, prefix: str):
 @client.slash_command()
 async def about(ctx : discord.ApplicationContext):
     embed = discord.Embed(title=f"About SHJ Polize", color=discord.Color.blurple())
+    print(ctx.bot.owner_ids)
     owners = [ctx.bot.get_user(i) for i in ctx.bot.owner_ids]
     print(owners)
     embed.description = "I am made by `{}` and `{}`".format(owners[0], owners[1])
