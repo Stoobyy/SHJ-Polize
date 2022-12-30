@@ -80,11 +80,11 @@ async def prefix(ctx, prefix: str):
 @client.slash_command()
 async def about(ctx):
     embed = discord.Embed(title=f"About {client.user.mention}", color=0x00ff00)
-    owners = [await client.fetch_user(i).name for i in client.owner_ids]
-    embed.description = "I am made by `{}` and `{}`".format(*owners)
+    owners = [await client.fetch_user(i) for i in client.owner_ids]
+    embed.description = "I am made by `{}` and `{}`".format(owners[0], owners[1])
     embed.add_field(name="Source Code", value="[Click Here](https://github.com/Stoobyy/SHJ-Polize)")
     await ctx.respond(embed=embed)
-    
+
 @client.command(hidden=True)
 async def load(ctx, extension):
     client.load_extension(f'cogs.{extension}')
