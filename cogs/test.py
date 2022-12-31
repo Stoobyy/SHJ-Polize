@@ -9,8 +9,8 @@ class Test(commands.Cog):
     @commands.slash_command()
     async def test(self, ctx):
         content = ""
-        content += f"Owners: {ctx.bot.owner_ids}\n"
         content += f"Owner: {ctx.bot.owner_id}\n"
+        content += f"Owners: {ctx.bot.owner_ids}\n"
         c = await ctx.bot.is_owner(ctx.author)
         content += f"Is owner: {c}\n"
         content += f"Owner: {ctx.bot.owner_id}\n"
