@@ -1,5 +1,5 @@
 requests
-py-cord
+git+https://github.com/NotNalin/pycord
 pymongo[srv]
 psutil
 pillow
