@@ -4,7 +4,19 @@ import os
 import topgg
 
 
-@topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, auth=os.environ['BOT_AUTH'])
+def on_autopost_success():
+    print("Successfully posted!")
+
+
+def on_autopost_error(exception: Exception):
+    print("Failed to post:", exception)
+
+
+def stats(client: commands.Bot = topgg.data(commands.Bot)):
+    return topgg.StatsWrapper(guild_count=len(client.guilds))
+
+
+@topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, auth=os.environ["BOT_AUTH"])
 async def on_bot_vote(vote_data: topgg.BotVoteData, client: commands.Bot = topgg.data(commands.Bot)):
     user_id = vote_data.user
     try:
@@ -25,7 +37,7 @@ async def on_bot_vote(vote_data: topgg.BotVoteData, client: commands.Bot = topgg
             pass
 
 
-@topgg.endpoint("/dslwebhook", topgg.WebhookType.GUILD, auth=os.environ['SERVER_AUTH'])
+@topgg.endpoint("/dslwebhook", topgg.WebhookType.GUILD, auth=os.environ["SERVER_AUTH"])
 async def on_guild_vote(vote_data: topgg.GuildVoteData, client: commands.Bot = topgg.data(commands.Bot)):
     user = await client.fetch_user(vote_data.user)
     guild: discord.Guild = await client.fetch_guild(vote_data.guild)
@@ -46,12 +58,19 @@ async def on_guild_vote(vote_data: topgg.GuildVoteData, client: commands.Bot = t
 class Topgg(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.client = client
-        self.webhook_manager = topgg.WebhookManager().set_data(self.client).endpoint(on_bot_vote).endpoint(on_guild_vote)
+        self.webhook_manager = topgg.WebhookManager().set_data(self.client)
+        self.webhook_manager.endpoint(on_bot_vote).endpoint(on_guild_vote)
+        self.dblclient = topgg.DBLClient(os.environ["TOPGG_TOKEN"]).set_data(self.client)
+        self.autoposter: topgg.AutoPoster = self.dblclient.autopost()
+        self.autoposter.on_success(on_autopost_success).on_error(on_autopost_error).stats(stats).interval(1800)
 
     @commands.Cog.listener()
     async def on_ready(self):
         if not self.webhook_manager.is_running:
             await self.webhook_manager.start(port=5000)
+
+        if not self.autoposter.is_running:
+            self.autoposter.start()
 
 
 def setup(client):
