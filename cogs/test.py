@@ -7,8 +7,14 @@ class Test(commands.Cog):
         self.client = client
     
     @commands.slash_command()
-    async def test(self, ctx, role: discord.Role):
-        await ctx.respond(role.id)
+    async def test(self, ctx):
+        content = ""
+        content += f"Owners: {ctx.bot.owner_ids}"
+        c = await ctx.bot.is_owner(ctx.author)
+        content += f"Is owner: {c}"
+        content += f"Owners: {ctx.bot.owner_ids}"
+        await ctx.respond(content)
+
 
     @commands.command()
     async def snowflake(self, ctx, snowflake, snowflake2=None):
