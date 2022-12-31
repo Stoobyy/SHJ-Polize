@@ -7,7 +7,7 @@ class Test(commands.Cog):
         self.client = client
     
     @commands.slash_command()
-    async def test(self, ctx):
+    async def test(self, ctx : discord.ApplicationContext):
         content = ""
         content += f"Owner: {ctx.bot.owner_id}\n"
         content += f"Owners: {ctx.bot.owner_ids}\n"
