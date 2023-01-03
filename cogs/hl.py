@@ -39,9 +39,8 @@ class Highlight(commands.Cog):
             ghl = highlightdb.find_one({"_id": guildid})
             if ghl is None:
                 highlightdb.insert_one({"_id": guildid, "hl": {}})
-                guildhl = highlightdb.find_one({"_id": guildid})
-            else:
-                guildhl = ghl["hl"]
+                ghl = highlightdb.find_one({"_id": guildid})
+            guildhl = ghl["hl"]
             hllist[guildid] = guildhl
 
         for user in guildhl:
