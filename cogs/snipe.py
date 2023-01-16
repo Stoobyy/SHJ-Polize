@@ -49,7 +49,13 @@ class Snipe(commands.Cog):
     @tasks.loop(minutes=5)
     async def save(self):
         snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
-
+    
+    @commands.command(name="save", hidden=True)
+    @commands.is_owner()
+    async def _save(self, ctx):
+        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
+        await ctx.reply("Saved!")
+    
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
         if message.author.bot:
@@ -327,9 +333,11 @@ class Snipe(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if reaction.emoji == "❌":
+            s_m = False
             try:
                 msg = deletemsg[str(reaction.message.channel.id)]
                 msg["DontSnipe"] = True
+                s_m = True
             except KeyError:
                 pass
             message = await reaction.message.channel.fetch_message(reaction.message.id)
@@ -353,10 +361,8 @@ class Snipe(commands.Cog):
                             await snipemsg.delete()
                         except discord.Forbidden:
                             pass
-            try:
+            if s_m == True:
                 del msg["DontSnipe"]
-            except KeyError:
-                pass
 
     @commands.command(aliases=["d"])
     async def delete(self, ctx):
