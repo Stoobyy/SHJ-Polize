@@ -44,7 +44,8 @@ class Snipe(commands.Cog):
         for i in d:
             if i["_id"] != "1":
                 snipedata[i["_id"]] = i["data"]
-        self.save.start()
+        if not self.save.is_running():
+            self.save.start()
 
     @tasks.loop(minutes=5)
     async def save(self):
