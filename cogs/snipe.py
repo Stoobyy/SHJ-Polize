@@ -34,28 +34,31 @@ class Snipe(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        s = snipedb.find_one({"_id": "1"})
-        global deletemsg, editmsg
-        deletemsg = pickle.loads(s["deletemsg"])
-        editmsg = pickle.loads(s["editmsg"])
-        d = snipedb.find({})
-        for i in d:
-            if i["_id"] != "1":
-                snipedata[i["_id"]] = i["data"]
-        if not self.save.is_running():
-            self.save.start()
+    # temp fix hopefully 
 
-    @tasks.loop(minutes=5)
-    async def save(self):
-        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
     
-    @commands.command(name="save", hidden=True)
-    @commands.is_owner()
-    async def _save(self, ctx):
-        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
-        await ctx.reply("Saved!")
+    # @commands.Cog.listener()
+    # async def on_ready(self):
+    #     s = snipedb.find_one({"_id": "1"})
+    #     global deletemsg, editmsg
+    #     deletemsg = pickle.loads(s["deletemsg"])
+    #     editmsg = pickle.loads(s["editmsg"])
+    #     d = snipedb.find({})
+    #     for i in d:
+    #         if i["_id"] != "1":
+    #             snipedata[i["_id"]] = i["data"]
+    #     if not self.save.is_running():
+    #         self.save.start()
+
+    # @tasks.loop(minutes=5)
+    # async def save(self):
+    #     snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
+    
+    # @commands.command(name="save", hidden=True)
+    # @commands.is_owner()
+    # async def _save(self, ctx):
+    #     snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
+    #     await ctx.reply("Saved!")
     
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
