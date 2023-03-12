@@ -111,7 +111,9 @@ class Snipe(commands.Cog):
 
         if role is not None:
             if role.id in snipedata[str(ctx.guild.id)]["roles"]:
-                await ctx.respond("This role is already whitelisted", ephemeral=True)
+                snipedata[str(ctx.guild.id)]["roles"].remove(role.id)
+                snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
+                await ctx.respond(f"Removed role {role.mention} from whitelist", allowed_mentions=discord.AllowedMentions.none())
                 return
             snipedata[str(ctx.guild.id)]["roles"].append(role.id)
             snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
@@ -119,7 +121,9 @@ class Snipe(commands.Cog):
             return
         if user is not None:
             if user.id in snipedata[str(ctx.guild.id)]["users"]:
-                await ctx.respond("This user is already whitelisted")
+                snipedata[str(ctx.guild.id)]["users"].remove(user.id)
+                snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
+                await ctx.respond(f"Removed user {user.mention} from whitelist", allowed_mentions=discord.AllowedMentions.none())
                 return
             snipedata[str(ctx.guild.id)]["users"].append(user.id)
             snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
@@ -148,13 +152,21 @@ class Snipe(commands.Cog):
             except discord.errors.Forbidden:
                 await ctx.reply("I do not have permission to view this channel", mention_author=False)
                 return
-        if "attachment" in deletemsg[channel_id]:
-            attachment = deletemsg[channel_id]["attachment"]
-            content += f"\n:open_file_folder:[Attachment]({attachment})"
+
         embed = discord.Embed(description=f"{content}", colour=1752220)
         embed.timestamp = timee
         embed.set_author(name=f"{author}", icon_url=f"{authorav}")
         embed.set_footer(text=f"Deleted in {channel}")
+
+        if content.startswith("https://") and " " not in content:
+            if content.endswith((".png", ".jpg", ".jpeg", ".gif")) or content.startswith("https://tenor.com/view/"):
+                embed.set_image(url=content)
+                embed.description = ""
+            
+        if "attachment" in deletemsg[channel_id]:
+            attachment = deletemsg[channel_id]["attachment"]
+            content += f"\n:open_file_folder:[Attachment]({attachment})"
+        
         if "img" in deletemsg[channel_id]:
             img = deletemsg[channel_id]["img"]
             img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
