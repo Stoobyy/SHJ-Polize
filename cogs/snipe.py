@@ -61,6 +61,12 @@ class Snipe(commands.Cog):
     #     await ctx.reply("Saved!")
     
     @commands.Cog.listener()
+    async def on_ready(self):
+        d = snipedb.find({})
+        for i in d:
+            snipedata[i["_id"]] = i["data"]
+
+    @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
         if message.author.bot:
             return
