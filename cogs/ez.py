@@ -73,7 +73,7 @@ class Ez(commands.Cog):
                         "_id": guildid,
                         "channel_blacklist": [],
                         "user_blacklist": [],
-                        "serverwide_blacklist": False,
+                        "serverwide_blacklist": True,
                         "server_deleteafter": 0,
                         "channel_deleteafter": {},
                     }

@@ -7,23 +7,32 @@ from discord.ext import commands
 from pymongo import MongoClient
 
 cluster = MongoClient(os.environ['MONGO'])
-db = cluster['SHJ-Polize']
+db = cluster['shj-polize']
 collection = db['prefixes']
 
 prefixes = {}
 
-client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), intents=discord.Intents.all())
+
+async def get_prefix(client, message):
+    prefix = prefixes.get(str(message.guild.id if message.guild else None), ">")
+    return commands.when_mentioned_or(prefix)(client, message)
+
+client = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all())
+
 
 
 @client.event
 async def on_ready():
     print(f"Logged in as {client.user}")
+    for document in collection.find():
+        prefixes[document['_id']] = document['prefix']
     await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
 
 @client.event
 async def on_message(message):
+    prefix = prefixes.get(str(message.guild.id if message.guild else None), ">")
     if message.content == client.user.mention:
-        await message.channel.send(f"My prefix is `>`")
+        await message.reply(f"My prefix is `{prefix}`")
     await client.process_commands(message)
 
 @client.command()
@@ -33,6 +42,51 @@ async def ping(ctx):
 @client.slash_command()
 async def ping(ctx):
     await ctx.respond(f"{client.latency * 1000 : .2f}ms")
+
+@client.slash_command()
+@commands.guild_only()
+@commands.has_permissions(manage_guild=True)
+async def prefix(ctx, prefix: str):
+    if len(prefix) > 5:
+        await ctx.respond("Prefix cannot be longer than 5 characters", ephemeral=True)
+        return
+    if prefix == prefixes.get(str(ctx.guild.id), ">"):
+        await ctx.respond("Prefix is already set to that", ephemeral=True)
+        return
+    if str(ctx.guild.id) in prefixes:
+        collection.update_one({"_id": str(ctx.guild.id)}, {"$set": {"prefix": prefix}})
+    else:
+        collection.insert_one({"_id": str(ctx.guild.id), "prefix": prefix})
+    prefixes[str(ctx.guild.id)] = prefix
+    await ctx.respond(f"Prefix set to `{prefix}`")
+
+@client.command()
+@commands.has_permissions(manage_guild=True)
+@commands.guild_only()
+async def prefix(ctx, prefix: str):
+    if len(prefix) > 5:
+        await ctx.reply("Prefix cannot be longer than 5 characters", mention_author=False)
+        return
+    if prefix == prefixes.get(str(ctx.guild.id), ">"):
+        await ctx.reply("Prefix is already set to that", mention_author=False)
+        return
+    if str(ctx.guild.id) in prefixes:
+        collection.update_one({"_id": str(ctx.guild.id)}, {"$set": {"prefix": prefix}})
+    else:
+        collection.insert_one({"_id": str(ctx.guild.id), "prefix": prefix})
+    prefixes[str(ctx.guild.id)] = prefix
+    await ctx.reply(f"Prefix set to `{prefix}`", mention_author=False)
+
+@client.slash_command()
+async def about(ctx : discord.ApplicationContext):
+    embed = discord.Embed(title=f"About SHJ Polize", color=discord.Color.blurple(), url="https://top.gg/bot/969663219570462790")
+    owners = [ctx.bot.get_user(i) for i in ctx.bot.owner_ids]
+    embed.description = "I am made by `{}` and `{}`".format(owners[0], owners[1])
+    embed.add_field(name="Vote for me", value="[Click Here](https://top.gg/bot/969663219570462790/vote)")
+    embed.add_field(name="Source Code", value="[Click Here](https://github.com/Stoobyy/SHJ-Polize)")
+    embed.add_field(name="Support sever", value="[Click Here](https://discord.gg/z62AMMKVnX)")
+    embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+    await ctx.respond(embed=embed)
 
 @client.command(hidden=True)
 async def load(ctx, extension):

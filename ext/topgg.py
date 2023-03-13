@@ -55,24 +55,9 @@ async def on_guild_vote(vote_data: topgg.GuildVoteData, client: commands.Bot = t
             pass
 
 
-class Topgg(commands.Cog):
-    def __init__(self, client: commands.Bot):
-        self.client = client
-        self.webhook_manager = topgg.WebhookManager().set_data(self.client)
-        self.webhook_manager.endpoint(on_bot_vote).endpoint(on_guild_vote)
-        self.dblclient = topgg.DBLClient(os.environ["TOPGG_TOKEN"]).set_data(self.client)
-        self.autoposter: topgg.AutoPoster = self.dblclient.autopost()
-        self.autoposter.on_success(on_autopost_success).on_error(on_autopost_error).stats(stats).set_interval(1800)
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        if not self.webhook_manager.is_running:
-            await self.webhook_manager.start(port=5000)
-
-        if not self.autoposter.is_running:
-            self.autoposter.start()
+manager = topgg.WebhookManager()
+manager.endpoint(on_bot_vote).endpoint(on_guild_vote)
 
 
-def setup(client):
-    client.add_cog(Topgg(client))
-    print("Topgg cog loaded")
+dblclient =  topgg.DBLClient(os.environ["TOPGG_TOKEN"])

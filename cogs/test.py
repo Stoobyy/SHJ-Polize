@@ -6,9 +6,17 @@ class Test(commands.Cog):
     def __init__(self, client):
         self.client = client
     
-    @commands.command()
-    async def test(self, ctx):
-        await ctx.send("Test")
+    @commands.slash_command()
+    async def test(self, ctx : discord.ApplicationContext):
+        content = ""
+        content += f"Owner: {ctx.bot.owner_id}\n"
+        content += f"Owners: {ctx.bot.owner_ids}\n"
+        c = await ctx.bot.is_owner(ctx.author)
+        content += f"Is owner: {c}\n"
+        content += f"Owner: {ctx.bot.owner_id}\n"
+        content += f"Owners: {ctx.bot.owner_ids}\n"
+        await ctx.respond(content)
+
 
     @commands.command()
     async def snowflake(self, ctx, snowflake, snowflake2=None):

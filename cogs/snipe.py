@@ -6,6 +6,7 @@ import pickle
 import discord
 from discord.commands import SlashCommandGroup
 from discord.ext import commands, tasks
+from discord.ui import View
 from pymongo import MongoClient
 
 cluster = MongoClient(os.environ["MONGO"])
@@ -20,6 +21,7 @@ tzone = timezone(timedelta(hours=4))
 devs = (499112914578309120, 700195735689494558)
 snipedata = {}
 
+
 async def snipe_check(ctx):
     if str(ctx.guild.id) in snipedata:
         if ctx.author.id in snipedata[str(ctx.guild.id)]["users"]:
@@ -30,25 +32,78 @@ async def snipe_check(ctx):
                     return True
     return False
 
+
+class DeleteView(View):
+    def __init__(self, ctx):
+        super().__init__(timeout=180, disable_on_timeout=True)
+        self.ctx = ctx
+
+    @discord.ui.button(label="Delete", style=discord.ButtonStyle.red, emoji="🗑️")
+    async def delete(self, button: discord.ui.Button, interaction: discord.Interaction):
+
+        s_m = False
+        try:
+            msg = deletemsg[str(interaction.channel.id)]
+            msg["DontSnipe"] = True
+            s_m = True
+        except KeyError:
+            pass
+
+        message = self.ctx.message
+
+        if message:
+            user = message.author.id
+        else:
+            user = self.ctx.author.id
+
+        if interaction.user.id == user or interaction.user.id in devs:
+            await interaction.message.delete()
+            if message:
+                try:
+                    await message.delete()
+                except discord.Forbidden:
+                    pass
+        else:
+            await interaction.response.send_message("You are not allowed to delete this message <a:nochamp:1021040710142668870>", ephemeral=True)
+
+        if s_m == True:
+            del msg["DontSnipe"]
+
+
 class Snipe(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    # temp fix hopefully
+
+    # @commands.Cog.listener()
+    # async def on_ready(self):
+    #     s = snipedb.find_one({"_id": "1"})
+    #     global deletemsg, editmsg
+    #     deletemsg = pickle.loads(s["deletemsg"])
+    #     editmsg = pickle.loads(s["editmsg"])
+    #     d = snipedb.find({})
+    #     for i in d:
+    #         if i["_id"] != "1":
+    #             snipedata[i["_id"]] = i["data"]
+    #     if not self.save.is_running():
+    #         self.save.start()
+
+    # @tasks.loop(minutes=5)
+    # async def save(self):
+    #     snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
+
+    # @commands.command(name="save", hidden=True)
+    # @commands.is_owner()
+    # async def _save(self, ctx):
+    #     snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
+    #     await ctx.reply("Saved!")
+
     @commands.Cog.listener()
     async def on_ready(self):
-        s = snipedb.find_one({"_id": "1"})
-        global deletemsg, editmsg
-        deletemsg = pickle.loads(s["deletemsg"])
-        editmsg = pickle.loads(s["editmsg"])
         d = snipedb.find({})
         for i in d:
-            if i["_id"] != "1":
-                snipedata[i["_id"]] = i["data"]
-        self.save.start()
-
-    @tasks.loop(minutes=5)
-    async def save(self):
-        snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
+            snipedata[i["_id"]] = i["data"]
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
@@ -82,7 +137,7 @@ class Snipe(commands.Cog):
 
     @commands.slash_command(name="snipe_whitelist", description="Whitelist a role or user to snipe messages")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    async def snipe_whitelist(self, ctx : discord.ApplicationContext, role: discord.Role = None, user: discord.User = None):
+    async def snipe_whitelist(self, ctx: discord.ApplicationContext, role: discord.Role = None, user: discord.User = None):
         if str(ctx.guild.id) not in snipedata:
             snipedata[str(ctx.guild.id)] = {"roles": [], "users": []}
             snipedb.insert_one({"_id": str(ctx.guild.id), "data": snipedata[str(ctx.guild.id)]})
@@ -101,7 +156,9 @@ class Snipe(commands.Cog):
 
         if role is not None:
             if role.id in snipedata[str(ctx.guild.id)]["roles"]:
-                await ctx.respond("This role is already whitelisted", ephemeral=True)
+                snipedata[str(ctx.guild.id)]["roles"].remove(role.id)
+                snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
+                await ctx.respond(f"Removed role {role.mention} from whitelist", allowed_mentions=discord.AllowedMentions.none())
                 return
             snipedata[str(ctx.guild.id)]["roles"].append(role.id)
             snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
@@ -109,7 +166,9 @@ class Snipe(commands.Cog):
             return
         if user is not None:
             if user.id in snipedata[str(ctx.guild.id)]["users"]:
-                await ctx.respond("This user is already whitelisted")
+                snipedata[str(ctx.guild.id)]["users"].remove(user.id)
+                snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
+                await ctx.respond(f"Removed user {user.mention} from whitelist", allowed_mentions=discord.AllowedMentions.none())
                 return
             snipedata[str(ctx.guild.id)]["users"].append(user.id)
             snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
@@ -138,24 +197,33 @@ class Snipe(commands.Cog):
             except discord.errors.Forbidden:
                 await ctx.reply("I do not have permission to view this channel", mention_author=False)
                 return
-        if "attachment" in deletemsg[channel_id]:
-            attachment = deletemsg[channel_id]["attachment"]
-            content += f"\n:open_file_folder:[Attachment]({attachment})"
+
         embed = discord.Embed(description=f"{content}", colour=1752220)
         embed.timestamp = timee
         embed.set_author(name=f"{author}", icon_url=f"{authorav}")
         embed.set_footer(text=f"Deleted in {channel}")
+        view = DeleteView(ctx)
+
+        if content.startswith("https://") and " " not in content:
+            if content.endswith((".png", ".jpg", ".jpeg", ".gif")):
+                embed.set_image(url=content)
+                embed.description = ""
+
+        if "attachment" in deletemsg[channel_id]:
+            attachment = deletemsg[channel_id]["attachment"]
+            content += f"\n:open_file_folder:[Attachment]({attachment})"
+
         if "img" in deletemsg[channel_id]:
             img = deletemsg[channel_id]["img"]
             img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
             embed.set_image(url=f"attachment://{img.filename}")
-            await ctx.reply(embed=embed, file=img, mention_author=False)
+            await ctx.reply(embed=embed, file=img, view=view, mention_author=False)
             return
-        await ctx.reply(embed=embed, mention_author=False)
+        await ctx.reply(embed=embed, view=view, mention_author=False)
 
     @commands.command(aliases=["dms"])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
-    async def dmsnipe(self, ctx, channel: discord.TextChannel = None): 
+    async def dmsnipe(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
         channel_id = str(channel.id)
@@ -175,13 +243,21 @@ class Snipe(commands.Cog):
             except discord.errors.Forbidden:
                 await ctx.reply("I do not have permission to view this channel", mention_author=False)
                 return
-        if "attachment" in deletemsg[channel_id]:
-            attachment = deletemsg[channel_id]["attachment"]
-            content += f"\n:open_file_folder:[Attachment]({attachment})"
+
         embed = discord.Embed(description=f"{content}", colour=1752220)
         embed.timestamp = timee
         embed.set_author(name=f"{author}", icon_url=f"{authorav}")
-        embed.set_footer(text=f"Deleted in {channel} ({ctx.guild.name})")
+        embed.set_footer(text=f"Deleted in {channel}")
+
+        if content.startswith("https://") and " " not in content:
+            if content.endswith((".png", ".jpg", ".jpeg", ".gif")):
+                embed.set_image(url=content)
+                embed.description = ""
+
+        if "attachment" in deletemsg[channel_id]:
+            attachment = deletemsg[channel_id]["attachment"]
+            content += f"\n:open_file_folder:[Attachment]({attachment})"
+
         if "img" in deletemsg[channel_id]:
             img = deletemsg[channel_id]["img"]
             img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
@@ -195,7 +271,7 @@ class Snipe(commands.Cog):
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     @discord.option(name="channel", type=discord.TextChannel, required=False, default=None)
     @discord.option(name="ephemeral", type=bool, required=False, default=False)
-    async def ssnipe(self, ctx, channel: discord.TextChannel, ephemeral):
+    async def ssnipe(self, ctx: discord.ApplicationContext, channel: discord.TextChannel, ephemeral):
         if channel is None:
             channel = ctx.channel
         channel_id = str(channel.id)
@@ -215,20 +291,33 @@ class Snipe(commands.Cog):
             except discord.Forbidden:
                 await ctx.respond("I do not have permission to view this channel", ephemeral=True)
                 return
-        if "attachment" in deletemsg[channel_id]:
-            attachment = deletemsg[channel_id]["attachment"]
-            content += f"\n:open_file_folder:[Attachment]({attachment})"
+
         embed = discord.Embed(description=f"{content}", colour=1752220)
         embed.timestamp = timee
         embed.set_author(name=f"{author}", icon_url=f"{authorav}")
         embed.set_footer(text=f"Deleted in {channel}")
+
+        if ephemeral:
+            view = None
+        else:
+            view = DeleteView(ctx)
+
+        if content.startswith("https://") and " " not in content:
+            if content.endswith((".png", ".jpg", ".jpeg", ".gif")):
+                embed.set_image(url=content)
+                embed.description = ""
+
+        if "attachment" in deletemsg[channel_id]:
+            attachment = deletemsg[channel_id]["attachment"]
+            content += f"\n:open_file_folder:[Attachment]({attachment})"
+
         if "img" in deletemsg[channel_id]:
             img = deletemsg[channel_id]["img"]
             img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
             embed.set_image(url=f"attachment://{img.filename}")
-            await ctx.respond(embed=embed, file=img, ephemeral=ephemeral)
+            await ctx.respond(embed=embed, file=img, view=view, ephemeral=ephemeral)
             return
-        await ctx.respond(embed=embed, ephemeral=ephemeral)
+        await ctx.respond(embed=embed, view=view, ephemeral=ephemeral)
 
     @commands.Cog.listener()
     async def on_message_edit(self, oldmsg, newmsg):
@@ -288,7 +377,8 @@ class Snipe(commands.Cog):
         embed.timestamp = timee
         embed.set_author(name=f"{author}", icon_url=f"{authav}")
         embed.set_footer(text=f"Edited in {channel}")
-        await ctx.reply(embed=embed, mention_author=False)
+        view = DeleteView(ctx)
+        await ctx.reply(embed=embed, view=view, mention_author=False)
 
     @commands.command(aliases=["dmes"])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
@@ -327,9 +417,11 @@ class Snipe(commands.Cog):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         if reaction.emoji == "❌":
+            s_m = False
             try:
                 msg = deletemsg[str(reaction.message.channel.id)]
                 msg["DontSnipe"] = True
+                s_m = True
             except KeyError:
                 pass
             message = await reaction.message.channel.fetch_message(reaction.message.id)
@@ -353,10 +445,8 @@ class Snipe(commands.Cog):
                             await snipemsg.delete()
                         except discord.Forbidden:
                             pass
-            try:
+            if s_m == True:
                 del msg["DontSnipe"]
-            except KeyError:
-                pass
 
     @commands.command(aliases=["d"])
     async def delete(self, ctx):
@@ -389,7 +479,7 @@ class Snipe(commands.Cog):
                     pass
             else:
                 try:
-                    await ctx.react("<a:nochamp:972351244700090408>")
+                    await ctx.react("<a:nochamp:1021040710142668870>")
                 except discord.Forbidden:
                     pass
             try:
@@ -423,6 +513,10 @@ class Snipe(commands.Cog):
             except discord.errors.Forbidden:
                 await ctx.respond("I do not have permission to view this channel", ephemeral=True)
                 return
+        if ephemeral:
+            view = None
+        else:
+            view = DeleteView(ctx)
 
         embed = discord.Embed(description=f"[Jump to message]({messageurl})", colour=1752220)
         embed.add_field(name="Original Message", value=f"{oldmsg}")
@@ -430,7 +524,7 @@ class Snipe(commands.Cog):
         embed.timestamp = timee
         embed.set_author(name=f"{author}", icon_url=f"{authav}")
         embed.set_footer(text=f"Edited in {channel}")
-        await ctx.respond(embed=embed, ephemeral=ephemeral)
+        await ctx.respond(embed=embed, view=view, ephemeral=ephemeral)
 
 
 def setup(client):
