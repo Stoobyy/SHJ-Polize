@@ -35,7 +35,7 @@ async def snipe_check(ctx):
 
 class DeleteView(View):
     def __init__(self, ctx):
-        super().__init__(timeout=180)
+        super().__init__(timeout=180, disable_on_timeout=True)
         self.ctx = ctx
 
     @discord.ui.button(label="Delete", style=discord.ButtonStyle.red, emoji="🗑️")
@@ -64,7 +64,7 @@ class DeleteView(View):
                 except discord.Forbidden:
                     pass
         else:
-            await interaction.response.send_message("You are not allowed to delete this message <a:nochamp:972351244700090408>", ephemeral=True)
+            await interaction.response.send_message("You are not allowed to delete this message <a:nochamp:1021040710142668870>", ephemeral=True)
 
         if s_m == True:
             del msg["DontSnipe"]
@@ -479,7 +479,7 @@ class Snipe(commands.Cog):
                     pass
             else:
                 try:
-                    await ctx.react("<a:nochamp:972351244700090408>")
+                    await ctx.react("<a:nochamp:1021040710142668870>")
                 except discord.Forbidden:
                     pass
             try:
