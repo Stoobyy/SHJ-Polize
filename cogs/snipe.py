@@ -50,24 +50,16 @@ class DeleteView(View):
             pass
         message = self.ctx.message
         try:
-            snipemsg = await message.channel.fetch_message(message.reference.message_id)
-            s_user = snipemsg.author.id
+            user = message.author.id
         except:
-            snipemsg = None
-            s_user = None
+            user = message.interaction.user.id
 
-        try:
-            s_user = message.interaction.user.id
-        except:
-            s_user = None
-
-        if interaction.user.id == s_user or interaction.user.id in devs:
-            await message.delete()
-            if snipemsg != None:
-                try:
-                    await snipemsg.delete()
-                except discord.Forbidden:
-                    pass
+        if interaction.user.id == user or interaction.user.id in devs:
+            await interaction.message.delete()
+            try:
+                await message.delete()
+            except discord.Forbidden:
+                pass
         else:
             await interaction.response.send_message("You are not allowed to delete this message <a:nochamp:972351244700090408>", ephemeral=True)
 
