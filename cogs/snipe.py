@@ -48,18 +48,21 @@ class DeleteView(View):
             s_m = True
         except KeyError:
             pass
+
         message = self.ctx.message
-        try:
+
+        if message:
             user = message.author.id
-        except:
-            user = message.interaction.user.id
+        else:
+            user = self.ctx.author.id
 
         if interaction.user.id == user or interaction.user.id in devs:
             await interaction.message.delete()
-            try:
-                await message.delete()
-            except discord.Forbidden:
-                pass
+            if message:
+                try:
+                    await message.delete()
+                except discord.Forbidden:
+                    pass
         else:
             await interaction.response.send_message("You are not allowed to delete this message <a:nochamp:972351244700090408>", ephemeral=True)
 
