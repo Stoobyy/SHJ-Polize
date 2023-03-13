@@ -48,7 +48,7 @@ class DeleteView(View):
             s_m = True
         except KeyError:
             pass
-        message = await self.ctx.message
+        message = self.ctx.message
         try:
             snipemsg = await message.channel.fetch_message(message.reference.message_id)
             s_user = snipemsg.author.id
