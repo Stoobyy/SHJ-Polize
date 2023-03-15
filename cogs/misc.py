@@ -9,6 +9,7 @@ class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.spotify_menu = app_commands.ContextMenu(name="Spotify", callback=self.spotify_menu_callback)
+        self.bot.tree.add_command(self.spotify_menu)
 
 
     @app_commands.command(name="spotify", description="get song info from spotify")
