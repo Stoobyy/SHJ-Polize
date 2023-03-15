@@ -14,35 +14,41 @@ collection = db["prefixes"]
 prefixes = {}
 
 
+class SHJPolize(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    async def setup_hook(self):
+
+        for document in collection.find():
+            prefixes[document["_id"]] = document["prefix"]
+
+        try:
+            await bot.load_extension("jishaku")
+        except:
+            pass
+        for cog in os.listdir("./cogs"):
+            if cog.endswith(".py"):
+                try:
+                    await bot.load_extension(f"cogs.{cog[:-3]}")
+                except commands.errors.ExtensionAlreadyLoaded:
+                    pass
+                except Exception as e:
+                    print(e.with_traceback(e.__traceback__))
+        await bot.tree.sync()
+
+
 async def get_prefix(bot, message):
     prefix = prefixes.get(str(message.guild.id if message.guild else None), ">")
     return commands.when_mentioned_or(prefix)(bot, message)
 
 
-bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all())
+bot = SHJPolize(command_prefix=get_prefix, intents=discord.Intents.all())
 
 
 @bot.event
 async def on_ready():
-    for cog in os.listdir("./cogs"):
-        if cog.endswith(".py"):
-            try:
-                await bot.load_extension(f"cogs.{cog[:-3]}")
-            except commands.errors.ExtensionAlreadyLoaded:
-                pass
-            except Exception as e:
-                print(e.with_traceback(e.__traceback__))
-    try:
-        await bot.load_extension("jishaku")
-    except:
-        pass
-    await bot.tree.sync()
-
-    for document in collection.find():
-        prefixes[document["_id"]] = document["prefix"]
-
     await bot.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name="with fishes"))
-
     print(f"Logged in as {bot.user}")
 
 
@@ -176,6 +182,6 @@ async def on_application_command_error(interaction: discord.Interaction, error):
         raise error
 
 
-token = os.environ['TOKEN']
+token = os.environ["TOKEN"]
 
 bot.run(token)
