@@ -52,8 +52,8 @@ class Misc(commands.Cog):
                 embed.set_author(name=user, icon_url=user.display_avatar.url)
                 embed.set_footer(text="Started")
                 embed.timestamp = activity.created_at
-            await interaction.response.send_message(embed=embed)
-            return
+                await interaction.response.send_message(embed=embed)
+                return
         await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
 
 async def setup(bot):
