@@ -141,8 +141,9 @@ class Snipe(commands.Cog):
             else:
                 deletemsg[channel]["attachment"] = attachment.url
 
-    @app_commands.command(name="snipe_whitelist", description="Whitelist a role or user to snipe messages")
+    @app_commands.command(name="snipe_whitelist", description="Whitelist a role or user to snipe messages (if left blank, shows the current whitelist)")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
+    @app_commands.describe(role="Role to whitelist", user="User to whitelist")
     async def snipe_whitelist(self, interaction: discord.Interaction, role: discord.Role = None, user: discord.User = None):
         if str(interaction.guild.id) not in snipedata:
             snipedata[str(interaction.guild.id)] = {"roles": [], "users": []}
@@ -273,7 +274,8 @@ class Snipe(commands.Cog):
         await ctx.author.send(embed=embed)
         await ctx.message.add_reaction("👍")
 
-    @app_commands.command(name="snipe")
+    @app_commands.command(name="snipe", description="shows deleted message in a channel")
+    @app_commands.describe(channel="channel to snipe from", ephemeral="whether to make the message hidden or not")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     async def ssnipe(self, interaction: discord.Interaction, channel: discord.TextChannel = None, ephemeral: bool = False):
         if channel is None:
@@ -491,7 +493,8 @@ class Snipe(commands.Cog):
             except KeyError:
                 pass
 
-    @app_commands.command()
+    @app_commands.command(name="editsnipe", description="shows the last edited message in a channel")
+    @app_commands.describe(channel="the channel to snipe from", ephemeral="whether to make the message hidden or not")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     async def editsnipe(self, interaction: discord.Interaction, channel: discord.TextChannel = None, ephemeral: bool = False):
         if channel is None:
