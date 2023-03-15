@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 startup_time = datetime.now().timestamp()
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 from pymongo import MongoClient
 
@@ -65,13 +66,14 @@ async def ping(ctx):
     await ctx.reply(f"{bot.latency * 1000 : .2f}ms", mention_author=False)
 
 
-@bot.tree.command()
+@bot.tree.command(name="ping", description="Get the bot's latency")
 async def ping(interaction: discord.Interaction):
     await interaction.response.send_message(f"{bot.latency * 1000 : .2f}ms")
 
 
-@bot.tree.command()
+@bot.tree.command(name="prefix", description="Change the bot's prefix")
 @commands.guild_only()
+@app_commands.describe(prefix="Prefix to set")
 @commands.has_permissions(manage_guild=True)
 async def prefix(interaction: discord.Interaction, prefix: str):
     if len(prefix) > 5:
