@@ -8,6 +8,7 @@ from discord.ext import commands
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.spotify_menu = app_commands.ContextMenu(name="Spotify", callback=self.spotify_menu_callback)
 
 
     @app_commands.command(name="spotify", description="get song info from spotify")
@@ -34,8 +35,7 @@ class Misc(commands.Cog):
         await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
 
 
-    @app_commands.context_menu(name="spotify")
-    async def spotify(self, interaction: discord.Interaction, user: discord.Member):
+    async def spotify_menu_callback(self, interaction: discord.Interaction, user: discord.Member):
         user = interaction.guild.get_member(user.id)
         if not user.activities:
             await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
