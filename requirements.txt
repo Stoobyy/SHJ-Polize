@@ -1,5 +1,5 @@
 requests
-py-cord
+discord.py
 pymongo[srv]
 psutil
 pillow

@@ -1,25 +1,18 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 import datetime
 from datetime import timedelta
 class Test(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
     
-    @commands.slash_command()
-    async def test(self, ctx : discord.ApplicationContext):
-        content = ""
-        content += f"Owner: {ctx.bot.owner_id}\n"
-        content += f"Owners: {ctx.bot.owner_ids}\n"
-        c = await ctx.bot.is_owner(ctx.author)
-        content += f"Is owner: {c}\n"
-        content += f"Owner: {ctx.bot.owner_id}\n"
-        content += f"Owners: {ctx.bot.owner_ids}\n"
-        await ctx.respond(content)
-
+    @app_commands.command(name="test", description="test")
+    async def test(self, interaction: discord.Interaction):
+        await interaction.response.send_message("test")
 
     @commands.command()
-    async def snowflake(self, ctx, snowflake, snowflake2=None):
+    async def snowflake(self, ctx : commands.Context, snowflake, snowflake2=None):
         s = discord.Object(id=snowflake)
         d : datetime.datetime = s.created_at.timestamp()
         if snowflake2:
@@ -46,6 +39,6 @@ class Test(commands.Cog):
 
 
 
-def setup(client):
-    client.add_cog(Test(client))
+async def setup(bot):
+    await bot.add_cog(Test(bot))
     print("Test cog loaded")
