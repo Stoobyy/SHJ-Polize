@@ -7,7 +7,7 @@ from discord.ext import commands
 
 class Misc(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: commands.Bot = bot
         self.spotify_menu = app_commands.ContextMenu(name="Spotify", callback=self.spotify_menu_callback)
         self.bot.tree.add_command(self.spotify_menu)
 
@@ -55,6 +55,50 @@ class Misc(commands.Cog):
                 await interaction.response.send_message(embed=embed)
                 return
         await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
+
+    @app_commands.command(name="say", description="say something as the bot")
+    @commands.is_owner()
+    async def say(self, interaction: discord.Interaction, message: str, guild_id: str, channel_id: str, reply_message_id: str=None):
+        try:
+            guild: discord.Guild = await self.bot.fetch_guild(int(guild_id))
+        except discord.Forbidden:
+            await interaction.response.send_message("Guild not found", ephemeral=True)
+            return
+            await interaction.response.send_message("Error while fetching guild, try again later.", ephemeral=True)
+            return
+        try:
+            channel = await guild.fetch_channel(int(channel_id))
+        except discord.NotFound:
+            await interaction.response.send_message("Channel not found", ephemeral=True)
+            return
+        except discord.Forbidden:
+            await interaction.response.send_message("Bot does not have permission to send messages in that channel", ephemeral=True)
+            return
+        if reply_message_id:
+            try:
+                reply_message = await channel.fetch_message(int(reply_message_id))
+            except discord.NotFound:
+                await interaction.response.send_message("Message not found", ephemeral=True)
+                return
+            except discord.Forbidden:
+                await interaction.response.send_message("Bot does not have permission to reply to messages", ephemeral=True)
+                return
+            try:
+                m = await reply_message.reply(message)
+            except discord.Forbidden:
+                await interaction.response.send_message("Bot does not have permission to send messages in that channel", ephemeral=True)
+                return
+        else:
+            try:
+                m = await channel.send(message)
+            except discord.Forbidden:
+                await interaction.response.send_message("Bot does not have permission to send messages in that channel", ephemeral=True)
+                return
+        await interaction.response.send_message(f"Message sent: {m.jump_url}")
+            
+        
+
+
 
 async def setup(bot):
     await bot.add_cog(Misc(bot))
