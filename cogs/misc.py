@@ -5,6 +5,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+import asyncio
+
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
@@ -56,6 +58,7 @@ class Misc(commands.Cog):
                 return
         await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
 
+    
     @app_commands.command(name="say", description="say something as the bot")
     @commands.is_owner()
     async def say(self, interaction: discord.Interaction, message: str, guild_id: str, channel_id: str, reply_message_id: str=None):
@@ -96,9 +99,40 @@ class Misc(commands.Cog):
                 return
         await interaction.response.send_message(f"Message sent: {m.jump_url}")
             
-        
+    @app_commands.command(name="copy", description="you dont wanna know")
+    @commands.is_owner()
+    async def copy(self, interaction: discord.Interaction, guild_id: str, channel_id: str):
+    # copy user messages from one channel to another and timeout after 2 minutes
+        try:
+            guild: discord.Guild = await self.bot.fetch_guild(int(guild_id))
+        except discord.Forbidden:
+            await interaction.response.send_message("Error while fetching guild, try again later.", ephemeral=True)
+            return
+        try:
+            channel = await guild.fetch_channel(int(channel_id))
+        except discord.NotFound:
+            await interaction.response.send_message("Channel not found", ephemeral=True)
+            return
+        except discord.Forbidden:
+            await interaction.response.send_message("Bot does not have permission to send messages in that channel", ephemeral=True)
+            return
+        await interaction.response.send_message("Copy started, timeout in 2 minutes")
+        def check(m):
+            return m.author == interaction.user
+        try:
+            message = await self.bot.wait_for("message", check=check, timeout=120)
+        except asyncio.TimeoutError:
+            await interaction.response.send_message("Copy timed out", ephemeral=True)
+            return
+        try:
+            await channel.send(message.content)
+        except discord.Forbidden:
+            await interaction.response.send_message("Bot does not have permission to send messages in that channel", ephemeral=True)
+            return
+        await interaction.response.send_message("Message sent")
 
 
+    
 
 async def setup(bot):
     await bot.add_cog(Misc(bot))
