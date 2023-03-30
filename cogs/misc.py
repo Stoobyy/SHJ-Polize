@@ -12,7 +12,7 @@ class Misc(commands.Cog):
         self.bot: commands.Bot = bot
         self.spotify_menu = app_commands.ContextMenu(name="Spotify", callback=self.spotify_menu_callback)
         self.bot.tree.add_command(self.spotify_menu)
-
+        self.yes = False
 
     @app_commands.command(name="spotify", description="get song info from spotify")
     @app_commands.describe(user="user to get song info from")
@@ -67,8 +67,6 @@ class Misc(commands.Cog):
         except discord.Forbidden:
             await interaction.response.send_message("Guild not found", ephemeral=True)
             return
-            await interaction.response.send_message("Error while fetching guild, try again later.", ephemeral=True)
-            return
         try:
             channel = await guild.fetch_channel(int(channel_id))
         except discord.NotFound:
@@ -102,6 +100,7 @@ class Misc(commands.Cog):
     @app_commands.command(name="copy", description="you dont wanna know")
     @commands.is_owner()
     async def copy(self, interaction: discord.Interaction, guild_id: str, channel_id: str):
+        global yes
     # copy user messages from one channel to another and timeout after 2 minutes
         try:
             guild: discord.Guild = await self.bot.fetch_guild(int(guild_id))
@@ -119,17 +118,38 @@ class Misc(commands.Cog):
         await interaction.response.send_message("Copy started, timeout in 2 minutes")
         def check(m):
             return m.author == interaction.user
-        try:
-            message = await self.bot.wait_for("message", check=check, timeout=120)
-        except asyncio.TimeoutError:
-            await interaction.response.send_message("Copy timed out", ephemeral=True)
-            return
-        try:
-            await channel.send(message.content)
-        except discord.Forbidden:
-            await interaction.response.send_message("Bot does not have permission to send messages in that channel", ephemeral=True)
-            return
-        await interaction.response.send_message("Message sent")
+        yes = True
+        while yes:
+            try:
+                message = await self.bot.wait_for("message", check=check, timeout=120)
+            except asyncio.TimeoutError:
+                await interaction.response.send_message("Copy timed out", ephemeral=True)
+                return
+            try:
+                if '|' in message.content:
+                    try:
+                        reply_message = await channel.fetch_message(int(message.content.split('|')[1]))
+                    except discord.NotFound:
+                        await interaction.response.send_message("Message not found", ephemeral=True)
+                        return
+                    except discord.Forbidden:
+                        await interaction.response.send_message("Bot does not have permission to reply to messages", ephemeral=True)
+                        return
+                    await channel.send(message.content.split('|')[0], reference=reply_message)
+                else:
+                    await channel.send(message.content)
+            except discord.Forbidden:
+                await interaction.response.send_message("Bot does not have permission to send messages in that channel", ephemeral=True)
+                return
+            await interaction.response.send_message("Message sent")
+    
+    @app_commands.command(name="stop", description="stop the copy command")
+    @commands.is_owner()
+    async def stop(self, interaction: discord.Interaction):
+        global yes
+        yes = False
+        await interaction.response.send_message("Copy stopped")
+
 
 
     
