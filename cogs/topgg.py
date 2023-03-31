@@ -73,6 +73,6 @@ class Topgg(commands.Cog):
             self.autoposter.start()
 
 
-async def setup(bot):
-    await bot.add_cog(Topgg(bot))
+def setup(client):
+    client.add_cog(Topgg(client))
     print("Topgg cog loaded")

@@ -5,7 +5,7 @@ from datetime import *
 
 import discord
 import requests
-from discord import app_commands
+from discord.commands import SlashCommandGroup
 from discord.ext import commands
 from pymongo import MongoClient
 
@@ -54,8 +54,8 @@ bl_list = {}
 
 
 class Ez(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, client):
+        self.client = client
 
     @commands.Cog.listener("on_message")
     async def ez_webhook(self, message):
@@ -99,7 +99,7 @@ class Ez(commands.Cog):
             hookurl = hook.url + "?wait=true"
             response = requests.post(hookurl, json=data)
             raw = response.json()
-            channel = await self.bot.fetch_channel(int(raw["channel_id"]))
+            channel = await self.client.fetch_channel(int(raw["channel_id"]))
             messageid = await channel.fetch_message(int(raw["id"]))
 
             if str(message.channel.id) in blacklist["channel_deleteafter"]:
@@ -162,13 +162,14 @@ class Ez(commands.Cog):
             bl_list[guildid] = blacklist
             await ctx.message.add_reaction("👍")
 
-    ez = app_commands.Group(name="ez", description="ez commands")
+    ez = SlashCommandGroup(name="ez", description="ez commands")
 
     @ez.command(name="blacklist", description="blacklist a channel or user")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    @app_commands.describe(channel="The channel to blacklist", user="The user to blacklist")
-    async def ez_blacklist(self, interaction: discord.Interaction, channel: discord.TextChannel=None, user: discord.Member=None):
-        guildid = interaction.guild.id
+    @discord.option(name="channel", type=discord.TextChannel, default=None, description="The channel to blacklist", required=False)
+    @discord.option(name="user", type=discord.Member, default=None, description="The user to blacklist", required=False)
+    async def ez_blacklist(self, ctx, channel: discord.TextChannel, user: discord.Member):
+        guildid = ctx.guild.id
         if guildid in bl_list:
             blacklist = bl_list[guildid]
         else:
@@ -192,12 +193,12 @@ class Ez(commands.Cog):
                 blacklist["channel_blacklist"].remove(channel.id)
                 ezdb.update_one({"_id": guildid}, {"$set": {"channel_blacklist": blacklist["channel_blacklist"]}})
                 bl_list[guildid] = blacklist
-                await interaction.response.send_message(f"<#{channel.id}> is no longer blacklisted", ephemeral=True)
+                await ctx.respond(f"<#{channel.id}> is no longer blacklisted", ephemeral=True)
                 return
             blacklist["channel_blacklist"].append(channel.id)
             ezdb.update_one({"_id": guildid}, {"$set": {"channel_blacklist": blacklist["channel_blacklist"]}})
             bl_list[guildid] = blacklist
-            await interaction.response.send_message(f"<#{channel.id}> is now blacklisted", ephemeral=True)
+            await ctx.respond(f"<#{channel.id}> is now blacklisted", ephemeral=True)
             return
 
         if isinstance(user, discord.Member):
@@ -205,21 +206,21 @@ class Ez(commands.Cog):
                 blacklist["user_blacklist"].remove(user.id)
                 ezdb.update_one({"_id": guildid}, {"$set": {"user_blacklist": blacklist["user_blacklist"]}})
                 bl_list[guildid] = blacklist
-                await interaction.response.send_message(f"<@{user.id}> is no longer blacklisted", ephemeral=True)
+                await ctx.respond(f"<@{user.id}> is no longer blacklisted", ephemeral=True)
                 return
             blacklist["user_blacklist"].append(user.id)
             ezdb.update_one({"_id": guildid}, {"$set": {"user_blacklist": blacklist["user_blacklist"]}})
             bl_list[guildid] = blacklist
-            await interaction.response.send_message(f"<@{user.id}> is now blacklisted", ephemeral=True)
+            await ctx.respond(f"<@{user.id}> is now blacklisted", ephemeral=True)
             return
         if channel is None and user is None:
-            await interaction.response.send_message(f"You need to specify a channel or user", ephemeral=True)
+            await ctx.respond(f"You need to specify a channel or user", ephemeral=True)
             return
 
     @ez.command(name="info", description="list blacklisted channels and users and shows deleteafter")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    async def ez_info(self, interaction: discord.Interaction):
-        guildid = interaction.guild.id
+    async def ez_info(self, ctx):
+        guildid = ctx.guild.id
         if guildid in bl_list:
             blacklist = bl_list[guildid]
         else:
@@ -257,13 +258,13 @@ class Ez(commands.Cog):
             for x, j in blacklist["channel_deleteafter"].items():
                 v += f"<#{x}> : {j} seconds\n"
             embed1.add_field(name="Channels", value=v, inline=False)
-        await interaction.response.send_message(embeds=[embed, embed1], ephemeral=True)
+        await ctx.respond(embeds=[embed, embed1], ephemeral=True)
 
     @ez.command(name="disable", description="disable serverwide blacklist")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    @app_commands.describe(disabled="Disable serverwide blacklist")
-    async def ez_disable(self, interaction: discord.Interaction, disabled: bool):
-        guildid = interaction.guild.id
+    @discord.option(name="disabled", type=bool, description="Disable serverwide blacklist", required=True)
+    async def ez_disable(self, ctx, disabled):
+        guildid = ctx.guild.id
         if guildid in bl_list:
             blacklist = bl_list[guildid]
         else:
@@ -285,28 +286,35 @@ class Ez(commands.Cog):
         sw = blacklist["serverwide_blacklist"]
         if sw is True:
             if disabled is True:
-                await interaction.response.send_message("Serverwide blacklist is already enabled", ephemeral=True)
+                await ctx.respond("Serverwide blacklist is already enabled", ephemeral=True)
                 return
             else:
                 blacklist["serverwide_blacklist"] = False
                 ezdb.update_one({"_id": guildid}, {"$set": {"serverwide_blacklist": blacklist["serverwide_blacklist"]}})
                 bl_list[guildid] = blacklist
-                await interaction.response.send_message(f"Serverwide blacklist is now disabled", ephemeral=True)
+                await ctx.respond(f"Serverwide blacklist is now disabled", ephemeral=True)
         else:
             if disabled is False:
-                await interaction.response.send_message("Serverwide blacklist is already disabled", ephemeral=True)
+                await ctx.respond("Serverwide blacklist is already disabled", ephemeral=True)
                 return
             else:
                 blacklist["serverwide_blacklist"] = True
                 ezdb.update_one({"_id": guildid}, {"$set": {"serverwide_blacklist": blacklist["serverwide_blacklist"]}})
                 bl_list[guildid] = blacklist
-                await interaction.response.send_message(f"Serverwide blacklist is now enabled", ephemeral=True)
+                await ctx.respond(f"Serverwide blacklist is now enabled", ephemeral=True)
 
     @ez.command(name="deleteafter", description="Set the deleteafter time for ez messages in channels and server")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    @app_commands.describe(channel="The channel to blacklist(if empty changes server deleteafter)", time="The time in seconds")
-    async def ez_deleteafter(self, interaction: discord.Interaction, channel: discord.TextChannel=None, time: int=None):
-        guildid = interaction.guild.id
+    @discord.option(
+        name="channel",
+        type=discord.TextChannel,
+        default=None,
+        description="The channel to blacklist if empty changes server deleteafter",
+        required=False,
+    )
+    @discord.option(name="time", type=int, default=None, description="The time in seconds", required=True)
+    async def ez_deleteafter(self, ctx, channel: discord.TextChannel, time: int):
+        guildid = ctx.guild.id
         if guildid in bl_list:
             blacklist = bl_list[guildid]
         else:
@@ -330,9 +338,9 @@ class Ez(commands.Cog):
                 blacklist["server_deleteafter"] = time
                 ezdb.update_one({"_id": guildid}, {"$set": {"server_deleteafter": blacklist["server_deleteafter"]}})
                 bl_list[guildid] = blacklist
-                await interaction.response.send_message(f"Server deleteafter set to {time} seconds", ephemeral=True)
+                await ctx.respond(f"Server deleteafter set to {time} seconds", ephemeral=True)
             else:
-                await interaction.response.send_message("You need to specify a time", ephemeral=True)
+                await ctx.respond("You need to specify a time", ephemeral=True)
 
         else:
             if time != None:
@@ -340,7 +348,7 @@ class Ez(commands.Cog):
                     blacklist["channel_deleteafter"][str(channel.id)] = time
                     ezdb.update_one({"_id": guildid}, {"$set": {"channel_deleteafter": blacklist["channel_deleteafter"]}})
                     bl_list[guildid] = blacklist
-                    await interaction.response.send_message(f"Deleteafter set to {time} seconds for <#{channel.id}>", ephemeral=True)
+                    await ctx.respond(f"Deleteafter set to {time} seconds for <#{channel.id}>", ephemeral=True)
                 else:
                     if blacklist["channel_deleteafter"] == {}:
                         blacklist["channel_deleteafter"] = {str(channel.id): time}
@@ -348,14 +356,14 @@ class Ez(commands.Cog):
                         blacklist["channel_deleteafter"][str(channel.id)] = time
                     ezdb.update_one({"_id": guildid}, {"$set": {"channel_deleteafter": blacklist["channel_deleteafter"]}})
                     bl_list[guildid] = blacklist
-                    await interaction.response.send_message(f"Deleteafter set to {time} seconds for <#{channel.id}>", ephemeral=True)
+                    await ctx.respond(f"Deleteafter set to {time} seconds for <#{channel.id}>", ephemeral=True)
             else:
                 blacklist["channel_deleteafter"].pop(str(channel.id))
                 ezdb.update_one({"_id": guildid}, {"$set": {"channel_deleteafter": blacklist["channel_deleteafter"]}})
                 bl_list[guildid] = blacklist
-                await interaction.response.send_message(f"Channel deleteafter removed", ephemeral=True)
+                await ctx.respond(f"Channel deleteafter removed", ephemeral=True)
 
 
-async def setup(bot):
-    await bot.add_cog(Ez(bot))
+def setup(client):
+    client.add_cog(Ez(client))
     print("Ez cog loaded")

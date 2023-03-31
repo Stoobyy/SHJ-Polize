@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import discord
-from discord import app_commands
+from discord.commands import SlashCommandGroup
 from discord.ext import commands
 from pymongo import MongoClient
 
@@ -18,11 +18,11 @@ hllist = {}
 
 
 class Highlight(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, client):
+        self.client = client
 
     @commands.Cog.listener("on_message")
-    async def hl_check(self, message: discord.Message):
+    async def hl_check(self, message):
         if message.author.bot or not message.guild:
             return
         guildid = message.guild.id
@@ -65,12 +65,11 @@ class Highlight(commands.Cog):
                             await member.send(f'In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word "{msg}"', embed=embed)
                         except discord.Forbidden:
                             pass
-    
-    hl = app_commands.Group(name="highlight", description="Highlight commands")
+    hl = SlashCommandGroup(name="highlight", description="Highlight commands")
 
     @hl.command(name="list", description="List all highlights")
-    async def hl_list(self, interaction : discord.Interaction):
-        guildid = interaction.guild.id
+    async def hl_list(self, ctx):
+        guildid = ctx.guild.id
         if guildid in hllist:
             guildhl = hllist[guildid]
         else:
@@ -82,23 +81,24 @@ class Highlight(commands.Cog):
                 guildhl = ghl["hl"]
             hllist[guildid] = guildhl
 
-        if str(interaction.user.id) not in guildhl:
+        if str(ctx.author.id) not in guildhl:
             embed = discord.Embed(title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220)
-            await interaction.response.send_message(embed=embed)
+            await ctx.respond(embed=embed)
         else:
-            if len(guildhl[str(interaction.user.id)]) == 0:
+            if len(guildhl[str(ctx.author.id)]) == 0:
                 embed = discord.Embed(title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220)
-                await interaction.response.send_message(embed=embed)
+                await ctx.respond(embed=embed)
             else:
                 str1 = ""
-                for i in guildhl[str(interaction.user.id)]:
+                for i in guildhl[str(ctx.author.id)]:
                     str1 += f"{i}\n"
                 embed = discord.Embed(title="You're currently tracking the following words", description=str1, color=1752220)
-                await interaction.response.send_message(embed=embed)
+                await ctx.respond(embed=embed)
 
     @hl.command(name="add", description="Add a highlight word")
-    async def hl_add(self, interaction: discord.Interaction, word: str):
-        guildid = interaction.guild.id
+    @discord.option(name="word", required=True)
+    async def hl_add(self, ctx, word):
+        guildid = ctx.guild.id
         if guildid in hllist:
             guildhl = hllist[guildid]
         else:
@@ -110,23 +110,24 @@ class Highlight(commands.Cog):
                 guildhl = ghl["hl"]
             hllist[guildid] = guildhl
 
-        if str(interaction.user.id) in guildhl:
-            if word in guildhl[str(interaction.user.id)]:
-                await interaction.response.send_message(f"{word} is already in your highlight list")
+        if str(ctx.author.id) in guildhl:
+            if word in guildhl[str(ctx.author.id)]:
+                await ctx.respond(f"{word} is already in your highlight list")
             else:
-                guildhl[str(interaction.user.id)].append(word)
+                guildhl[str(ctx.author.id)].append(word)
                 highlightdb.update_one({"_id": guildid}, {"$set": {"hl": guildhl}})
                 hllist[guildid] = guildhl
-                await interaction.response.send_message(f"{word} has been added to your highlight list")
+                await ctx.respond(f"{word} has been added to your highlight list")
         else:
-            guildhl[str(interaction.user.id)] = [word]
+            guildhl[str(ctx.author.id)] = [word]
             highlightdb.update_one({"_id": guildid}, {"$set": {"hl": guildhl}})
             hllist[guildid] = guildhl
-            await interaction.response.send_message(f"{word} has been added to your highlight list")
+            await ctx.respond(f"{word} has been added to your highlight list")
 
     @hl.command(name="remove", description="Remove a highlight word")
-    async def hl_remove(self, interaction: discord.Interaction, word: str):
-        guildid = interaction.guild.id
+    @discord.option(name="word", required=True)
+    async def hl_remove(self, ctx, word):
+        guildid = ctx.guild.id
         if guildid in hllist:
             guildhl = hllist[guildid]
         else:
@@ -138,18 +139,18 @@ class Highlight(commands.Cog):
                 guildhl = ghl["hl"]
             hllist[guildid] = guildhl
 
-        if str(interaction.user.id) in guildhl:
-            if word in guildhl[str(interaction.user.id)]:
-                guildhl[str(interaction.user.id)].remove(word)
+        if str(ctx.author.id) in guildhl:
+            if word in guildhl[str(ctx.author.id)]:
+                guildhl[str(ctx.author.id)].remove(word)
                 highlightdb.update_one({"_id": guildid}, {"$set": {"hl": guildhl}})
-                await interaction.response.send_message(f"{word} has been removed from your highlight list")
+                await ctx.respond(f"{word} has been removed from your highlight list")
                 hllist[guildid] = guildhl
             else:
-                await interaction.response.send_message(f"{word} is not in your highlight list")
+                await ctx.respond(f"{word} is not in your highlight list")
         else:
-            await interaction.response.send_message(f"You currently have no highlight words")
+            await ctx.respond(f"You currently have no highlight words")
 
 
-async def setup(bot):
-    await bot.add_cog(Highlight(bot))
+def setup(client):
+    client.add_cog(Highlight(client))
     print("Highlight cog loaded")
