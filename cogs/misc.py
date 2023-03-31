@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 import asyncio
 
 class Misc(commands.Cog):
