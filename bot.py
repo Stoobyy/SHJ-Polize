@@ -183,6 +183,6 @@ for cog in os.listdir("./cogs"):
 
 bot.load_extension("jishaku")
 
-token = "OTY5NjYzMjE5NTcwNDYyNzkw.Gp_FJ2.KCsQusIClO8Fi4vNnAu7d1VFJOYeIfbpVrwXCU"
+token = os.environ["TOKEN"]
 
 bot.run(token)
