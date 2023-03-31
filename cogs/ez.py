@@ -54,8 +54,8 @@ bl_list = {}
 
 
 class Ez(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.Cog.listener("on_message")
     async def ez_webhook(self, message):
@@ -99,7 +99,7 @@ class Ez(commands.Cog):
             hookurl = hook.url + "?wait=true"
             response = requests.post(hookurl, json=data)
             raw = response.json()
-            channel = await self.client.fetch_channel(int(raw["channel_id"]))
+            channel = await self.bot.fetch_channel(int(raw["channel_id"]))
             messageid = await channel.fetch_message(int(raw["id"]))
 
             if str(message.channel.id) in blacklist["channel_deleteafter"]:
@@ -364,6 +364,6 @@ class Ez(commands.Cog):
                 await ctx.respond(f"Channel deleteafter removed", ephemeral=True)
 
 
-def setup(client):
-    client.add_cog(Ez(client))
+def setup(bot):
+    bot.add_cog(Ez(bot))
     print("Ez cog loaded")

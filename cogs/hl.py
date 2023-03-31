@@ -18,8 +18,8 @@ hllist = {}
 
 
 class Highlight(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.Cog.listener("on_message")
     async def hl_check(self, message):
@@ -151,6 +151,6 @@ class Highlight(commands.Cog):
             await ctx.respond(f"You currently have no highlight words")
 
 
-def setup(client):
-    client.add_cog(Highlight(client))
+def setup(bot):
+    bot.add_cog(Highlight(bot))
     print("Highlight cog loaded")
