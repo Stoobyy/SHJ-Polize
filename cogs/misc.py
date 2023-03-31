@@ -30,8 +30,8 @@ class Misc(commands.Cog):
                 return
         await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
 
-    @commands.user_command()
-    async def spotify(self, interaction: discord.Interaction, user: discord.Member = None):
+    @commands.user_command(name="Spotify")
+    async def _spotify(self, interaction: discord.Interaction, user: discord.Member = None):
         user = user or interaction.user
         user = interaction.guild.get_member(user.id)
         if not user.activities:
