@@ -52,7 +52,7 @@ class Misc(commands.Cog):
                 return
         await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
 
-    @commands.slash_command(name="say", description="say something as the bot")
+    @commands.slash_command(name="say", description="say something as the bot", guild_ids=[906909577394663484])
     @commands.is_owner()
     async def say(self, interaction: discord.Interaction, message: str, guild_id: str, channel_id: str, reply_message_id: str=None):
         try:
@@ -90,7 +90,7 @@ class Misc(commands.Cog):
                 return
         await interaction.response.send_message(f"Message sent: {m.jump_url}")
 
-    @commands.slash_command(name="copy", description="you dont wanna know")
+    @commands.slash_command(name="copy", description="you dont wanna know", guild_ids=[906909577394663484])
     @commands.is_owner()
     async def copy(self, interaction: discord.Interaction, guild_id: str, channel_id: str):
     # copy user messages from one channel to another and timeout after 2 minutes
@@ -141,7 +141,7 @@ class Misc(commands.Cog):
                 await interaction.followup.send("Bot does not have permission to send messages in that channel", ephemeral=True)
                 return
         
-    @commands.slash_command(name="stop", description="stop the copy command")
+    @commands.slash_command(name="stop", description="stop the copy command", guild_ids=[906909577394663484])
     @commands.is_owner()
     async def stop(self, interaction: discord.Interaction):
         if self.copy_message:
