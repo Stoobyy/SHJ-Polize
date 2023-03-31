@@ -1,66 +1,96 @@
 import os
-from datetime import *
+from datetime import datetime, timedelta
+
 startup_time = datetime.now().timestamp()
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 from pymongo import MongoClient
 
-cluster = MongoClient(os.environ['MONGO'])
-db = cluster['shj-polize']
-collection = db['prefixes']
+cluster = MongoClient(os.environ["MONGO"])
+db = cluster["shj-polize"]
+collection = db["prefixes"]
 
 prefixes = {}
 
 
-async def get_prefix(client, message):
+class SHJPolize(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    async def setup_hook(self):
+
+        for document in collection.find():
+            prefixes[document["_id"]] = document["prefix"]
+
+        try:
+            await bot.load_extension("jishaku")
+        except:
+            pass
+        for cog in os.listdir("./cogs"):
+            if cog.endswith(".py"):
+                try:
+                    await bot.load_extension(f"cogs.{cog[:-3]}")
+                except commands.errors.ExtensionAlreadyLoaded:
+                    pass
+                except Exception as e:
+                    print(e.with_traceback(e.__traceback__))
+        await bot.tree.sync()
+
+
+async def get_prefix(bot, message):
     prefix = prefixes.get(str(message.guild.id if message.guild else None), ">")
-    return commands.when_mentioned_or(prefix)(client, message)
-
-client = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all())
+    return commands.when_mentioned_or(prefix)(bot, message)
 
 
+bot = SHJPolize(command_prefix=get_prefix, intents=discord.Intents.all())
 
-@client.event
+
+@bot.event
 async def on_ready():
-    print(f"Logged in as {client.user}")
-    for document in collection.find():
-        prefixes[document['_id']] = document['prefix']
-    await client.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name='with fishes'))
+    await bot.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name="with fishes"))
+    print(f"Logged in as {bot.user}")
 
-@client.event
+
+@bot.event
 async def on_message(message):
     prefix = prefixes.get(str(message.guild.id if message.guild else None), ">")
-    if message.content == client.user.mention:
+    if message.content == bot.user.mention:
         await message.reply(f"My prefix is `{prefix}`")
-    await client.process_commands(message)
+    await bot.process_commands(message)
 
-@client.command()
+
+@bot.command()
 async def ping(ctx):
-    await ctx.reply(f"{client.latency * 1000 : .2f}ms", mention_author=False)
+    await ctx.reply(f"{bot.latency * 1000 : .2f}ms", mention_author=False)
 
-@client.slash_command()
-async def ping(ctx):
-    await ctx.respond(f"{client.latency * 1000 : .2f}ms")
 
-@client.slash_command()
+@bot.tree.command(name="ping", description="Get the bot's latency")
+async def ping(interaction: discord.Interaction):
+    await interaction.response.send_message(f"{bot.latency * 1000 : .2f}ms")
+
+
+@bot.tree.command(name="prefix", description="Change the bot's prefix")
 @commands.guild_only()
+@app_commands.describe(prefix="Prefix to set")
 @commands.has_permissions(manage_guild=True)
-async def prefix(ctx, prefix: str):
+async def prefix(interaction: discord.Interaction, prefix: str):
     if len(prefix) > 5:
-        await ctx.respond("Prefix cannot be longer than 5 characters", ephemeral=True)
+        await interaction.response.send_message("Prefix cannot be longer than 5 characters", ephemeral=True)
         return
-    if prefix == prefixes.get(str(ctx.guild.id), ">"):
-        await ctx.respond("Prefix is already set to that", ephemeral=True)
+    if prefix == prefixes.get(str(interaction.guild.id), ">"):
+        await interaction.response.send_message("Prefix is already set to that", ephemeral=True)
         return
-    if str(ctx.guild.id) in prefixes:
-        collection.update_one({"_id": str(ctx.guild.id)}, {"$set": {"prefix": prefix}})
+    if str(interaction.guild.id) in prefixes:
+        collection.update_one({"_id": str(interaction.guild.id)}, {"$set": {"prefix": prefix}})
     else:
-        collection.insert_one({"_id": str(ctx.guild.id), "prefix": prefix})
-    prefixes[str(ctx.guild.id)] = prefix
-    await ctx.respond(f"Prefix set to `{prefix}`")
+        collection.insert_one({"_id": str(interaction.guild.id), "prefix": prefix})
+    prefixes[str(interaction.guild.id)] = prefix
+    await interaction.response.send_message(f"Prefix set to `{prefix}`")
 
-@client.command()
+
+@bot.command()
 @commands.has_permissions(manage_guild=True)
 @commands.guild_only()
 async def prefix(ctx, prefix: str):
@@ -77,34 +107,41 @@ async def prefix(ctx, prefix: str):
     prefixes[str(ctx.guild.id)] = prefix
     await ctx.reply(f"Prefix set to `{prefix}`", mention_author=False)
 
-@client.slash_command()
-async def about(ctx : discord.ApplicationContext):
+
+@bot.tree.command()
+async def about(interaction: discord.Interaction):
     embed = discord.Embed(title=f"About SHJ Polize", color=discord.Color.blurple(), url="https://top.gg/bot/969663219570462790")
-    owners = [ctx.bot.get_user(i) for i in ctx.bot.owner_ids]
-    embed.description = "I am made by `{}` and `{}`".format(owners[0], owners[1])
+    # info = await interaction.client.application_info()
+    # owners = [interaction.client.get_user(i.id) for i in info.team.members]
+    # embed.description = "I am made by `{}` and `{}`".format(owners[0], owners[1])
+    embed.description = "I am made by `TrickyGamer#8188` and `Stooby#0215`"
     embed.add_field(name="Vote for me", value="[Click Here](https://top.gg/bot/969663219570462790/vote)")
     embed.add_field(name="Source Code", value="[Click Here](https://github.com/Stoobyy/SHJ-Polize)")
     embed.add_field(name="Support sever", value="[Click Here](https://discord.gg/z62AMMKVnX)")
-    embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
-    await ctx.respond(embed=embed)
+    embed.set_thumbnail(url=interaction.client.user.display_avatar.url)
+    await interaction.response.send_message(embed=embed)
 
-@client.command(hidden=True)
+
+@bot.command(hidden=True)
 async def load(ctx, extension):
-    client.load_extension(f'cogs.{extension}')
-    await ctx.send(f'Loaded {extension}')
+    bot.load_extension(f"cogs.{extension}")
+    await ctx.send(f"Loaded {extension}")
 
-@client.command(hidden=True)
+
+@bot.command(hidden=True)
 async def unload(ctx, extension):
-    client.unload_extension(f'cogs.{extension}')
-    await ctx.send(f'Unloaded {extension}')
+    bot.unload_extension(f"cogs.{extension}")
+    await ctx.send(f"Unloaded {extension}")
 
-@client.command(hidden=True)
+
+@bot.command(hidden=True)
 async def reload(ctx, extension):
-    client.unload_extension(f'cogs.{extension}')
-    client.load_extension(f'cogs.{extension}')
-    await ctx.send(f'Reloaded {extension}')
+    bot.unload_extension(f"cogs.{extension}")
+    bot.load_extension(f"cogs.{extension}")
+    await ctx.send(f"Reloaded {extension}")
 
-@client.command()
+
+@bot.command()
 async def status(ctx):
     current_time = datetime.now().timestamp()
     time = current_time - startup_time
@@ -119,38 +156,34 @@ async def status(ctx):
     time = time.split(":")
     value += f"{time[0]} hours , {time[1]} minutes and {int(float(time[2]))} seconds"
     await ctx.reply(f"I have been online for `{value}`", mention_author=False)
-    
-@client.event
+
+
+@bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions, commands.errors.NotOwner)):
-        await ctx.message.add_reaction('<a:nochamp:1021040710142668870>')
+        await ctx.message.add_reaction("<a:nochamp:1021040710142668870>")
     elif isinstance(error, commands.errors.ChannelNotFound):
-        await ctx.reply('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(', mention_author=False)
+        await ctx.reply("Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(", mention_author=False)
     elif isinstance(error, commands.errors.CommandNotFound):
         pass
     elif isinstance(error, commands.errors.MissingRequiredArgument):
         pass
     else:
-        await ctx.reply(f'{type(error)}\n{error}', mention_author=False)
+        await ctx.reply(f"`{type(error)}\n{error}`", mention_author=False)
         raise error
 
 
-@client.event
-async def on_application_command_error(ctx, error):
+@bot.event
+async def on_application_command_error(interaction: discord.Interaction, error):
     if isinstance(error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions)):
-        await ctx.respond('<a:nochamp:1021040710142668870>', ephemeral=True)
+        await interaction.response.send_message("<a:nochamp:1021040710142668870>", ephemeral=True)
     elif isinstance(error, commands.errors.ChannelNotFound):
-        await ctx.respond('Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(')
+        await interaction.response.send_message("Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(")
     else:
-        await ctx.respond(f'{type(error)}\n{error}', ephemeral=True)
+        await interaction.response.send_message(f"`{type(error)}\n{error}`", ephemeral=True)
         raise error
 
-for cog in os.listdir('./cogs'):
-    if cog.endswith('.py'):
-        client.load_extension(f'cogs.{cog[:-3]}', store=False)
 
-client.load_extension('jishaku')
+token = os.environ["TOKEN"]
 
-token = os.environ['TOKEN']
-
-client.run(token)
+bot.run(token)

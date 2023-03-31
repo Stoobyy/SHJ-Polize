@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import io
 import pickle
 import discord
-from discord.commands import SlashCommandGroup
+from discord import app_commands
 from discord.ext import commands, tasks
 from discord.ui import View
 from pymongo import MongoClient
@@ -35,12 +35,11 @@ async def snipe_check(ctx):
 
 class DeleteView(View):
     def __init__(self, ctx):
-        super().__init__(timeout=180, disable_on_timeout=True)
+        super().__init__(timeout=180)
         self.ctx = ctx
 
     @discord.ui.button(label="Delete", style=discord.ButtonStyle.red, emoji="🗑️")
-    async def delete(self, button: discord.ui.Button, interaction: discord.Interaction):
-
+    async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
         s_m = False
         try:
             msg = deletemsg[str(interaction.channel.id)]
@@ -54,7 +53,7 @@ class DeleteView(View):
         if message:
             user = message.author.id
         else:
-            user = self.ctx.author.id
+            user = self.ctx.user.id
 
         if interaction.user.id == user or interaction.user.id in devs:
             await interaction.message.delete()
@@ -69,10 +68,17 @@ class DeleteView(View):
         if s_m == True:
             del msg["DontSnipe"]
 
+    async def on_timeout(self):
+        for button in self.children:
+            button.disabled = True
+        try:
+            await self.message.edit(view=self)
+        except AttributeError:
+            await self.ctx.edit_original_response(view=self)
 
 class Snipe(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     # temp fix hopefully
 
@@ -135,14 +141,15 @@ class Snipe(commands.Cog):
             else:
                 deletemsg[channel]["attachment"] = attachment.url
 
-    @commands.slash_command(name="snipe_whitelist", description="Whitelist a role or user to snipe messages")
+    @app_commands.command(name="snipe_whitelist", description="Whitelist a role or user to snipe messages (if left blank, shows the current whitelist)")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.is_owner())
-    async def snipe_whitelist(self, ctx: discord.ApplicationContext, role: discord.Role = None, user: discord.User = None):
-        if str(ctx.guild.id) not in snipedata:
-            snipedata[str(ctx.guild.id)] = {"roles": [], "users": []}
-            snipedb.insert_one({"_id": str(ctx.guild.id), "data": snipedata[str(ctx.guild.id)]})
+    @app_commands.describe(role="Role to whitelist", user="User to whitelist")
+    async def snipe_whitelist(self, interaction: discord.Interaction, role: discord.Role = None, user: discord.User = None):
+        if str(interaction.guild.id) not in snipedata:
+            snipedata[str(interaction.guild.id)] = {"roles": [], "users": []}
+            snipedb.insert_one({"_id": str(interaction.guild.id), "data": snipedata[str(interaction.guild.id)]})
         if role is None and user is None:
-            d = snipedata[str(ctx.guild.id)]
+            d = snipedata[str(interaction.guild.id)]
             embed = discord.Embed(title="Snipe Whitelist")
             r = "\n".join("<@&{}>".format(x) for x in d["roles"])
             u = "\n".join("<@{}>".format(x) for x in d["users"])
@@ -152,27 +159,27 @@ class Snipe(commands.Cog):
                 u = "None"
             embed.add_field(name="Roles", value=r)
             embed.add_field(name="Users", value=u)
-            await ctx.respond(embed=embed)
+            await interaction.response.send_message(embed=embed)
 
         if role is not None:
-            if role.id in snipedata[str(ctx.guild.id)]["roles"]:
-                snipedata[str(ctx.guild.id)]["roles"].remove(role.id)
-                snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
-                await ctx.respond(f"Removed role {role.mention} from whitelist", allowed_mentions=discord.AllowedMentions.none())
+            if role.id in snipedata[str(interaction.guild.id)]["roles"]:
+                snipedata[str(interaction.guild.id)]["roles"].remove(role.id)
+                snipedb.update_one({"_id": str(interaction.guild.id)}, {"$set": {"data": snipedata[str(interaction.guild.id)]}})
+                await interaction.response.send_message(f"Removed role {role.mention} from whitelist", allowed_mentions=discord.AllowedMentions.none())
                 return
-            snipedata[str(ctx.guild.id)]["roles"].append(role.id)
-            snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
-            await ctx.respond(f"Whitelisted role {role.mention}", allowed_mentions=discord.AllowedMentions.none())
+            snipedata[str(interaction.guild.id)]["roles"].append(role.id)
+            snipedb.update_one({"_id": str(interaction.guild.id)}, {"$set": {"data": snipedata[str(interaction.guild.id)]}})
+            await interaction.response.send_message(f"Whitelisted role {role.mention}", allowed_mentions=discord.AllowedMentions.none())
             return
         if user is not None:
-            if user.id in snipedata[str(ctx.guild.id)]["users"]:
-                snipedata[str(ctx.guild.id)]["users"].remove(user.id)
-                snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
-                await ctx.respond(f"Removed user {user.mention} from whitelist", allowed_mentions=discord.AllowedMentions.none())
+            if user.id in snipedata[str(interaction.guild.id)]["users"]:
+                snipedata[str(interaction.guild.id)]["users"].remove(user.id)
+                snipedb.update_one({"_id": str(interaction.guild.id)}, {"$set": {"data": snipedata[str(interaction.guild.id)]}})
+                await interaction.response.send_message(f"Removed user {user.mention} from whitelist", allowed_mentions=discord.AllowedMentions.none())
                 return
-            snipedata[str(ctx.guild.id)]["users"].append(user.id)
-            snipedb.update_one({"_id": str(ctx.guild.id)}, {"$set": {"data": snipedata[str(ctx.guild.id)]}})
-            await ctx.respond(f"Whitelisted user {user.mention}", allowed_mentions=discord.AllowedMentions.none())
+            snipedata[str(interaction.guild.id)]["users"].append(user.id)
+            snipedb.update_one({"_id": str(interaction.guild.id)}, {"$set": {"data": snipedata[str(interaction.guild.id)]}})
+            await interaction.response.send_message(f"Whitelisted user {user.mention}", allowed_mentions=discord.AllowedMentions.none())
             return
 
     @commands.command(aliases=["s"])
@@ -188,7 +195,7 @@ class Snipe(commands.Cog):
             content = deletemsg[channel_id]["content"]
         else:
             try:
-                c = await self.client.fetch_channel(channel_id)
+                c = await self.bot.fetch_channel(channel_id)
                 await ctx.reply("There is no deleted message in this channel", mention_author=False)
                 return
             except discord.errors.NotFound:
@@ -217,9 +224,9 @@ class Snipe(commands.Cog):
             img = deletemsg[channel_id]["img"]
             img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
             embed.set_image(url=f"attachment://{img.filename}")
-            await ctx.reply(embed=embed, file=img, view=view, mention_author=False)
+            view.message = await ctx.reply(embed=embed, file=img, view=view, mention_author=False)
             return
-        await ctx.reply(embed=embed, view=view, mention_author=False)
+        view.message = await ctx.reply(embed=embed, view=view, mention_author=False)
 
     @commands.command(aliases=["dms"])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
@@ -234,7 +241,7 @@ class Snipe(commands.Cog):
             content = deletemsg[channel_id]["content"]
         else:
             try:
-                c = await self.client.fetch_channel(channel_id)
+                c = await self.bot.fetch_channel(channel_id)
                 await ctx.reply("There is no deleted message in this channel", mention_author=False)
                 return
             except discord.errors.NotFound:
@@ -267,13 +274,12 @@ class Snipe(commands.Cog):
         await ctx.author.send(embed=embed)
         await ctx.message.add_reaction("👍")
 
-    @commands.slash_command(name="snipe")
+    @app_commands.command(name="snipe", description="shows deleted message in a channel")
+    @app_commands.describe(channel="channel to snipe from", ephemeral="whether to make the message hidden or not")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
-    @discord.option(name="channel", type=discord.TextChannel, required=False, default=None)
-    @discord.option(name="ephemeral", type=bool, required=False, default=False)
-    async def ssnipe(self, ctx: discord.ApplicationContext, channel: discord.TextChannel, ephemeral):
+    async def ssnipe(self, interaction: discord.Interaction, channel: discord.TextChannel = None, ephemeral: bool = False):
         if channel is None:
-            channel = ctx.channel
+            channel = interaction.channel
         channel_id = str(channel.id)
         if channel_id in deletemsg:
             author = deletemsg[channel_id]["author"]
@@ -282,14 +288,14 @@ class Snipe(commands.Cog):
             content = deletemsg[channel_id]["content"]
         else:
             try:
-                c = await self.client.fetch_channel(channel_id)
-                await ctx.respond("There is no deleted message in this channel", ephemeral=True)
+                c = await self.bot.fetch_channel(channel_id)
+                await interaction.response.send_message("There is no deleted message in this channel", ephemeral=True)
                 return
             except discord.NotFound:
-                await ctx.respond("This channel does not exist", ephemeral=True)
+                await interaction.response.send_message("This channel does not exist", ephemeral=True)
                 return
             except discord.Forbidden:
-                await ctx.respond("I do not have permission to view this channel", ephemeral=True)
+                await interaction.response.send_message("I do not have permission to view this channel", ephemeral=True)
                 return
 
         embed = discord.Embed(description=f"{content}", colour=1752220)
@@ -300,7 +306,7 @@ class Snipe(commands.Cog):
         if ephemeral:
             view = None
         else:
-            view = DeleteView(ctx)
+            view = DeleteView(interaction)
 
         if content.startswith("https://") and " " not in content:
             if content.endswith((".png", ".jpg", ".jpeg", ".gif")):
@@ -315,9 +321,9 @@ class Snipe(commands.Cog):
             img = deletemsg[channel_id]["img"]
             img = discord.File(io.BytesIO(img), deletemsg[channel_id]["filename"])
             embed.set_image(url=f"attachment://{img.filename}")
-            await ctx.respond(embed=embed, file=img, view=view, ephemeral=ephemeral)
+            await interaction.response.send_message(embed=embed, file=img, view=view, ephemeral=ephemeral)
             return
-        await ctx.respond(embed=embed, view=view, ephemeral=ephemeral)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=ephemeral)
 
     @commands.Cog.listener()
     async def on_message_edit(self, oldmsg, newmsg):
@@ -346,7 +352,7 @@ class Snipe(commands.Cog):
                 "time": timee,
             }
 
-    @commands.command(aliases=["es"])
+    @commands.command(aliases=["es", "editsnipe"])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
     async def esnipe(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
@@ -361,7 +367,7 @@ class Snipe(commands.Cog):
             timee = editmsg[channel_id]["time"]
         else:
             try:
-                c = await self.client.fetch_channel(channel_id)
+                c = await self.bot.fetch_channel(channel_id)
                 await ctx.reply("There is no edited message in this channel", mention_author=False)
                 return
             except discord.errors.NotFound:
@@ -378,7 +384,7 @@ class Snipe(commands.Cog):
         embed.set_author(name=f"{author}", icon_url=f"{authav}")
         embed.set_footer(text=f"Edited in {channel}")
         view = DeleteView(ctx)
-        await ctx.reply(embed=embed, view=view, mention_author=False)
+        view.message = await ctx.reply(embed=embed, view=view, mention_author=False)
 
     @commands.command(aliases=["dmes"])
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
@@ -395,7 +401,7 @@ class Snipe(commands.Cog):
             timee = editmsg[channel_id]["time"]
         else:
             try:
-                c = await self.client.fetch_channel(channel_id)
+                c = await self.bot.fetch_channel(channel_id)
                 await ctx.reply("There is no edited message in this channel", mention_author=False)
                 return
             except discord.errors.NotFound:
@@ -437,7 +443,7 @@ class Snipe(commands.Cog):
             except:
                 s_user = None
 
-            if message.author.id == self.client.user.id:
+            if message.author.id == self.bot.user.id:
                 if user.id == s_user or user.id in devs:
                     await message.delete()
                     if snipemsg != None:
@@ -451,7 +457,7 @@ class Snipe(commands.Cog):
     @commands.command(aliases=["d"])
     async def delete(self, ctx):
         message = await ctx.channel.fetch_message(ctx.message.reference.message_id)
-        if message.author.id == self.client.user.id:
+        if message.author.id == self.bot.user.id:
             try:
                 msg = deletemsg[str(ctx.channel.id)]
                 msg["DontSnipe"] = True
@@ -487,13 +493,12 @@ class Snipe(commands.Cog):
             except KeyError:
                 pass
 
-    @commands.slash_command()
+    @app_commands.command(name="editsnipe", description="shows the last edited message in a channel")
+    @app_commands.describe(channel="the channel to snipe from", ephemeral="whether to make the message hidden or not")
     @commands.check_any(commands.has_permissions(manage_messages=True), commands.check(snipe_check), commands.is_owner())
-    @discord.option(name="channel", type=discord.TextChannel, required=False, default=None)
-    @discord.option(name="ephemeral", type=bool, required=False, default=False)
-    async def editsnipe(self, ctx, channel: discord.TextChannel, ephemeral):
+    async def editsnipe(self, interaction: discord.Interaction, channel: discord.TextChannel = None, ephemeral: bool = False):
         if channel is None:
-            channel = ctx.channel
+            channel = interaction.channel
         channel_id = str(channel.id)
         if channel_id in editmsg:
             author = editmsg[channel_id]["author"]
@@ -504,19 +509,19 @@ class Snipe(commands.Cog):
             timee = editmsg[channel_id]["time"]
         else:
             try:
-                c = await self.client.fetch_channel(channel_id)
-                await ctx.respond("There is no edited message in this channel", ephemeral=True)
+                c = await self.bot.fetch_channel(channel_id)
+                await interaction.response.send_message("There is no edited message in this channel", ephemeral=True)
                 return
             except discord.errors.NotFound:
-                await ctx.respond("This channel does not exist", ephemeral=True)
+                await interaction.response.send_message("This channel does not exist", ephemeral=True)
                 return
             except discord.errors.Forbidden:
-                await ctx.respond("I do not have permission to view this channel", ephemeral=True)
+                await interaction.response.send_message("I do not have permission to view this channel", ephemeral=True)
                 return
         if ephemeral:
             view = None
         else:
-            view = DeleteView(ctx)
+            view = DeleteView(interaction)
 
         embed = discord.Embed(description=f"[Jump to message]({messageurl})", colour=1752220)
         embed.add_field(name="Original Message", value=f"{oldmsg}")
@@ -524,9 +529,9 @@ class Snipe(commands.Cog):
         embed.timestamp = timee
         embed.set_author(name=f"{author}", icon_url=f"{authav}")
         embed.set_footer(text=f"Edited in {channel}")
-        await ctx.respond(embed=embed, view=view, ephemeral=ephemeral)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=ephemeral)
 
 
-def setup(client):
-    client.add_cog(Snipe(client))
+async def setup(bot):
+    await bot.add_cog(Snipe(bot))
     print("Snipe cog loaded")
