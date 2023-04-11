@@ -5,4 +5,4 @@ psutil
 pillow
 jishaku
 git+https://github.com/top-gg/python-sdk/
-mojang
+mojang==0.2.0
