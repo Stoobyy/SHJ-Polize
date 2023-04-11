@@ -9,10 +9,8 @@ from mojang import MojangAPI
 class Mc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    mc = SlashCommandGroup(name="mmc", description="Minecraft commands")
 
-    @mc.command(name="skin", description="mnecraft skind")
-    @discord.option(name="username", type=str, description="Username", required=True)
+    @commands.slash_command()
     async def skin(self, ctx, username):
         id=ctx.author.id
         embed=discord.Embed()
