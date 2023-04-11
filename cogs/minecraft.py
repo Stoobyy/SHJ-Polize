@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from datetime import datetime, timedelta, timezone
+from discord.commands import SlashCommandGroup
 import asyncio
 import requests
 from mojang import MojangAPI
@@ -8,9 +9,11 @@ from mojang import MojangAPI
 class Mc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
-    @commands.command()
-    async def skin(ctx,username='.'):
+    mc = SlashCommandGroup(name="mmc", description="Minecraft commands")
+
+    @mc.command(name="skin", description="mnecraft skind")
+    @discord.option(name="username", type=str, description="Username", required=True)
+    async def skin(self, ctx, username):
         id=ctx.author.id
         embed=discord.Embed()
         embed.add_field(name='No Username Provided!',value='Please provide a username or register your account by running `>register {username} {SkyblockProfile}`\nIf you don\'t play Skyblock, you can set the SkyblockProfile to None.')
