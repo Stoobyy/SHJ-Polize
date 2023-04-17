@@ -11,6 +11,15 @@ from io import BytesIO
 import requests
 
 
+class CapeView(discord.ui.View):
+    @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary) 
+    async def button_callback(self, button, interaction, *args, **kwargs):
+        await interaction.edit_message(embed= args[1] if len(args) > 1 else args[0])
+    
+    @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary) 
+    async def button_callback(self, button, interaction, *args, **kwargs):
+        await interaction.edit_message(embed= args[0])
+
 class Mc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -59,9 +68,8 @@ class Mc(commands.Cog):
             embed.add_field(name="IP", value=f"{data['ip']}:{data['port']}", inline=True)
             await ctx.reply(embed=embed, mention_author=False)
         else:
-            embed = discord.Embed(title=f"{name}'s status", description=":green_circle: Server is online", color=3066993)
+            embed = discord.Embed(title=f"{name}'s status", description=f":green_circle: Server is online | {data['ip']}:{data['port']}", color=3066993)
             embed.set_thumbnail(url=f"https://api.mcsrvstat.us/icon/{name}")
-            embed.add_field(name="IP", value=f"{data['ip']}:{data['port']}", inline=True)
             embed.add_field(name="MOTD", value="\n".join(data["motd"]["clean"]), inline=True)
             embed.add_field(name="Version", value=data["version"], inline=True)
             if "software" in data:
@@ -147,8 +155,7 @@ class Mc(commands.Cog):
         if len(embeds) == 0:
             await ctx.send(f"{username} has no capes.")
             return
-        await ctx.reply(embeds=embeds, files=files, mention_author=False)
-
+        embed = discord.Embed(title=f"{name}'s capes", description=f"{'✅' if of_cape in files else '❌'} Optifine\n{'✅' if mc_cape in files  else '❌'} Minecraft", colour=15105570, view = CapeView(ctx, embeds, files))
 
 def setup(bot):
     bot.add_cog(Mc(bot))
