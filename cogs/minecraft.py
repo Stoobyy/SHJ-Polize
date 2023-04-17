@@ -13,11 +13,11 @@ import requests
 
 class CapeView(discord.ui.View):
     @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary) 
-    async def button_callback(self, button, interaction, *args, **kwargs):
+    async def button_callback(self, button, interaction, *args):
         await interaction.edit_message(embed= args[1] if len(args) > 1 else args[0])
     
     @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary) 
-    async def button_callback(self, button, interaction, *args, **kwargs):
+    async def button_callback(self, button, interaction, *args):
         await interaction.edit_message(embed= args[0])
 
 class Mc(commands.Cog):
@@ -155,7 +155,8 @@ class Mc(commands.Cog):
         if len(embeds) == 0:
             await ctx.send(f"{username} has no capes.")
             return
-        embed = discord.Embed(title=f"{name}'s capes", description=f"{'✅' if of_cape in files else '❌'} Optifine\n{'✅' if mc_cape in files  else '❌'} Minecraft", colour=15105570, view = CapeView(ctx, embeds, files))
+        embed = discord.Embed(title=f"{name}'s capes", description=f"{'✅' if of_cape in files else '❌'} Optifine\n{'✅' if mc_cape in files  else '❌'} Minecraft", colour=15105570, view = CapeView(files))
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Mc(bot))
