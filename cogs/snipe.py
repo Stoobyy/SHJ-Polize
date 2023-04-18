@@ -1,5 +1,4 @@
 import os
-from datetime import datetime, timedelta, timezone
 
 import io
 import pickle
@@ -15,8 +14,6 @@ snipedb = db["snipe"]
 
 deletemsg = {}
 editmsg = {}
-
-tzone = timezone(timedelta(hours=4))
 
 devs = (499112914578309120, 700195735689494558)
 snipedata = {}
@@ -118,7 +115,7 @@ class Snipe(commands.Cog):
         author = str(message.author)
         message_author_avatar = message.author.display_avatar.url
         channel = str(message.channel.id)
-        timee = datetime.now(tzone)
+        timee = message.created_at
 
         if channel in deletemsg:
             if "DontSnipe" in deletemsg[channel]:
@@ -327,7 +324,7 @@ class Snipe(commands.Cog):
         channel = str(oldmsg.channel.id)
         authav = oldmsg.author.display_avatar.url
         msgurl = oldmsg.jump_url
-        timee = datetime.now(tzone)
+        timee = newmsg.created_at
 
         if oldmsg.author.bot:
             return
