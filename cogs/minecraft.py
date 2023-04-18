@@ -21,7 +21,7 @@ class CapeDropdown(discord.ui.Select):
         super().__init__(placeholder="Select a cape", options=options, min_values=1, max_values=1)
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.edit_message(embed=self.embeds[self.values[0]], file=self.files[self.values[0]])
+        await interaction.response.edit_message(embed=self.embeds[self.values[0]], file=self.files[self.values[0]], view=None)
 
 class CapeView(discord.ui.View):
     def __init__(self, embeds, files):
