@@ -68,8 +68,9 @@ class Moderation(commands.Cog):
 
         You can also ban users who are not in your server by passing in their ID as the argument.
         """
-        await ctx.guild.ban(discord.Object(id=user), reason=reason)
-        await ctx.send('banned' + discord.Object(id=user).mention)
+        user = await self.bot.fetch_user(user)
+        await ctx.guild.ban(user, reason=reason)
+        await ctx.send('banned' + user.mention)
 
     @commands.command()
     @commands.guild_only()
