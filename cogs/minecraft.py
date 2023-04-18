@@ -31,8 +31,8 @@ class Mc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.slash_command()
-    async def skin(self, ctx, username):
+    @commands.slash_command(name="skin", description="Get a player's skin")
+    async def _skin(self, ctx, username):
         MojangAPI = API()
         uuid = MojangAPI.get_uuid(username)
         name = MojangAPI.get_username(uuid)
@@ -46,6 +46,21 @@ class Mc(commands.Cog):
         await ctx.respond(embed=embed)
 
     @commands.command()
+    async def skin(self, ctx, username):
+        MojangAPI = API()
+        uuid = MojangAPI.get_uuid(username)
+        name = MojangAPI.get_username(uuid)
+        if name == None:
+            await ctx.reply(f"<:Mike:882149622561243137> {username} is not a valid username.")
+            return
+        embed = discord.Embed(title=f"{name}'s skin", description=f"[Click here for skin](https://crafatar.com/skins/{uuid})", colour=15105570)
+        embed.set_image(url=f"https://visage.surgeplay.com/full/{uuid}?width=177&height=288")
+        embed.set_thumbnail(url=f"https://visage.surgeplay.com//face/{uuid}")
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=f"{ctx.author.avatar}")
+        await ctx.reply(embed=embed)
+
+
+    @commands.command(alias=["ip"])
     async def server(self, ctx, ip=None):
         if ip is None:
             if ctx.guild.id == 723259592800206940:
@@ -177,6 +192,77 @@ class Mc(commands.Cog):
             colour=15105570,
         )
         await ctx.send(embed=embed, view=CapeView(embeds, files))
+
+    @commands.slash_command(name="cape", description="Get a player's cape")
+    async def _cape(self, ctx: discord.ApplicationContext, username: str):
+        await ctx.defer()
+        MojangAPI = API()
+        uuid = MojangAPI.get_uuid(username)
+        name = MojangAPI.get_username(uuid)
+        if name is None:
+            await ctx.followup.send("Invalid username", mention_author=False)
+            return
+
+        response = requests.get(f"https://api.capes.dev/load/{name}")
+        raw = response.json()
+
+        embeds = {}
+        files = {}
+        capes = 0
+        minecraft = raw["minecraft"]
+        optifine = raw["optifine"]
+
+        if minecraft["exists"] == True:
+            capeurl = minecraft["frontImageUrl"]
+            response = requests.get(capeurl)
+            cape = Image.open(BytesIO(response.content))
+            cape = cape.resize((636, 1024))
+
+            with BytesIO() as capeimg:
+                cape.save(capeimg, format="png")
+                capeimg.seek(0)
+                mc_cape = discord.File(capeimg, filename="cape.png")
+
+            embed = discord.Embed(title=f"{name}'s Mojang cape", description=f"[Click here for cape]({capeurl})", colour=15105570)
+            embed.set_image(url=f"attachment://cape.png")
+            embed.set_thumbnail(url=f"https://crafatar.com/avatars/{uuid}?overlay")
+            embeds["minecraft"] = embed
+            files["minecraft"] = mc_cape
+            capes += 1
+        else:
+            embeds["minecraft"] = None
+            files["minecraft"] = None
+
+        if optifine["exists"] == True:
+            capeurl = optifine["frontImageUrl"]
+            response = requests.get(capeurl)
+            cape = Image.open(BytesIO(response.content))
+            cape = cape.resize((636, 1024))
+
+            with BytesIO() as capeimg:
+                cape.save(capeimg, format="png")
+                capeimg.seek(0)
+                of_cape = discord.File(capeimg, filename="optifine.png")
+
+            embed = discord.Embed(title=f"{name}'s Optifine cape", description=f"[Click here for cape]({capeurl})", colour=15105570)
+            embed.set_image(url=f"attachment://optifine.png")
+            embed.set_thumbnail(url=f"https://crafatar.com/avatars/{uuid}?overlay")
+            embeds["optifine"] = embed
+            files["optifine"] = of_cape
+            capes += 1
+        else:
+            embeds["optifine"] = None
+            files["optifine"] = None
+
+        if capes == 0:
+            await ctx.followup.send(f"{username} has no capes.")
+            return
+        embed = discord.Embed(
+            title=f"{name}'s capes",
+            description=f"{'✅' if 'optifine' in files else '❌'} Optifine\n{'✅' if 'minecraft' in files  else '❌'} Minecraft",
+            colour=15105570,
+        )
+        await ctx.followup.send(embed=embed, view=CapeView(embeds, files))
 
 
 def setup(bot):
