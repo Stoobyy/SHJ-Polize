@@ -13,29 +13,33 @@ import requests
 
 class CapeView(discord.ui.View):
     def __init__(self, embeds, files):
-        super().__init__(timeout=180, disable_on_timeout=True)
         self.embeds = embeds
         self.files = files
         print(self.children)
         for i in self.children:
             print(i)
+            if i.custom_id == "minecraft":
+                if self.embeds["minecraft"] is None:
+                    i.disabled = True
+            elif i.custom_id == "optifine":
+                if self.embeds["optifine"] is None:
+                    i.disabled = True
+        
+        super().__init__(timeout=180, disable_on_timeout=True)
 
-        if embeds["minecraft"] is None:
-            self.children[0].disabled = True
-        if embeds["optifine"] is None:
-            self.children[1].disabled = True
 
-    @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary)
+
+    @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary, custom_id="minecraft")
     async def button_callback(self, button, interaction: discord.Interaction):
         button.style = discord.ButtonStyle.success
         self.children[1].style = discord.ButtonStyle.primary
-        await interaction.response.edit_message(embed=self.embeds[0], view=self, file=self.files["minecraft"] or discord.MISSING)
+        await interaction.response.edit_message(embed=self.embeds['minecraft'], view=self, file=self.files["minecraft"] or discord.MISSING)
 
-    @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary, custom_id="optifine")
     async def button_callback(self, button, interaction):
         button.style = discord.ButtonStyle.success
         self.children[0].style = discord.ButtonStyle.primary
-        await interaction.response.edit_message(embed=self.embeds[1], view=self, file=self.files["optifine"] or discord.MISSING)
+        await interaction.response.edit_message(embed=self.embeds['minecraft'], view=self, file=self.files["optifine"] or discord.MISSING)
 
 
 class Mc(commands.Cog):
@@ -181,7 +185,7 @@ class Mc(commands.Cog):
             return
         embed = discord.Embed(
             title=f"{name}'s capes",
-            description=f"{'✅' if of_cape in files else '❌'} Optifine\n{'✅' if mc_cape in files  else '❌'} Minecraft",
+            description=f"{'✅' if 'optifine' in files else '❌'} Optifine\n{'✅' if 'minecraft' in files  else '❌'} Minecraft",
             colour=15105570,
         )
         await ctx.send(embed=embed, view=CapeView(embeds, files))
