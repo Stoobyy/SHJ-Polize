@@ -12,14 +12,28 @@ import requests
 
 
 class CapeView(discord.ui.View):
-    @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary) 
-    async def button_callback(self, button, interaction, *args):
-        await interaction.edit_message(embed= args[1] if len(args) > 1 else args[0])
-    
-    @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary) 
-    async def button_callback(self, button, interaction, *args):
-        await interaction.edit_message(embed= args[0])
+    def __init__(self, embeds):
+        super().__init__(timeout=180,disable_on_timeout=True)
+        self.embeds = embeds
+        if embeds['minecraft'] is None:
+            self.children[0].disabled = True
+        if embeds['optifine'] is None:
+            self.children[1].disabled = True
 
+
+    @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary) 
+    async def button_callback(self, button, interaction):
+        button.style = discord.ButtonStyle.success
+        self.children[1].style = discord.ButtonStyle.primary
+        await interaction.edit_message(embed= self.embeds[0], view=self)
+
+
+    @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary) 
+    async def button_callback(self, button, interaction):
+        button.style = discord.ButtonStyle.success
+        self.children[0].style = discord.ButtonStyle.primary
+        await interaction.edit_message(embed= self.embeds[1], view=self)
+    
 class Mc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -113,7 +127,7 @@ class Mc(commands.Cog):
         response = requests.get(f"https://api.capes.dev/load/{name}")
         raw = response.json()
 
-        embeds = []
+        embeds = {}
         files = []
         minecraft = raw["minecraft"]
         optifine = raw["optifine"]
@@ -132,8 +146,10 @@ class Mc(commands.Cog):
             embed = discord.Embed(title=f"{name}'s Mojang cape", description=f"[Click here for cape]({capeurl})", colour=15105570)
             embed.set_image(url=f"attachment://cape.png")
             embed.set_thumbnail(url=f"https://crafatar.com/avatars/{uuid}?overlay")
-            embeds.append(embed)
+            embeds['minecraft']=embed
             files.append(mc_cape)
+        else:
+            embeds["minecraft"] = None
 
         if optifine["exists"] == True:
             capeurl = optifine["frontImageUrl"]
@@ -149,14 +165,16 @@ class Mc(commands.Cog):
             embed = discord.Embed(title=f"{name}'s Optifine cape", description=f"[Click here for cape]({capeurl})", colour=15105570)
             embed.set_image(url=f"attachment://optifine.png")
             embed.set_thumbnail(url=f"https://crafatar.com/avatars/{uuid}?overlay")
-            embeds.append(embed)
+            embeds['optifine']=embed
             files.append(of_cape)
+        else:
+            embeds["optifine"] = None
 
         if len(embeds) == 0:
             await ctx.send(f"{username} has no capes.")
             return
-        embed = discord.Embed(title=f"{name}'s capes", description=f"{'✅' if of_cape in files else '❌'} Optifine\n{'✅' if mc_cape in files  else '❌'} Minecraft", colour=15105570, view = CapeView(files))
-        await ctx.send(embed=embed)
+        embed = discord.Embed(title=f"{name}'s capes", description=f"{'✅' if of_cape in files else '❌'} Optifine\n{'✅' if mc_cape in files  else '❌'} Minecraft", colour=15105570)
+        await ctx.send(embed=embed, view = CapeView(embeds), files=files)
 
 def setup(bot):
     bot.add_cog(Mc(bot))
