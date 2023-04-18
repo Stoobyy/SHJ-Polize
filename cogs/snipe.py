@@ -324,7 +324,7 @@ class Snipe(commands.Cog):
         channel = str(oldmsg.channel.id)
         authav = oldmsg.author.display_avatar.url
         msgurl = oldmsg.jump_url
-        timee = newmsg.created_at
+        timee = newmsg.edited_at
 
         if oldmsg.author.bot:
             return
