@@ -10,32 +10,22 @@ from PIL import Image, ImageFilter
 from io import BytesIO
 import requests
 
-
-class CapeView(discord.ui.View):
+class CapeDropdown(discord.ui.Select):
     def __init__(self, embeds, files):
         self.embeds = embeds
         self.files = files
+        options = []
+        for i in embeds:
+            if i is not None:
+                options.append(discord.SelectOption(label=i.title, description=i.description))
+        super().__init__(placeholder="Select a cape", options=options, min_values=1, max_values=1)
 
-        mc = discord.ui.Button(label="Minecraft Cape", style=discord.ButtonStyle.primary, custom_id="minecraft")
-        mc.callback = self.minecraft_callback
-        optifine = discord.ui.Button(label="Optifine Cape", style=discord.ButtonStyle.primary, custom_id="optifine")
-        optifine.callback = self.optifine_callback
-        if self.embeds["minecraft"] is None:
-            mc.disabled = True
-        if self.embeds["optifine"] is None:
-            optifine.disabled = True
-        super().__init__(mc,optifine,timeout=180, disable_on_timeout=True)
-        
-    async def minecraft_callback(self, button, interaction: discord.Interaction):
-        button.style = discord.ButtonStyle.success
-        self.children[1].style = discord.ButtonStyle.primary
-        await interaction.response.edit_message(embed=self.embeds['minecraft'], view=self, file=self.files["minecraft"] or discord.MISSING)
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.edit_message(embed=self.embeds[self.values[0].lower], file=self.files[self.values[0].lower])
 
-    async def optifine_callback(self, button, interaction):
-        button.style = discord.ButtonStyle.success
-        self.children[0].style = discord.ButtonStyle.primary
-        await interaction.response.edit_message(embed=self.embeds['minecraft'], view=self, file=self.files["optifine"] or discord.MISSING)
-
+class CapeView(discord.ui.View):
+    def __init__(self, embeds, files):
+        super().__init__(CapeDropdown(embeds, files),timeout=180, disable_on_timeout=True)
 
 class Mc(commands.Cog):
     def __init__(self, bot):
@@ -132,6 +122,7 @@ class Mc(commands.Cog):
 
         embeds = {}
         files = {}
+        capes = 0
         minecraft = raw["minecraft"]
         optifine = raw["optifine"]
 
@@ -151,6 +142,7 @@ class Mc(commands.Cog):
             embed.set_thumbnail(url=f"https://crafatar.com/avatars/{uuid}?overlay")
             embeds["minecraft"] = embed
             files["minecraft"] = mc_cape
+            capes += 1
         else:
             embeds["minecraft"] = None
             files["minecraft"] = None
@@ -171,11 +163,12 @@ class Mc(commands.Cog):
             embed.set_thumbnail(url=f"https://crafatar.com/avatars/{uuid}?overlay")
             embeds["optifine"] = embed
             files["optifine"] = of_cape
+            capes += 1
         else:
             embeds["optifine"] = None
             files["optifine"] = None
 
-        if len(embeds) == 0:
+        if capes == 0:
             await ctx.send(f"{username} has no capes.")
             return
         embed = discord.Embed(
