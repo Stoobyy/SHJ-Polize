@@ -17,7 +17,7 @@ class CapeDropdown(discord.ui.Select):
         options = []
         for i in embeds:
             if i is not None:
-                options.append(discord.SelectOption(label=i.title, description=i.description))
+                options.append(discord.SelectOption(label=i.title))
         super().__init__(placeholder="Select a cape", options=options, min_values=1, max_values=1)
 
     async def callback(self, interaction: discord.Interaction):
