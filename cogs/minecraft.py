@@ -15,28 +15,23 @@ class CapeView(discord.ui.View):
     def __init__(self, embeds, files):
         self.embeds = embeds
         self.files = files
-        print(self.children)
-        for i in self.children:
-            print(i)
-            if i.custom_id == "minecraft":
-                if self.embeds["minecraft"] is None:
-                    i.disabled = True
-            elif i.custom_id == "optifine":
-                if self.embeds["optifine"] is None:
-                    i.disabled = True
+
+        mc = discord.ui.Button(label="Minecraft Cape", style=discord.ButtonStyle.primary, custom_id="minecraft")
+        mc.callback = self.minecraft_callback
+        optifine = discord.ui.Button(label="Optifine Cape", style=discord.ButtonStyle.primary, custom_id="optifine")
+        optifine.callback = self.optifine_callback
+        if self.embeds["minecraft"] is None:
+            mc.disabled = True
+        if self.embeds["optifine"] is None:
+            optifine.disabled = True
+        super().__init__(mc,optifine,timeout=180, disable_on_timeout=True)
         
-        super().__init__(timeout=180, disable_on_timeout=True)
-
-
-
-    @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary, custom_id="minecraft")
-    async def button_callback(self, button, interaction: discord.Interaction):
+    async def minecraft_callback(self, button, interaction: discord.Interaction):
         button.style = discord.ButtonStyle.success
         self.children[1].style = discord.ButtonStyle.primary
         await interaction.response.edit_message(embed=self.embeds['minecraft'], view=self, file=self.files["minecraft"] or discord.MISSING)
 
-    @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary, custom_id="optifine")
-    async def button_callback(self, button, interaction):
+    async def optifine_callback(self, button, interaction):
         button.style = discord.ButtonStyle.success
         self.children[0].style = discord.ButtonStyle.primary
         await interaction.response.edit_message(embed=self.embeds['minecraft'], view=self, file=self.files["optifine"] or discord.MISSING)
