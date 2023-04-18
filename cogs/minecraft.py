@@ -16,12 +16,12 @@ class CapeDropdown(discord.ui.Select):
         self.files = files
         options = []
         for i in embeds:
-            if i is not None:
-                options.append(discord.SelectOption(label=i.title))
+            if embeds[i] is not None:
+                options.append(discord.SelectOption(label=i))
         super().__init__(placeholder="Select a cape", options=options, min_values=1, max_values=1)
 
     async def callback(self, interaction: discord.Interaction):
-        await interaction.response.edit_message(embed=self.embeds[self.values[0].lower], file=self.files[self.values[0].lower])
+        await interaction.response.edit_message(embed=self.embeds[self.values[0]], file=self.files[self.values[0]])
 
 class CapeView(discord.ui.View):
     def __init__(self, embeds, files):
