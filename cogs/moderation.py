@@ -75,7 +75,7 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.bot_has_permissions(ban_members=True)
     @commands.check_any(commands.has_permissions(ban_members=True), commands.is_owner())
-    async def unban(self, ctx, user: discord.Snowflake, *, reason: str = None):
+    async def unban(self, ctx, user: int, *, reason: str = None):
         """
         Unban a user.
         """
