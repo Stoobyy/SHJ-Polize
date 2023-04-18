@@ -12,28 +12,32 @@ import requests
 
 
 class CapeView(discord.ui.View):
-    def __init__(self, embeds):
-        super().__init__(timeout=180,disable_on_timeout=True)
+    def __init__(self, embeds, files):
+        super().__init__(timeout=180, disable_on_timeout=True)
         self.embeds = embeds
-        if embeds['minecraft'] is None:
+        self.files = files
+        print(self.children)
+        for i in self.children:
+            print(i)
+
+        if embeds["minecraft"] is None:
             self.children[0].disabled = True
-        if embeds['optifine'] is None:
+        if embeds["optifine"] is None:
             self.children[1].disabled = True
 
-
-    @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary) 
-    async def button_callback(self, button, interaction):
+    @discord.ui.button(label="Minecraft Cape", style=discord.ButtonStyle.primary)
+    async def button_callback(self, button, interaction: discord.Interaction):
         button.style = discord.ButtonStyle.success
         self.children[1].style = discord.ButtonStyle.primary
-        await interaction.edit_message(embed= self.embeds[0], view=self)
+        await interaction.response.edit_message(embed=self.embeds[0], view=self, file=self.files["minecraft"] or discord.MISSING)
 
-
-    @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary) 
+    @discord.ui.button(label="Optifine Cape", style=discord.ButtonStyle.primary)
     async def button_callback(self, button, interaction):
         button.style = discord.ButtonStyle.success
         self.children[0].style = discord.ButtonStyle.primary
-        await interaction.edit_message(embed= self.embeds[1], view=self)
-    
+        await interaction.response.edit_message(embed=self.embeds[1], view=self, file=self.files["optifine"] or discord.MISSING)
+
+
 class Mc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -128,7 +132,7 @@ class Mc(commands.Cog):
         raw = response.json()
 
         embeds = {}
-        files = []
+        files = {}
         minecraft = raw["minecraft"]
         optifine = raw["optifine"]
 
@@ -146,10 +150,11 @@ class Mc(commands.Cog):
             embed = discord.Embed(title=f"{name}'s Mojang cape", description=f"[Click here for cape]({capeurl})", colour=15105570)
             embed.set_image(url=f"attachment://cape.png")
             embed.set_thumbnail(url=f"https://crafatar.com/avatars/{uuid}?overlay")
-            embeds['minecraft']=embed
-            files.append(mc_cape)
+            embeds["minecraft"] = embed
+            files["minecraft"] = mc_cape
         else:
             embeds["minecraft"] = None
+            files["minecraft"] = None
 
         if optifine["exists"] == True:
             capeurl = optifine["frontImageUrl"]
@@ -165,16 +170,22 @@ class Mc(commands.Cog):
             embed = discord.Embed(title=f"{name}'s Optifine cape", description=f"[Click here for cape]({capeurl})", colour=15105570)
             embed.set_image(url=f"attachment://optifine.png")
             embed.set_thumbnail(url=f"https://crafatar.com/avatars/{uuid}?overlay")
-            embeds['optifine']=embed
-            files.append(of_cape)
+            embeds["optifine"] = embed
+            files["optifine"] = of_cape
         else:
             embeds["optifine"] = None
+            files["optifine"] = None
 
         if len(embeds) == 0:
             await ctx.send(f"{username} has no capes.")
             return
-        embed = discord.Embed(title=f"{name}'s capes", description=f"{'✅' if of_cape in files else '❌'} Optifine\n{'✅' if mc_cape in files  else '❌'} Minecraft", colour=15105570)
-        await ctx.send(embed=embed, view = CapeView(embeds), files=files)
+        embed = discord.Embed(
+            title=f"{name}'s capes",
+            description=f"{'✅' if of_cape in files else '❌'} Optifine\n{'✅' if mc_cape in files  else '❌'} Minecraft",
+            colour=15105570,
+        )
+        await ctx.send(embed=embed, view=CapeView(embeds, files))
+
 
 def setup(bot):
     bot.add_cog(Mc(bot))
