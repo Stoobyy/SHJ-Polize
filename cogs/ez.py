@@ -56,9 +56,12 @@ bl_list = {}
 class Ez(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        data = ezdb.find({})
+        for i in data:
+            bl_list[i["_id"]] = i
 
     @commands.Cog.listener("on_message")
-    async def ez_webhook(self, message):
+    async def ez_webhook(self, message: discord.Message):
         if message.author.bot or not message.guild:
             return
 
@@ -66,20 +69,7 @@ class Ez(commands.Cog):
         if guildid in bl_list:
             blacklist = bl_list[guildid]
         else:
-            blacklist = ezdb.find_one({"_id": guildid})
-            if blacklist is None:
-                ezdb.insert_one(
-                    {
-                        "_id": guildid,
-                        "channel_blacklist": [],
-                        "user_blacklist": [],
-                        "serverwide_blacklist": True,
-                        "server_deleteafter": 0,
-                        "channel_deleteafter": {},
-                    }
-                )
-                blacklist = ezdb.find_one({"_id": guildid})
-            bl_list[guildid] = blacklist
+            return
 
         if blacklist["serverwide_blacklist"] is True:
             return
@@ -87,11 +77,11 @@ class Ez(commands.Cog):
             return
 
         if "ez" in message.content.lower().split():
-            hooks = await message.channel.webhooks()
-            hook = discord.utils.get(hooks, name="ezz")
-            if hook is None:
-                hook = await message.channel.create_webhook(name="ezz", avatar=None, reason=None)
             try:
+                hooks = await message.channel.webhooks()
+                hook = discord.utils.get(hooks, name="ezz")
+                if hook is None:
+                    hook = await message.channel.create_webhook(name="ezz", avatar=None, reason=None)
                 await message.delete()
             except discord.Forbidden:
                 return
@@ -130,7 +120,7 @@ class Ez(commands.Cog):
                         "_id": guildid,
                         "channel_blacklist": [],
                         "user_blacklist": [],
-                        "serverwide_blacklist": False,
+                        "serverwide_blacklist": True,
                         "server_deleteafter": 0,
                         "channel_deleteafter": {},
                     }
@@ -180,7 +170,7 @@ class Ez(commands.Cog):
                         "_id": guildid,
                         "channel_blacklist": [],
                         "user_blacklist": [],
-                        "serverwide_blacklist": False,
+                        "serverwide_blacklist": True,
                         "server_deleteafter": 0,
                         "channel_deleteafter": {},
                     }
@@ -231,7 +221,7 @@ class Ez(commands.Cog):
                         "_id": guildid,
                         "channel_blacklist": [],
                         "user_blacklist": [],
-                        "serverwide_blacklist": False,
+                        "serverwide_blacklist": True,
                         "server_deleteafter": 0,
                         "channel_deleteafter": {},
                     }
@@ -275,7 +265,7 @@ class Ez(commands.Cog):
                         "_id": guildid,
                         "channel_blacklist": [],
                         "user_blacklist": [],
-                        "serverwide_blacklist": False,
+                        "serverwide_blacklist": True,
                         "server_deleteafter": 0,
                         "channel_deleteafter": {},
                     }
@@ -325,7 +315,7 @@ class Ez(commands.Cog):
                         "_id": guildid,
                         "channel_blacklist": [],
                         "user_blacklist": [],
-                        "serverwide_blacklist": False,
+                        "serverwide_blacklist": True,
                         "server_deleteafter": 0,
                         "channel_deleteafter": {},
                     }

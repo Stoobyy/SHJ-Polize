@@ -20,6 +20,9 @@ hllist = {}
 class Highlight(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        data = highlightdb.find()
+        for i in data:
+            hllist[i["_id"]] = i["hl"]
 
     @commands.Cog.listener("on_message")
     async def hl_check(self, message):
@@ -36,42 +39,32 @@ class Highlight(commands.Cog):
         if guildid in hllist:
             guildhl = hllist[guildid]
         else:
-            ghl = highlightdb.find_one({"_id": guildid})
-            if ghl is None:
-                highlightdb.insert_one({"_id": guildid, "hl": {}})
-                ghl = highlightdb.find_one({"_id": guildid})
-            guildhl = ghl["hl"]
-            hllist[guildid] = guildhl
-        
+            return
 
 
         for user in guildhl:
-            try:
-                for msg in guildhl[user]:
-                    if msg.upper() in message.content.upper().split():
-                        message1 = []
-                        async for i in message.channel.history(limit=5):
-                            timee = i.created_at
-                            message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
-                        message1.reverse()
-                        embed = discord.Embed(
-                            title=f"**{msg}**",
-                            description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})',
-                            color=1752220,
-                        )
-                        embed.set_footer(text=f"Message ID: {message.id} | Author ID: {message.author.id}")
-                        member = message.guild.get_member(int(str(user)))
-                        timee = datetime.now(tzone).timestamp()
-                        lastt = last[guildid][user] if user in last[guildid] else 0
-                        if lastt == 0 or timee - lastt > 300:
-                            try:
-                                await member.send(f'In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word "{msg}"', embed=embed)
-                            except discord.Forbidden:
-                                pass
-            except Exception as e:
-                print(user)
-                print(guildhl[user])
-                raise e
+            for msg in guildhl[user]:
+                if msg.upper() in message.content.upper().split():
+                    message1 = []
+                    async for i in message.channel.history(limit=5):
+                        timee = i.created_at
+                        message1.append(f'**[{timee.strftime("%H:%M:%S")}] {i.author.name}**: {i.content}\n')
+                    message1.reverse()
+                    embed = discord.Embed(
+                        title=f"**{msg}**",
+                        description=f'{"".join(message1)}\n**Source Message**\n[Jump to message]({message.jump_url})',
+                        color=1752220,
+                    )
+                    embed.set_footer(text=f"Message ID: {message.id} | Author ID: {message.author.id}")
+                    member = message.guild.get_member(int(str(user)))
+                    timee = datetime.now(tzone).timestamp()
+                    lastt = last[guildid][user] if user in last[guildid] else 0
+                    if lastt == 0 or timee - lastt > 300:
+                        try:
+                            await member.send(f'In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word "{msg}"', embed=embed)
+                        except discord.Forbidden:
+                            pass
+
                         
     hl = SlashCommandGroup(name="highlight", description="Highlight commands")
 
