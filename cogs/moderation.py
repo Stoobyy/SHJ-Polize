@@ -56,8 +56,10 @@ class Moderation(commands.Cog):
         Kick a member.
         """
         await member.kick(reason=reason)
-        embed = discord.Embed(title="Kicked", description=f"{member.mention} has been kicked from {ctx.guild.name}", color=15548997)
+        embed = discord.Embed(title="Kicked", description=f"{member.mention} has been kicked from for `{reason}`", color=15548997)
+        embed.timestamp = datetime.now()
         await ctx.send(embed=embed)
+        await ctx.message.delete()
 
     @commands.command()
     @commands.guild_only()
@@ -71,8 +73,10 @@ class Moderation(commands.Cog):
         """
         user = await self.bot.fetch_user(user)
         await ctx.guild.ban(user, reason=reason)
-        embed = discord.Embed(title="Banned", description=f"{user.mention} has been banned from {ctx.guild.name}", color=15548997)
+        embed = discord.Embed(title="Banned", description=f"{user.mention} has been banned for `{reason}`", color=15548997)
+        embed.timestamp = datetime.now()
         await ctx.send(embed=embed)
+        await ctx.message.delete()
 
 
     @commands.command()
@@ -85,8 +89,10 @@ class Moderation(commands.Cog):
         """
         user = await self.bot.fetch_user(user)
         await ctx.guild.unban(user, reason=reason)
-        embed = discord.Embed(title="Unbanned", description=f"{user.mention} has been unbanned from {ctx.guild.name}", color=2067276)
+        embed = discord.Embed(title="Unbanned", description=f"{user.mention} has been unbanned", color=2067276)
+        embed.timestamp = datetime.now()
         await ctx.send(embed=embed)
+        await ctx.message.delete()
 
 
 def setup(bot):
