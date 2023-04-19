@@ -86,7 +86,7 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.bot_has_permissions(kick_members=True)
     @commands.check_any(commands.has_permissions(kick_members=True), commands.is_owner())
-    async def kick(self, ctx, member: HierarchyMember, *, reason: str = 'No reason provided'):
+    async def _kick(self, ctx, member: HierarchyMember, *, reason: str = 'No reason provided'):
         await member.kick(reason=reason)
         embed = discord.Embed(title="Mod Action", description=f"{member.mention} has been kicked for `{reason}`", color=15548997)
         embed.timestamp = datetime.now()
@@ -98,7 +98,7 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.bot_has_permissions(ban_members=True)
     @commands.check_any(commands.has_permissions(ban_members=True), commands.is_owner())
-    async def ban(self, ctx, user: HackMember, *, reason: str = 'No reason provided'):
+    async def _ban(self, ctx, user: HackMember, *, reason: str = 'No reason provided'):
         user = await self.bot.fetch_user(user)
         await ctx.guild.ban(user, reason=reason)
         embed = discord.Embed(title="Mod Action", description=f"{user.mention} has been banned for `{reason}`", color=15548997)
@@ -112,7 +112,7 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.bot_has_permissions(ban_members=True)
     @commands.check_any(commands.has_permissions(ban_members=True), commands.is_owner())
-    async def unban(self, ctx, user: str, *, reason: str = 'No reason provided'):
+    async def _unban(self, ctx, user: str, *, reason: str = 'No reason provided'):
         user = await self.bot.fetch_user(int(user))
         await ctx.guild.unban(user, reason=reason)
         embed = discord.Embed(title="Mod Action", description=f"{user.mention} has been unbanned", color=2067276)
