@@ -51,19 +51,19 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.bot_has_permissions(kick_members=True)
     @commands.check_any(commands.has_permissions(kick_members=True), commands.is_owner())
-    async def kick(self, ctx, member: HierarchyMember, *, reason: str = None, ephemeral: bool = False):
+    async def kick(self, ctx, member: HierarchyMember, *, reason: str = None):
         """
         Kick a member.
         """
         await member.kick(reason=reason)
         embed = discord.Embed(title="Kicked", description=f"{member.mention} has been kicked from {ctx.guild.name}", color=15548997)
-        await ctx.send(embed=embed, ephemeral=ephemeral)
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
     @commands.bot_has_permissions(ban_members=True)
     @commands.check_any(commands.has_permissions(ban_members=True), commands.is_owner())
-    async def ban(self, ctx, user: HackMember, *, reason: str = None, ephemeral: bool = False):
+    async def ban(self, ctx, user: HackMember, *, reason: str = None):
         """
         Ban a user.
 
@@ -72,7 +72,7 @@ class Moderation(commands.Cog):
         user = await self.bot.fetch_user(user)
         await ctx.guild.ban(user, reason=reason)
         embed = discord.Embed(title="Banned", description=f"{user.mention} has been banned from {ctx.guild.name}", color=15548997)
-        await ctx.send(embed=embed, ephemeral=ephemeral)
+        await ctx.send(embed=embed)
 
 
     @commands.command()
