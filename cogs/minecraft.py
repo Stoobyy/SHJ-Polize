@@ -10,6 +10,7 @@ from PIL import Image, ImageFilter
 from io import BytesIO
 import requests
 
+
 class CapeDropdown(discord.ui.Select):
     def __init__(self, embeds, files):
         self.embeds = embeds
@@ -23,9 +24,11 @@ class CapeDropdown(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.edit_message(embed=self.embeds[self.values[0]], file=self.files[self.values[0]], view=None)
 
+
 class CapeView(discord.ui.View):
     def __init__(self, embeds, files):
-        super().__init__(CapeDropdown(embeds, files),timeout=180, disable_on_timeout=True)
+        super().__init__(CapeDropdown(embeds, files), timeout=180, disable_on_timeout=True)
+
 
 class Mc(commands.Cog):
     def __init__(self, bot):
@@ -58,7 +61,6 @@ class Mc(commands.Cog):
         embed.set_thumbnail(url=f"https://api.mineatar.io/face/{uuid}")
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=f"{ctx.author.avatar}")
         await ctx.reply(embed=embed)
-
 
     @commands.command(alias=["ip"])
     async def server(self, ctx, ip=None):
@@ -188,7 +190,7 @@ class Mc(commands.Cog):
             return
         embed = discord.Embed(
             title=f"{name}'s capes",
-            description=f"{'✅' if 'optifine' in files else '❌'} Optifine\n{'✅' if 'minecraft' in files  else '❌'} Minecraft",
+            description=f"{'✅' if embeds['optifine'] else '❌'} Optifine\n{'✅' if embeds['minecraft'] else '❌'} Minecraft",
             colour=15105570,
         )
         await ctx.send(embed=embed, view=CapeView(embeds, files))
@@ -259,7 +261,7 @@ class Mc(commands.Cog):
             return
         embed = discord.Embed(
             title=f"{name}'s capes",
-            description=f"{'✅' if 'optifine' in files else '❌'} Optifine\n{'✅' if 'minecraft' in files  else '❌'} Minecraft",
+            description=f"{'✅' if embeds['optifine'] else '❌'} Optifine\n{'✅' if embeds['minecraft'] else '❌'} Minecraft",
             colour=15105570,
         )
         await ctx.followup.send(embed=embed, view=CapeView(embeds, files))
