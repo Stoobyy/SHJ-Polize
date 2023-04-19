@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import io
 import pickle
@@ -115,7 +116,7 @@ class Snipe(commands.Cog):
         author = str(message.author)
         message_author_avatar = message.author.display_avatar.url
         channel = str(message.channel.id)
-        timee = message.created_at
+        timee = message.created_at or datetime.utcnow()
 
         if channel in deletemsg:
             if "DontSnipe" in deletemsg[channel]:
@@ -324,7 +325,7 @@ class Snipe(commands.Cog):
         channel = str(oldmsg.channel.id)
         authav = oldmsg.author.display_avatar.url
         msgurl = oldmsg.jump_url
-        timee = newmsg.edited_at
+        timee = newmsg.edited_at or datetime.utcnow()
 
         if oldmsg.author.bot:
             return
