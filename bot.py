@@ -108,6 +108,13 @@ async def about(ctx: commands.Context):
     embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
     await ctx.reply(embed=embed)
 
+@bot.command()
+async def vote(ctx):
+    await ctx.reply("https://top.gg/bot/969663219570462790/vote", mention_author=False)
+
+@bot.slash_command(name="vote", description="Vote for the bot")
+async def vote(ctx):
+    await ctx.respond("https://top.gg/bot/969663219570462790/vote")
 
 @bot.command(hidden=True)
 async def load(ctx, extension):
@@ -147,7 +154,9 @@ async def status(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isinstance(
+    if isinstance(error, commands.errors.BotMissingPermissions):
+        await ctx.reply("Bot is missing permissions to run that command", mention_author=False)
+    elif isinstance(
         error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions, commands.errors.NotOwner)
     ):
         await ctx.message.add_reaction("<a:nochamp:1021040710142668870>")
@@ -157,19 +166,25 @@ async def on_command_error(ctx, error):
         pass
     elif isinstance(error, commands.errors.MissingRequiredArgument):
         pass
+    elif isinstance(error, discord.errors.Forbidden):
+        raise error
     else:
-        await ctx.reply(f"{type(error)}\n{error}", mention_author=False)
+        await ctx.reply(f"`{type(error)}\n{error}`", mention_author=False)
         raise error
 
 
 @bot.event
 async def on_application_command_error(ctx, error):
-    if isinstance(error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions)):
+    if isinstance(error, commands.errors.BotMissingPermissions):
+        await ctx.respond("Bot is missing permissions to run that command", ephemeral=True)
+    elif isinstance(error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions)):
         await ctx.respond("<a:nochamp:1021040710142668870>", ephemeral=True)
     elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.respond("Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(")
+    elif isinstance(error, discord.errors.Forbidden):
+        raise error
     else:
-        await ctx.respond(f"{type(error)}\n{error}", ephemeral=True)
+        await ctx.respond(f"`{type(error)}\n{error}`", ephemeral=True)
         raise error
 
 
