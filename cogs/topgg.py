@@ -71,7 +71,15 @@ class Topgg(commands.Cog):
 
         if not self.autoposter.is_running:
             self.autoposter.start()
-
+    
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def votes(self, ctx):
+        data = await self.dblclient.get_bot_votes()
+        votes = ""
+        for i in data:
+            votes += f"{i.username}\n"
+        await ctx.send(f"Votes : \n{votes}")
 
 def setup(bot):
     bot.add_cog(Topgg(bot))
