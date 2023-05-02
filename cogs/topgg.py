@@ -81,6 +81,12 @@ class Topgg(commands.Cog):
             votes += f"{i.username}\n"
         await ctx.send(f"Votes : \n{votes}")
 
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def voted(self, ctx, user : discord.User):
+        data = await self.dblclient.get_user_vote(user.id)
+        await ctx.send(f"Username : {user.name}\nID : {user.id}\nHas voted : {data}")
+
 def setup(bot):
     bot.add_cog(Topgg(bot))
     print("Topgg cog loaded")
