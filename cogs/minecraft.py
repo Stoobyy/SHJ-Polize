@@ -43,7 +43,7 @@ class Mc(commands.Cog):
             await ctx.respond(f"<:Mike:882149622561243137> {username} is not a valid username.")
             return
         embed = discord.Embed(title=f"{name}'s skin", description=f"[Click here for skin](https://api.mineatar.io/skin/{uuid})", colour=15105570)
-        embed.set_image(url=f"https://api.mineatar.io/body/full/{uuid}?scale=8")
+        embed.set_image(url=f"https://visage.surgeplay.com/full/{uuid}.png")
         embed.set_thumbnail(url=f"https://api.mineatar.io/face/{uuid}")
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=f"{ctx.author.avatar}")
         await ctx.respond(embed=embed)
@@ -57,7 +57,7 @@ class Mc(commands.Cog):
             await ctx.reply(f"<:Mike:882149622561243137> {username} is not a valid username.")
             return
         embed = discord.Embed(title=f"{name}'s skin", description=f"[Click here for skin](https://api.mineatar.io/skin/{uuid})", colour=15105570)
-        embed.set_image(url=f"https://api.mineatar.io/body/full/{uuid}?scale=8")
+        embed.set_image(url=f"https://visage.surgeplay.com/full/{uuid}.png")
         embed.set_thumbnail(url=f"https://api.mineatar.io/face/{uuid}")
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=f"{ctx.author.avatar}")
         await ctx.reply(embed=embed)
