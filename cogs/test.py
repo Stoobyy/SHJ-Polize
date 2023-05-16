@@ -6,15 +6,14 @@ from .ext.topgg import dblclient
 
 
 
+async def votecheck( ctx):
+    data = await dblclient.get_user_vote(ctx.author.id)
+    return data
 class Test(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.dblclient = dblclient
 
     
-    async def votecheck(self, ctx):
-        data = await self.dblclient.get_user_vote(ctx.author.id)
-        return data
     
     @commands.slash_command()
     async def test(self, ctx : discord.ApplicationContext):
