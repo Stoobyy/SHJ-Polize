@@ -69,4 +69,4 @@ async def votecheck( ctx):
     if data:
         return True
     else:
-        raise VoteCheckError("You have not voted\n Please vote to use this command")
+        raise VoteCheckError("You need to vote for SHJ-Polize on top.gg to use this command! You can vote here : https://top.gg/bot/969663219570462790/vote")
