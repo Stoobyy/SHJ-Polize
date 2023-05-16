@@ -3,18 +3,10 @@ from discord.ext import commands
 import os
 import topgg
 
+devs = (499112914578309120, 700195735689494558)
 
-def on_autopost_success():
-    print("Successfully posted!")
-
-
-def on_autopost_error(exception: Exception):
-    print("Failed to post:", exception)
-
-
-def stats(client: commands.Bot = topgg.data(commands.Bot)):
-    return topgg.StatsWrapper(guild_count=len(client.guilds))
-
+class VoteCheckError(commands.CheckFailure):
+    pass
 
 @topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, auth=os.environ["BOT_AUTH"])
 async def on_bot_vote(vote_data: topgg.BotVoteData, client: commands.Bot = topgg.data(commands.Bot)):
@@ -59,12 +51,11 @@ async def on_guild_vote(vote_data: topgg.GuildVoteData, client: commands.Bot = t
 manager = topgg.WebhookManager()
 manager.endpoint(on_bot_vote).endpoint(on_guild_vote)
 
-class VoteCheckError(commands.CheckFailure):
-    pass
-
 dblclient =  topgg.DBLClient(token=os.environ["TOPGG_TOKEN"], default_bot_id=969663219570462790)
 
 async def votecheck( ctx):
+    if ctx.author.id in devs:
+        return True
     data = await dblclient.get_user_vote(ctx.author.id)
     if data:
         return True
