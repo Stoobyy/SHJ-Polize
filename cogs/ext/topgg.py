@@ -59,7 +59,7 @@ async def on_guild_vote(vote_data: topgg.GuildVoteData, client: commands.Bot = t
 manager = topgg.WebhookManager()
 manager.endpoint(on_bot_vote).endpoint(on_guild_vote)
 
-class VoteCheckError(Exception):
+class VoteCheckError(commands.CheckFailure):
     pass
 
 dblclient =  topgg.DBLClient(token=os.environ["TOPGG_TOKEN"], default_bot_id=969663219570462790)
