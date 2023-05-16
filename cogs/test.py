@@ -59,7 +59,7 @@ class Test(commands.Cog):
         await ctx.send("||thanks for voting||")
 
     @commands.Cog.listener()
-    async def on_error(self, ctx, error):
+    async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             await ctx.send("You have not voted\n Please vote to use this command")
 
