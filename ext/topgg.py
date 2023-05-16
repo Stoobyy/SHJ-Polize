@@ -60,4 +60,4 @@ manager = topgg.WebhookManager()
 manager.endpoint(on_bot_vote).endpoint(on_guild_vote)
 
 
-dblclient =  topgg.DBLClient(os.environ["TOPGG_TOKEN"])
+dblclient =  topgg.DBLClient(token=os.environ["TOPGG_TOKEN"], default_bot_id=969663219570462790)
