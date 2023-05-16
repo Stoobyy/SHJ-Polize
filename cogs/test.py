@@ -2,9 +2,18 @@ import discord
 from discord.ext import commands
 import datetime
 from datetime import timedelta
+from .ext.topgg import dblclient
+
+
+
 class Test(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.dblclient = dblclient.set_data(bot)
+
+    
+    async def votecheck(self, ctx):
+        return await self.dblclient.get_user_vote(ctx.author.id)
     
     @commands.slash_command()
     async def test(self, ctx : discord.ApplicationContext):
@@ -43,6 +52,16 @@ class Test(commands.Cog):
             value += time[1] + " minutes and "
         value += f"{float(time[2]) : .2f}" + " seconds"
         await ctx.reply(value, mention_author=False)
+
+    @commands.command()
+    @commands.check(votecheck)
+    async def secret(self, ctx):
+        await ctx.send("")
+
+    @commands.Cog.listener()
+    async def on_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send("You have not voted\n Please vote to use this command")
 
 
 
