@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import os
 import topgg
-from ..ext.topgg import dblclient, manager
+from .ext.topgg import manager, dblclient
 
 
 def on_autopost_success():
