@@ -167,6 +167,8 @@ async def on_command_error(ctx, error):
         pass
     elif isinstance(error, commands.errors.MissingRequiredArgument):
         pass
+    elif isinstance(error, VoteCheckError):
+        await ctx.reply("You need to vote for SHJ-Polize on top.gg to use this command! You can vote here : https://top.gg/bot/969663219570462790/vote", mention_author=False)
     elif isinstance(error, discord.errors.Forbidden):
         raise error
     else:
@@ -182,6 +184,8 @@ async def on_application_command_error(ctx, error):
         await ctx.respond("<a:nochamp:1021040710142668870>", ephemeral=True)
     elif isinstance(error, commands.errors.ChannelNotFound):
         await ctx.respond("Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(")
+    elif isinstance(error, VoteCheckError):
+        await ctx.respond("You need to vote for SHJ-Polize on top.gg to use this command! You can vote here : https://top.gg/bot/969663219570462790/vote", ephemeral=True)
     elif isinstance(error, discord.errors.Forbidden):
         raise error
     else:
