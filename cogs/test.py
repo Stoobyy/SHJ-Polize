@@ -9,7 +9,7 @@ from .ext.topgg import dblclient
 class Test(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.dblclient = dblclient.set_data(bot)
+        self.dblclient = dblclient
 
     
     async def votecheck(self, ctx):
