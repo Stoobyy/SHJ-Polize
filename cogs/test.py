@@ -13,7 +13,8 @@ class Test(commands.Cog):
 
     
     async def votecheck(self, ctx):
-        return await self.dblclient.get_user_vote(ctx.author.id)
+        data = await self.dblclient.get_user_vote(ctx.author.id)
+        return data
     
     @commands.slash_command()
     async def test(self, ctx : discord.ApplicationContext):
@@ -56,7 +57,7 @@ class Test(commands.Cog):
     @commands.command()
     @commands.check(votecheck)
     async def secret(self, ctx):
-        await ctx.send("")
+        await ctx.send("||thanks for voting||")
 
     @commands.Cog.listener()
     async def on_error(self, ctx, error):
