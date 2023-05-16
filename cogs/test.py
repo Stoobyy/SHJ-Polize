@@ -2,7 +2,9 @@ import discord
 from discord.ext import commands
 import datetime
 from datetime import timedelta
+import json
 from .ext.topgg import votecheck
+from .ext.database import db
 
 
 
@@ -10,19 +12,10 @@ class Test(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    
-    
-    @commands.slash_command()
-    async def test(self, ctx : discord.ApplicationContext):
-        content = ""
-        content += f"Owner: {ctx.bot.owner_id}\n"
-        content += f"Owners: {ctx.bot.owner_ids}\n"
-        c = await ctx.bot.is_owner(ctx.author)
-        content += f"Is owner: {c}\n"
-        content += f"Owner: {ctx.bot.owner_id}\n"
-        content += f"Owners: {ctx.bot.owner_ids}\n"
-        await ctx.respond(content)
-
+    @commands.command()
+    async def test(self, ctx, guildid: int = None):
+        data = db.hl.find_one({"_id": guildid or ctx.guild.id})
+        await ctx.reply(json.dumps(indent=4), mention_author=False)
 
     @commands.command()
     async def snowflake(self, ctx, snowflake, snowflake2=None):
@@ -57,6 +50,6 @@ class Test(commands.Cog):
 
 
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(Test(bot))
     print("Test cog loaded")
