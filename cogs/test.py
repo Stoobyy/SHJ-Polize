@@ -2,13 +2,10 @@ import discord
 from discord.ext import commands
 import datetime
 from datetime import timedelta
-from .ext.topgg import dblclient
+from .ext.topgg import votecheck
 
 
 
-async def votecheck( ctx):
-    data = await dblclient.get_user_vote(ctx.author.id)
-    return data
 class Test(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
