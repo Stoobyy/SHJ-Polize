@@ -56,12 +56,12 @@ class Test(commands.Cog):
     @commands.command()
     @commands.check(votecheck)
     async def secret(self, ctx):
-        await ctx.send("||thanks for voting||")
+        await ctx.reply("||thanks for voting||")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await ctx.send("You have not voted\n Please vote to use this command")
+            await ctx.reply("You have not voted\n Please vote to use this command")
 
 
 
