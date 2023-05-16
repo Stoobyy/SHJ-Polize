@@ -3,14 +3,14 @@ from datetime import datetime
 
 import io
 import pickle
+
 import discord
 from discord.commands import SlashCommandGroup
 from discord.ext import commands, tasks
 from discord.ui import View
-from pymongo import MongoClient
 
-cluster = MongoClient(os.environ["MONGO"])
-db = cluster["shj-polize"]
+from .ext.database import db
+
 snipedb = db["snipe"]
 
 deletemsg = {}
@@ -38,7 +38,6 @@ class DeleteView(View):
 
     @discord.ui.button(label="Delete", style=discord.ButtonStyle.red, emoji="🗑️")
     async def delete(self, button: discord.ui.Button, interaction: discord.Interaction):
-
         s_m = False
         try:
             msg = deletemsg[str(interaction.channel.id)]

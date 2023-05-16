@@ -13,9 +13,8 @@ class Test(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def test(self, ctx, guildid: int = None):
-        data = db.hl.find_one({"_id": guildid or ctx.guild.id})
-        await ctx.reply(json.dumps(data, indent=4), mention_author=False)
+    async def test(self, ctx):
+        await ctx.reply("test", mention_author=False)
 
     @commands.command()
     async def snowflake(self, ctx, snowflake, snowflake2=None):

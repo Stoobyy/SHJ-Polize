@@ -7,10 +7,9 @@ import discord
 import requests
 from discord.commands import SlashCommandGroup
 from discord.ext import commands
-from pymongo import MongoClient
 
-cluster = MongoClient(os.environ["MONGO"])
-db = cluster["shj-polize"]
+from .ext.database import db
+
 ezdb = db["ez"]
 
 ez_list = [

@@ -4,10 +4,9 @@ from datetime import datetime, timedelta, timezone
 import discord
 from discord.commands import SlashCommandGroup
 from discord.ext import commands
-from pymongo import MongoClient
 
-cluster = MongoClient(os.environ["MONGO"])
-db = cluster["shj-polize"]
+from .ext.database import db
+
 highlightdb = db["hl"]
 
 tzone = timezone(timedelta(hours=4))
@@ -41,7 +40,6 @@ class Highlight(commands.Cog):
         else:
             return
 
-
         for user in guildhl:
             for msg in guildhl[user]:
                 if msg.upper() in message.content.upper().split():
@@ -61,11 +59,12 @@ class Highlight(commands.Cog):
                     lastt = last[guildid][user] if user in last[guildid] else 0
                     if lastt == 0 or timee - lastt > 300:
                         try:
-                            await member.send(f'In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word "{msg}"', embed=embed)
+                            await member.send(
+                                f'In **{message.guild.name}** {message.channel.mention}, you were mentioned with highlight word "{msg}"', embed=embed
+                            )
                         except discord.Forbidden:
                             pass
 
-                        
     hl = SlashCommandGroup(name="highlight", description="Highlight commands")
 
     @hl.command(name="list", description="List all highlights")
@@ -82,11 +81,15 @@ class Highlight(commands.Cog):
             hllist[guildid] = guildhl
 
         if str(ctx.author.id) not in guildhl:
-            embed = discord.Embed(title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220)
+            embed = discord.Embed(
+                title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220
+            )
             await ctx.respond(embed=embed)
         else:
             if len(guildhl[str(ctx.author.id)]) == 0:
-                embed = discord.Embed(title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220)
+                embed = discord.Embed(
+                    title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220
+                )
                 await ctx.respond(embed=embed)
             else:
                 str1 = ""
