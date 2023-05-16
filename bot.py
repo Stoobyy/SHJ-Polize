@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from cogs.ext.topgg import VoteCheckError
+from cogs.ext.database import db
 
 startup_time = datetime.now().timestamp()
 
@@ -8,8 +9,7 @@ import discord
 from discord.ext import commands
 from pymongo import MongoClient
 
-cluster = MongoClient(os.environ["MONGO"])
-db = cluster["shj-polize"]
+
 collection = db["prefixes"]
 
 prefixes = {}
