@@ -160,7 +160,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, VoteCheckError):
         embed = discord.Embed(description= ' You need to vote for SHJ-Polize on top.gg to use this command!', color=discord.Color.blurple())
         embed.add_field(name="Vote for me", value="[Click Here](https://top.gg/bot/969663219570462790/vote)")
-        embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+        embed.set_thumbnail(url='https://media.discordapp.net/attachments/907118140473876490/1109813440723308564/17f5107688eeb6c6b07851e13a518046.png?width=608&height=608')
         await ctx.reply(embed=embed, mention_author=False)
     elif isinstance(
         error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions, commands.errors.NotOwner)
@@ -186,7 +186,7 @@ async def on_application_command_error(ctx, error):
     elif isinstance(error, VoteCheckError):
         embed = discord.Embed(description= ' You need to vote for SHJ-Polize on top.gg to use this command!', color=discord.Color.blurple())
         embed.add_field(name="Vote for me", value="[Click Here](https://top.gg/bot/969663219570462790/vote)")
-        embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+        embed.set_thumbnail(url='https://media.discordapp.net/attachments/907118140473876490/1109813440723308564/17f5107688eeb6c6b07851e13a518046.png?width=608&height=608')
         await ctx.respond(embed=embed, ephemeral=True)
     elif isinstance(error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions)):
         await ctx.respond("<a:nochamp:1021040710142668870>", ephemeral=True)
