@@ -167,7 +167,7 @@ async def on_command_error(ctx, error):
     ):
         await ctx.message.add_reaction("<a:nochamp:1021040710142668870>")
     elif isinstance(error, commands.errors.ChannelNotFound):
-        await ctx.reply("Channel not found\nEither channel is not in guild or bot doesnt have access to that channel :(", mention_author=False)
+        await ctx.reply("Channel not found\n Either channel is not in guild or bot doesnt have access to that channel :(", mention_author=False)
     elif isinstance(error, commands.errors.CommandNotFound):
         pass
     elif isinstance(error, commands.errors.MissingRequiredArgument):
