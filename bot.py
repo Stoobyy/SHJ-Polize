@@ -161,7 +161,7 @@ async def on_command_error(ctx, error):
         embed = discord.Embed(description= ' You need to vote for SHJ-Polize on top.gg to use this command!', color=discord.Color.blurple())
         embed.add_field(name="Vote for me", value="[Click Here](https://top.gg/bot/969663219570462790/vote)")
         embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
-        await ctx.respond(embed=embed, mention_author=False)
+        await ctx.reply(embed=embed, mention_author=False)
     elif isinstance(
         error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions, commands.errors.NotOwner)
     ):
