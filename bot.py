@@ -158,7 +158,10 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.BotMissingPermissions):
         await ctx.reply("Bot is missing permissions to run that command", mention_author=False)
     elif isinstance(error, VoteCheckError):
-        await ctx.reply("You need to vote for SHJ-Polize on top.gg to use this command! You can vote here : https://top.gg/bot/969663219570462790/vote", mention_author=False)
+        embed = discord.Embed(description= ' You need to vote for SHJ-Polize on top.gg to use this command!', color=discord.Color.blurple())
+        embed.add_field(name="Vote for me", value="[Click Here](https://top.gg/bot/969663219570462790/vote)")
+        embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+        await ctx.respond(embed=embed, mention_author=False)
     elif isinstance(
         error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions, commands.errors.NotOwner)
     ):
@@ -181,7 +184,10 @@ async def on_application_command_error(ctx, error):
     if isinstance(error, commands.errors.BotMissingPermissions):
         await ctx.respond("Bot is missing permissions to run that command", ephemeral=True)
     elif isinstance(error, VoteCheckError):
-        await ctx.respond("You need to vote for SHJ-Polize on top.gg to use this command! You can vote here : https://top.gg/bot/969663219570462790/vote", ephemeral=True)
+        embed = discord.Embed(description= ' You need to vote for SHJ-Polize on top.gg to use this command!', color=discord.Color.blurple())
+        embed.add_field(name="Vote for me", value="[Click Here](https://top.gg/bot/969663219570462790/vote)")
+        embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
+        await ctx.respond(embed=embed, ephemeral=True)
     elif isinstance(error, (commands.errors.CheckAnyFailure, commands.errors.MissingAnyRole, commands.errors.MissingPermissions)):
         await ctx.respond("<a:nochamp:1021040710142668870>", ephemeral=True)
     elif isinstance(error, commands.errors.ChannelNotFound):
