@@ -161,6 +161,7 @@ class Ez(commands.Cog):
         guildid = ctx.guild.id
         if guildid in bl_list:
             blacklist = bl_list[guildid]
+            
         else:
             blacklist = ezdb.find_one({"_id": guildid})
             if blacklist is None:
