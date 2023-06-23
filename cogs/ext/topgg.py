@@ -24,7 +24,7 @@ async def on_bot_vote(vote_data: topgg.BotVoteData, client: commands.Bot = topgg
     else:
         print(f"Received a vote by: {user} ({user_id})")
         try:
-            await user.send("Thanks for voting for SHJ-Polize on top.gg!")
+            await user.send("Thanks for voting me on top.gg!\n Here's a cookie 🍪")
         except:
             pass
 
