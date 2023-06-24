@@ -39,10 +39,15 @@ class Highlight(commands.Cog):
             guildhl = hllist[guildid]
         else:
             return
+        
+        users = []
 
         for user in guildhl:
             for msg in guildhl[user]:
-                if msg.upper() in message.content.upper().split():
+                if user in users:
+                    continue
+                if msg.upper() in message.content.upper().split() or " " in msg and msg.upper() in message.content.upper():
+                    users.append(user)
                     message1 = []
                     async for i in message.channel.history(limit=5):
                         timee = i.created_at
