@@ -131,7 +131,4 @@ dmypy.json
 # VSCode
 .vscode/
 Stoobybot.py
-.idea/discord.xml
-.idea/modules.xml
-.idea/vcs.xml
-.idea/SHJ-Polize.iml
+.idea/
