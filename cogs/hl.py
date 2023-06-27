@@ -60,6 +60,8 @@ class Highlight(commands.Cog):
                     )
                     embed.set_footer(text=f"Message ID: {message.id} | Author ID: {message.author.id}")
                     member = message.guild.get_member(int(str(user)))
+                    if member is None:
+                        return
                     timee = datetime.now(tzone).timestamp()
                     lastt = last[guildid][user] if user in last[guildid] else 0
                     if lastt == 0 or timee - lastt > 300:
