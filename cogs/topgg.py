@@ -36,10 +36,16 @@ class Topgg(commands.Cog):
     @commands.is_owner()
     async def votes(self, ctx):
         data = await self.dblclient.get_bot_votes()
-        votes = ""
+        embed = discord.Embed(title="Votes", description=f"Total votes : {len(data)}", color=discord.Color.green())
+        votes = {}
         for i in data:
-            votes += f"{i.username}\n"
-        await ctx.send(f"Votes : \n{votes}")
+            votes[i.username] = votes[i.username]+1 if i.username in votes else 1
+        value = ""
+        for i in votes:
+            value += f"{i} : {votes[i]}\n"
+        embed.add_field(name="Votes", value=value)
+        embed.add_field(name="Last 5 votes", value="\n".join([i.username for i in data[:5]]), inline=False)
+        await ctx.send(embed=embed)
 
     @commands.command(hidden=True)
     @commands.is_owner()
