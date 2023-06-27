@@ -46,7 +46,14 @@ class Highlight(commands.Cog):
             for msg in guildhl[user]:
                 if user in users:
                     continue
-                if msg.upper() in message.content.upper().split() or " " in msg and msg.upper() in message.content.upper():
+                flag = False
+                if len(msg)<4:
+                    if msg.upper() in message.content.upper().split() or " " in msg and msg.upper() in message.content.upper():
+                        flag = True
+                else:
+                    if msg.upper() in message.content.upper():
+                        flag = True
+                if flag:
                     users.append(user)
                     message1 = []
                     async for i in message.channel.history(limit=5):
