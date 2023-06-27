@@ -6,7 +6,7 @@ from .ext.topgg import manager, dblclient
 
 
 def on_autopost_success():
-    print("Successfully posted!")
+    pass
 
 
 def on_autopost_error(exception: Exception):
