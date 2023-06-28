@@ -154,9 +154,9 @@ class Misc(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        serverData = db["serverConfig"]
-
-        if str(member.guild.id) not in serverData:
+        serverDB = db["serverConfig"]
+        serverData = serverDB.find_one({"_id": str(member.guild.id)})
+        if not serverData:
             return
         channel = await self.bot.fetch_channel(serverData[str(member.guild.id)]["welcomeChannel"])
         await channel.send(serverData[str(member.guild.id)]["welcomeMessage"].replace("{user}", member.mention).replace("{server}", member.guild.name))
@@ -164,13 +164,22 @@ class Misc(commands.Cog):
     @commands.slash_command(name = 'welcome', description = 'set the welcome message and channel')
     @commands.has_permissions(manage_guild = True)
     async def welcome(self, interaction: discord.Interaction, channel: discord.TextChannel, *, message: str = 'Hello there,{}\nWelcome to {}\nGet yourself some roles\nHave a great time here in the server!'):
-        serverData = db["serverConfig"]
-        if str(interaction.guild.id) not in serverData:
-            serverData[str(interaction.guild.id)] = {}
+        serverDB = db["serverConfig"]
+        serverData = serverDB.find_one({"_id": str(interaction.guild.id)})
+
+        if not serverData:
+            serverDB.insert_one({
+                        "_id": str(interaction.guild.id),
+                        "welcomeChannel": channel.id,
+                        "welcomeMessage": message
+                    })
         
-        serverData[str(interaction.guild.id)]["welcomeChannel"] = channel.id
-        serverData[str(interaction.guild.id)]["welcomeMessage"] = message
-        db["serverConfig"] = serverData
+        else:
+            serverDB.update_one({"_id": str(interaction.guild.id)}, {"$set": {
+                        "welcomeChannel": channel.id,
+                        "welcomeMessage": message
+                    }})
+            
         await interaction.response.send_message(f"Welcome message set to {message} in {channel.mention}")
 
 
