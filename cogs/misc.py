@@ -3,6 +3,8 @@ from discord.ext import commands
 from datetime import datetime, timedelta, timezone
 import asyncio
 
+from ext.database import db
+
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -149,6 +151,27 @@ class Misc(commands.Cog):
             await interaction.response.send_message("Copy stopped")
         else:
             await interaction.response.send_message("Copy is not running", ephemeral=True)
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        serverData = db["serverConfig"]
+        if serverData[str(member.guild.id)]["welcomeChannel"] == None:
+            return
+        channel = await self.bot.fetch_channel(serverData[str(member.guild.id)]["welcomeChannel"])
+        await channel.send(serverData[str(member.guild.id)]["welcomeMessage"].replace("{user}", member.mention).replace("{server}", member.guild.name))
+    
+    @commands.slash_command(name = 'welcome', description = 'set the welcome message and channel')
+    @commands.has_permissions(manage_guild = True)
+    async def welcome(self, interaction: discord.Interaction, channel: discord.TextChannel, *, message: str = 'Hello there,{}\nWelcome to {}\nGet yourself some roles\nHave a great time here in the server!'):
+        serverData = db["serverConfig"]
+        serverData[str(interaction.guild.id)]["welcomeChannel"] = channel.id
+        serverData[str(interaction.guild.id)]["welcomeMessage"] = message
+        db["serverConfig"] = serverData
+        await interaction.response.send_message(f"Welcome message set to {message} in {channel.mention}")
+
+
+
+
 
 
 
