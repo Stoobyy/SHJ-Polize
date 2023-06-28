@@ -3,8 +3,8 @@ from discord.ext import commands
 import datetime
 from datetime import timedelta
 import json
-from .ext.topgg import votecheck
-from .ext.database import db
+from ext.topgg import votecheck
+from ext.database import db
 
 
 

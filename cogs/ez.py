@@ -8,7 +8,7 @@ import requests
 from discord.commands import SlashCommandGroup
 from discord.ext import commands
 
-from .ext.database import db
+from ext.database import db
 
 ezdb = db["ez"]
 

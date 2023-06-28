@@ -9,7 +9,7 @@ from discord.commands import SlashCommandGroup
 from discord.ext import commands, tasks
 from discord.ui import View
 
-from .ext.database import db
+from ext.database import db
 
 snipedb = db["snipe"]
 
