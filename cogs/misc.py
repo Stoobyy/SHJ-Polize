@@ -155,7 +155,8 @@ class Misc(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         serverData = db["serverConfig"]
-        if serverData[str(member.guild.id)]["welcomeChannel"] == None:
+
+        if str(member.guild.id) not in serverData:
             return
         channel = await self.bot.fetch_channel(serverData[str(member.guild.id)]["welcomeChannel"])
         await channel.send(serverData[str(member.guild.id)]["welcomeMessage"].replace("{user}", member.mention).replace("{server}", member.guild.name))
@@ -164,6 +165,9 @@ class Misc(commands.Cog):
     @commands.has_permissions(manage_guild = True)
     async def welcome(self, interaction: discord.Interaction, channel: discord.TextChannel, *, message: str = 'Hello there,{}\nWelcome to {}\nGet yourself some roles\nHave a great time here in the server!'):
         serverData = db["serverConfig"]
+        if str(interaction.guild.id) not in serverData:
+            serverData[str(interaction.guild.id)] = {}
+        
         serverData[str(interaction.guild.id)]["welcomeChannel"] = channel.id
         serverData[str(interaction.guild.id)]["welcomeMessage"] = message
         db["serverConfig"] = serverData
