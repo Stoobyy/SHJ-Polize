@@ -40,11 +40,12 @@ class Topgg(commands.Cog):
         votes = {}
         for i in data:
             votes[i.username] = votes[i.username]+1 if i.username in votes else 1
+        top5 = sorted(votes.items(), key=lambda x: x[1], reverse=True)[:5]
         value = ""
-        for i in votes:
-            value += f"{i} : {votes[i]}\n"
-        embed.add_field(name="Votes", value=value)
-        embed.add_field(name="Last 5 votes", value="\n".join([i.username for i in data[:5]]), inline=False)
+        for i in top5:
+            value += f"{i[0]} : {i[1]}\n"
+        embed.add_field(name="Top 5 voters", value=value)
+        embed.add_field(name="Last 5 voters", value="\n".join([i.username for i in data[:5]]))
         await ctx.send(embed=embed)
 
     @commands.command(hidden=True)
