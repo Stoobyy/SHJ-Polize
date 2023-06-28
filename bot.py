@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
-from cogs.ext.topgg import VoteCheckError
-from cogs.ext.database import db
+from ext.topgg import VoteCheckError
+from ext.database import db
 
 startup_time = datetime.now().timestamp()
 
@@ -209,6 +209,6 @@ for cog in os.listdir("./cogs"):
 
 bot.load_extension("jishaku")
 
-token = os.environ["TOKEN"]
+
 
 bot.run(token)
