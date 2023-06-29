@@ -39,7 +39,7 @@ class Highlight(commands.Cog):
             guildhl = hllist[guildid]
         else:
             return
-        
+
         users = []
 
         for user in guildhl:
@@ -47,7 +47,7 @@ class Highlight(commands.Cog):
                 if user in users:
                     continue
                 flag = False
-                if len(msg)<4:
+                if len(msg) < 4:
                     if msg.upper() in message.content.upper().split() or " " in msg and msg.upper() in message.content.upper():
                         flag = True
                 else:
@@ -95,9 +95,7 @@ class Highlight(commands.Cog):
             hllist[guildid] = guildhl
 
         if str(ctx.author.id) not in guildhl:
-            embed = discord.Embed(
-                title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220
-            )
+            embed = discord.Embed(title="Highlight List", description=f"You currently have no highlight words\nRun /hl add [word] to add some", color=1752220)
             await ctx.respond(embed=embed)
         else:
             if len(guildhl[str(ctx.author.id)]) == 0:
