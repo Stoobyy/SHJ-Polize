@@ -2,7 +2,6 @@ import os
 from datetime import datetime
 
 import io
-import pickle
 
 import discord
 from discord.commands import SlashCommandGroup
@@ -33,8 +32,16 @@ async def snipe_check(ctx):
 
 class DeleteView(View):
     def __init__(self, ctx):
-        super().__init__(timeout=180, disable_on_timeout=True)
+        super().__init__(timeout=180)
         self.ctx = ctx
+
+    async def on_timeout(self):
+        self.disable_all_items()
+        message = self._message or self.parent
+        try:
+            await message.edit(view=self)
+        except discord.NotFound:
+            pass
 
     @discord.ui.button(label="Delete", style=discord.ButtonStyle.red, emoji="🗑️")
     async def delete(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -70,31 +77,6 @@ class DeleteView(View):
 class Snipe(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    # temp fix hopefully
-
-    # @commands.Cog.listener()
-    # async def on_ready(self):
-    #     s = snipedb.find_one({"_id": "1"})
-    #     global deletemsg, editmsg
-    #     deletemsg = pickle.loads(s["deletemsg"])
-    #     editmsg = pickle.loads(s["editmsg"])
-    #     d = snipedb.find({})
-    #     for i in d:
-    #         if i["_id"] != "1":
-    #             snipedata[i["_id"]] = i["data"]
-    #     if not self.save.is_running():
-    #         self.save.start()
-
-    # @tasks.loop(minutes=5)
-    # async def save(self):
-    #     snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
-
-    # @commands.command(name="save", hidden=True)
-    # @commands.is_owner()
-    # async def _save(self, ctx):
-    #     snipedb.update_one({"_id": "1"}, {"$set": {"deletemsg": pickle.dumps(deletemsg), "editmsg": pickle.dumps(editmsg)}})
-    #     await ctx.reply("Saved!")
 
     @commands.Cog.listener()
     async def on_ready(self):
