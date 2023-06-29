@@ -107,24 +107,6 @@ class Mc(commands.Cog):
                     pass
             await ctx.reply(embed=embed, mention_author=False)
 
-    @commands.command(hidden=True)
-    async def serverinfo(self, ctx):
-        if ctx.guild.id != 723259592800206940:
-            return
-        embed = discord.Embed(title="FishyMC", description="Version = `1.19 `\nIP = `funfishmc.aternos.me`", colour=2123412)
-        embedd = discord.Embed(
-            title="Rules",
-            description="""1. Swearing is allowed, but don’t get personal.
-    2. Stealing from people isnt allowed. If you want something, work for it.
-    3. Pranks are allowed, as long as it isn’t griefing. If something gets griefed, it’s your responsibility to fix it.
-    4. Cheats are strictly not allowed. Any player found to log on with any kind of hack, this includes hacked clients and mods, will face severe punishments.
-    5. Spamming in chats or leaking personal information in chats is stictly not allowed.
-    Players found to break these rules are subject to severe punishments. These punishments include chat mutes, temporary bans, permanant bans, etc. Punishment will depend on the severity of the offense commited.""",
-            colour=1243903,
-        )
-        await ctx.send(content="FishyMC V(Lost track) is finally live.", embed=embed)
-        await ctx.send(embed=embedd)
-
     @commands.command()
     async def cape(self, ctx, username):
         MojangAPI = API()
