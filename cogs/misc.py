@@ -1,14 +1,27 @@
 import discord
 from discord.ext import commands
-from datetime import datetime, timedelta, timezone
+import datetime
+from datetime import timedelta, timezone
 import asyncio
 
 from ext.database import db
+
+serverDB = db["serverConfig"]
+
+welcomedict = {}
+
 
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.copy_message = False
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        d = serverDB.find({})
+        for i in d:
+            welcomedict[i["_id"]] = i
+            del welcomedict[i["_id"]]["_id"]
 
     @commands.slash_command()
     async def spotify(self, interaction: discord.Interaction, user: discord.Member = None):
@@ -54,9 +67,35 @@ class Misc(commands.Cog):
                 return
         await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
 
+    @commands.command()
+    async def snowflake(self, ctx, snowflake, snowflake2=None):
+        s = discord.Object(id=snowflake)
+        d: datetime.datetime = s.created_at.timestamp()
+        if snowflake2:
+            s2 = discord.Object(id=snowflake2)
+            st: datetime.datetime = s2.created_at.timestamp()
+        elif ctx.message.reference:
+            msg = await ctx.channel.fetch_message(ctx.message.reference.message_id)
+            st = msg.created_at.timestamp()
+        else:
+            st = datetime.datetime.now().timestamp()
+        time = str(timedelta(seconds=st - d))
+        value = ""
+        if "," in time:
+            time = time.split(",")
+            value += time[0] + " , "
+            time = time[1]
+        time = time.split(":")
+        if int(time[0]) != 0:
+            value += time[0] + " hours, "
+        if int(time[1]) != 0:
+            value += time[1] + " minutes and "
+        value += f"{float(time[2]) : .2f}" + " seconds"
+        await ctx.reply(value, mention_author=False)
+
     @commands.slash_command(name="say", description="say something as the bot", guild_ids=[906909577394663484])
     @commands.is_owner()
-    async def say(self, interaction: discord.Interaction, message: str, guild_id: str, channel_id: str, reply_message_id: str=None):
+    async def say(self, interaction: discord.Interaction, message: str, guild_id: str, channel_id: str, reply_message_id: str = None):
         try:
             guild: discord.Guild = await self.bot.fetch_guild(int(guild_id))
         except discord.Forbidden:
@@ -95,7 +134,7 @@ class Misc(commands.Cog):
     @commands.slash_command(name="copy", description="you dont wanna know", guild_ids=[906909577394663484])
     @commands.is_owner()
     async def copy(self, interaction: discord.Interaction, guild_id: str, channel_id: str):
-    # copy user messages from one channel to another and timeout after 2 minutes
+        # copy user messages from one channel to another and timeout after 2 minutes
         try:
             guild: discord.Guild = await self.bot.fetch_guild(int(guild_id))
         except discord.Forbidden:
@@ -110,8 +149,10 @@ class Misc(commands.Cog):
             await interaction.response.send_message("Bot does not have permission to send messages in that channel", ephemeral=True)
             return
         await interaction.response.send_message("Copy started, timeout in 2 minutes")
+
         def check(m):
             return m.author == interaction.user and m.channel == interaction.channel
+
         self.copy_message = True
         while self.copy_message:
             try:
@@ -120,8 +161,8 @@ class Misc(commands.Cog):
                 await interaction.followup.send("Copy timed out", ephemeral=True)
                 return
             try:
-                if '|' in message.content:
-                    content, reply_message_id = message.content.rsplit('|',1)
+                if "|" in message.content:
+                    content, reply_message_id = message.content.rsplit("|", 1)
                     reply_message_id = reply_message_id.strip()
                     if not reply_message_id.isdigit():
                         await channel.send(message.content)
@@ -142,7 +183,7 @@ class Misc(commands.Cog):
             except discord.Forbidden:
                 await interaction.followup.send("Bot does not have permission to send messages in that channel", ephemeral=True)
                 return
-        
+
     @commands.slash_command(name="stop", description="stop the copy command", guild_ids=[906909577394663484])
     @commands.is_owner()
     async def stop(self, interaction: discord.Interaction):
@@ -154,40 +195,53 @@ class Misc(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        serverDB = db["serverConfig"]
-        serverData = serverDB.find_one({"_id": str(member.guild.id)})
-        if not serverData:
+        guildid = str(member.guild.id)
+        if guildid not in welcomedict:
             return
-        channel = await self.bot.fetch_channel(serverData[str(member.guild.id)]["welcomeChannel"])
-        await channel.send(serverData[str(member.guild.id)]["welcomeMessage"].replace("{user}", member.mention).replace("{server}", member.guild.name))
-    
-    @commands.slash_command(name = 'welcome', description = 'set the welcome message and channel')
-    @commands.has_permissions(manage_guild = True)
-    async def welcome(self, interaction: discord.Interaction, channel: discord.TextChannel, *, message: str = 'Hello there,{}\nWelcome to {}\nGet yourself some roles\nHave a great time here in the server!'):
-        serverDB = db["serverConfig"]
-        serverData = serverDB.find_one({"_id": str(interaction.guild.id)})
+        if welcomedict[guildid]["joinDM"] != "":
+            try:
+                await member.send(welcomedict[guildid]["joinDM"])
+            except:
+                pass
+        if welcomedict[guildid]["welcomeChannel"] != "":
+            channel = await self.bot.fetch_channel(welcomedict[str(member.guild.id)]["welcomeChannel"])
+            try:
+                await channel.send(welcomedict[str(member.guild.id)]["welcomeMessage"].replace("{user}", member.mention).replace("{server}", member.guild.name))
+            except:
+                pass
 
-        if not serverData:
-            serverDB.insert_one({
-                        "_id": str(interaction.guild.id),
-                        "welcomeChannel": channel.id,
-                        "welcomeMessage": message
-                    })
-        
+    @commands.slash_command(name="welcome", description="set the welcome message and channel")
+    @commands.has_permissions(manage_guild=True)
+    async def welcome(
+        self,
+        interaction: discord.Interaction,
+        channel: discord.TextChannel,
+        *,
+        message: str = "Hello there,{}\nWelcome to {}\nGet yourself some roles\nHave a great time here in the server!",
+    ):
+        if str(interaction.guild.id) not in welcomedict:
+            serverDB.insert_one({"_id": str(interaction.guild.id), "welcomeChannel": channel.id, "welcomeMessage": message, "joinDM": ""})
+
         else:
-            serverDB.update_one({"_id": str(interaction.guild.id)}, {"$set": {
-                        "welcomeChannel": channel.id,
-                        "welcomeMessage": message
-                    }})
-            
+            serverDB.update_one({"_id": str(interaction.guild.id)}, {"$set": {"welcomeChannel": channel.id, "welcomeMessage": message}})
+
+        welcomedict[str(interaction.guild.id)]["welcomeChannel"] = channel.id
+        welcomedict[str(interaction.guild.id)]["welcomeMessage"] = message
+
         await interaction.response.send_message(f"Welcome message set to {message} in {channel.mention}")
 
+    @commands.slash_command(name="joindm", description="set the join dm message")
+    @commands.has_permissions(manage_guild=True)
+    async def joindm(self, interaction: discord.Interaction, *, message):
+        if str(interaction.guild.id) not in welcomedict:
+            serverDB.insert_one({"_id": str(interaction.guild.id), "welcomeChannel": "", "welcomeMessage": "", "joinDM": message})
 
+        else:
+            serverDB.update_one({"_id": str(interaction.guild.id)}, {"$set": {"joinDM": message}})
 
+        welcomedict[str(interaction.guild.id)]["joinDM"] = message
 
-
-
-
+        await interaction.response.send_message(f"Join DM message set to `{message}`")
 
 
 def setup(bot):
