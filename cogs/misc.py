@@ -35,7 +35,7 @@ class Misc(commands.Cog):
                 embed = discord.Embed(title=activity.title, description=f"by {activity.artist}", color=activity.color, url=activity.track_url)
                 embed.set_thumbnail(url=activity.album_cover_url)
                 embed.add_field(name="Album", value=activity.album, inline=False)
-                duration = str(datetime.utcnow() - activity.start.replace(tzinfo=None)).split(".")[0].split(":", 1)[1]
+                duration = str(datetime.datetime.utcnow() - activity.start.replace(tzinfo=None)).split(".")[0].split(":", 1)[1]
                 tduration = str(activity.duration).split(".")[0].split(":", 1)[1]
                 embed.add_field(name="Duration", value=f"{duration} / {tduration}", inline=False)
                 embed.set_author(name=user, icon_url=user.display_avatar.url)
@@ -57,7 +57,7 @@ class Misc(commands.Cog):
                 embed = discord.Embed(title=activity.title, description=f"by {activity.artist}", color=activity.color, url=activity.track_url)
                 embed.set_thumbnail(url=activity.album_cover_url)
                 embed.add_field(name="Album", value=activity.album, inline=False)
-                duration = str(datetime.utcnow() - activity.start.replace(tzinfo=None)).split(".")[0].split(":", 1)[1]
+                duration = str(datetime.datetime.utcnow() - activity.start.replace(tzinfo=None)).split(".")[0].split(":", 1)[1]
                 tduration = str(activity.duration).split(".")[0].split(":", 1)[1]
                 embed.add_field(name="Duration", value=f"{duration} / {tduration}", inline=False)
                 embed.set_author(name=user, icon_url=user.display_avatar.url)
