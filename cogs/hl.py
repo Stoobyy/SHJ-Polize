@@ -47,12 +47,13 @@ class Highlight(commands.Cog):
                 if user in users:
                     continue
                 flag = False
-                if len(msg) < 4:
-                    if msg.upper() in message.content.upper().split() or " " in msg and msg.upper() in message.content.upper():
-                        flag = True
-                else:
+                if " " in msg:
                     if msg.upper() in message.content.upper():
                         flag = True
+                else:
+                    for i in message.content.upper().split():
+                        if i.startswith(msg.upper()):
+                            flag = True
                 if flag:
                     users.append(user)
                     message1 = []
