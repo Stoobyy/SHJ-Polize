@@ -6,7 +6,7 @@ from ext.database import db
 startup_time = datetime.now().timestamp()
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 from pymongo import MongoClient
 
 
@@ -20,8 +20,20 @@ async def get_prefix(bot, message):
     return commands.when_mentioned_or(prefix)(bot, message)
 
 
-bot = commands.Bot(command_prefix=get_prefix, intents=discord.Intents.all())
+bot = bridge.Bot(command_prefix=get_prefix, intents=discord.Intents.all(), help_command=None)
 
+class HelpDropdown(discord.ui.Select):
+    def __init__(self, embeds):
+        self.embeds = embeds
+        options = []
+        for i in embeds:
+            options.append(discord.SelectOption(label=i.title, value=i.title))
+        super().__init__(placeholder="Choose a category", min_values=1, max_values=1, options=options)
+    
+    async def callback(self, interaction: discord.Interaction):
+        for i in self.embeds:
+            if i.title == self.values[0]:
+                await interaction.response.edit_message(embed=i, view=self.view)
 
 @bot.event
 async def on_ready():
@@ -38,18 +50,61 @@ async def on_message(message):
         await message.reply(f"My prefix is `{prefix}`")
     await bot.process_commands(message)
 
+@bot.bridge_command(name="help", description="Get help on how to use the bot")
+async def help(ctx: discord.ApplicationContext):
+    embed1 = discord.Embed(title="General", color=discord.Color.blurple())
+    embed1.add_field(name="`/help`", value="Get help on how to use the bot")
+    embed1.add_field(name="`[/]ping`", value="Get the bot's latency")
+    embed1.add_field(name="`[/]about`", value="Get info about the bot")
+    embed1.add_field(name="`[/]vote`", value="Vote for the bot")
+    embed1.add_field(name="`status`", value="Get the bot's uptime")
+    embed1.add_field(name="`prefix`", value="Change the bot's prefix")
 
-@bot.command()
-async def ping(ctx):
-    await ctx.reply(f"{bot.latency * 1000 : .2f}ms", mention_author=False)
+    embed2 = discord.Embed(title="Moderation", color=discord.Color.blurple())
+    embed2.add_field(name="`[/]kick`", value="Kick a member")
+    embed2.add_field(name="`[/]ban`", value="Ban a member")
+    embed2.add_field(name="`[/]unban`", value="Unban a member")
+    embed2.add_field(name="`purge`", value="Purge messages")
 
+    embed3 = discord.Embed(title="Misc", color=discord.Color.blurple())
+    embed3.add_field(name="`[/]spotify`", value="Get info about a spotify track a user is listening to")
+    embed3.add_field(name="`snowflake`", value="Get time difference between a discord snowflake and now or another snowflake")
+    embed3.add_field(name="`/welcome`", value="Set a welcome channel and message")
+    embed3.add_field(name="`/joindm`", value="Set a join dm message")
 
-@bot.slash_command(name="ping", description="Get the bot's latency")
+    embed4 = discord.Embed(title="Snipe", color=discord.Color.blurple())
+    embed4.add_field(name="`[/]snipe`", value="Snipe a deleted message")
+    embed4.add_field(name="`dmsnipe`", value="Snipe a deleted message in dms")
+    embed4.add_field(name="`[/]editsnipe`", value="Snipe an edited message")
+    embed4.add_field(name="`dmesnipe`", value="Snipe an edited message in dms")
+    embed4.add_field(name="`delete`", value="Delete a snipe")
+
+    embed5 = discord.Embed(title="Highlight", color=discord.Color.blurple())
+    embed5.add_field(name="`/hl add`", value="Add a highlight word")
+    embed5.add_field(name="`/hl list`", value="List all highlight words")
+    embed5.add_field(name="`/hl remove`", value="Remove a highlight word")
+
+    embed6 = discord.Embed(title="Minecraft", color=discord.Color.blurple())
+    embed6.add_field(name="`server`", value="Get info about a minecraft server")
+    embed6.add_field(name="`[/]skin`", value="Get a minecraft user's skin")
+    embed6.add_field(name="`[/]cape`", value="Get a minecraft user's cape")
+
+    embed7 = discord.Embed(title="Ez", color=discord.Color.blurple())
+    embed7.add_field(name="`/ez blacklist`", value="blacklist a channel or user")
+    embed7.add_field(name="`/ez info`", value="list blacklisted channels and users and shows deleteafter")
+    embed7.add_field(name="`/ez deleteafter`", value="Set the deleteafter time for ez messages in channels and server")
+    embed7.add_field(name="`/ez disable`", value="disable serverwide blacklist")
+
+    embeds = [embed1, embed2, embed3, embed4, embed5, embed6, embed7]
+
+    await ctx.respond(embed=embed1, view=discord.ui.View(HelpDropdown(embeds=embeds), timeout=60, disable_on_timeout=True))
+
+@bot.bridge_command(name="ping", description="Get the bot's latency")
 async def ping(ctx):
     await ctx.respond(f"{bot.latency * 1000 : .2f}ms")
 
 
-@bot.slash_command(name="prefix", description="Change the bot's prefix")
+@bot.bridge_command(name="prefix", description="Change the bot's prefix")
 @commands.guild_only()
 @commands.has_permissions(manage_guild=True)
 async def prefix(ctx, prefix: str):
@@ -67,25 +122,7 @@ async def prefix(ctx, prefix: str):
     await ctx.respond(f"Prefix set to `{prefix}`")
 
 
-@bot.command()
-@commands.has_permissions(manage_guild=True)
-@commands.guild_only()
-async def prefix(ctx, prefix: str):
-    if len(prefix) > 5:
-        await ctx.reply("Prefix cannot be longer than 5 characters", mention_author=False)
-        return
-    if prefix == prefixes.get(str(ctx.guild.id), ">"):
-        await ctx.reply("Prefix is already set to that", mention_author=False)
-        return
-    if str(ctx.guild.id) in prefixes:
-        collection.update_one({"_id": str(ctx.guild.id)}, {"$set": {"prefix": prefix}})
-    else:
-        collection.insert_one({"_id": str(ctx.guild.id), "prefix": prefix})
-    prefixes[str(ctx.guild.id)] = prefix
-    await ctx.reply(f"Prefix set to `{prefix}`", mention_author=False)
-
-
-@bot.slash_command()
+@bot.bridge_command()
 async def about(ctx: discord.ApplicationContext):
     embed = discord.Embed(title=f"About SHJ Polize", color=discord.Color.blurple(), url="https://top.gg/bot/969663219570462790")
     info = await ctx.bot.application_info()
@@ -97,23 +134,7 @@ async def about(ctx: discord.ApplicationContext):
     embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
     await ctx.respond(embed=embed)
 
-@bot.command()
-async def about(ctx: commands.Context):
-    embed = discord.Embed(title=f"About SHJ Polize", color=discord.Color.blurple(), url="https://top.gg/bot/969663219570462790")
-    info = await ctx.bot.application_info()
-    owners = [ctx.bot.get_user(i.id) for i in info.team.members]
-    embed.description = "I am made by `{}` and `{}`".format(owners[0], owners[1])
-    embed.add_field(name="Vote for me", value="[Click Here](https://top.gg/bot/969663219570462790/vote)")
-    embed.add_field(name="Source Code", value="[Click Here](https://github.com/Stoobyy/SHJ-Polize)")
-    embed.add_field(name="Support sever", value="[Click Here](https://discord.gg/z62AMMKVnX)")
-    embed.set_thumbnail(url=ctx.bot.user.display_avatar.url)
-    await ctx.reply(embed=embed)
-
-@bot.command()
-async def vote(ctx):
-    await ctx.reply("https://top.gg/bot/969663219570462790/vote", mention_author=False)
-
-@bot.slash_command(name="vote", description="Vote for the bot")
+@bot.bridge_command(name="vote", description="Vote for the bot")
 async def vote(ctx):
     await ctx.respond("https://top.gg/bot/969663219570462790/vote")
 
