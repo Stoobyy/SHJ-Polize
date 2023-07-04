@@ -35,6 +35,20 @@ class HelpDropdown(discord.ui.Select):
             if i.title == self.values[0]:
                 await interaction.response.edit_message(embed=i, view=self.view)
 
+class HelpView(discord.ui.View):
+    def __init__(self, embeds):
+        self.embeds = embeds
+        super().__init__(HelpDropdown(embeds),timeout=60, disable_on_timeout=True)
+    
+    async def on_timeout(self):
+        self.disable_all_items()
+        message = self._message or self.parent
+        try:
+            await message.edit(view=self)
+        except discord.NotFound:
+            pass
+    
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user}")
@@ -97,7 +111,7 @@ async def help(ctx: discord.ApplicationContext):
 
     embeds = [embed1, embed2, embed3, embed4, embed5, embed6, embed7]
 
-    await ctx.respond(embed=embed1, view=discord.ui.View(HelpDropdown(embeds=embeds), timeout=60, disable_on_timeout=True))
+    await ctx.respond(embed=embed1, view=HelpView(embeds))
 
 @bot.bridge_command(name="ping", description="Get the bot's latency")
 async def ping(ctx):
