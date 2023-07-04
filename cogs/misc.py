@@ -217,7 +217,7 @@ class Misc(commands.Cog):
         interaction: discord.Interaction,
         channel: discord.TextChannel = "",
         *,
-        message: str = "Hello there,{}\nWelcome to {}\nGet yourself some roles\nHave a great time here in the server!",
+        message: str = "Hello there,{user}\nWelcome to {server}\nGet yourself some roles\nHave a great time here in the server!",
     ):
         if str(interaction.guild.id) not in welcomedict:
             serverDB.insert_one({"_id": str(interaction.guild.id), "welcomeChannel": channel.id, "welcomeMessage": message, "joinDM": ""})
