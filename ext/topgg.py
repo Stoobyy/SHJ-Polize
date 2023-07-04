@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 import os
 import topgg
 
@@ -9,7 +9,7 @@ class VoteCheckError(commands.CheckFailure):
     pass
 
 @topgg.endpoint("/dblwebhook", topgg.WebhookType.BOT, auth=os.environ["BOT_AUTH"])
-async def on_bot_vote(vote_data: topgg.BotVoteData, client: commands.Bot = topgg.data(commands.Bot)):
+async def on_bot_vote(vote_data: topgg.BotVoteData, client: bridge.Bot = topgg.data(bridge.Bot)):
     user_id = vote_data.user
     try:
         user = await client.fetch_user(vote_data.user)
@@ -30,7 +30,7 @@ async def on_bot_vote(vote_data: topgg.BotVoteData, client: commands.Bot = topgg
 
 
 @topgg.endpoint("/dslwebhook", topgg.WebhookType.GUILD, auth=os.environ["SERVER_AUTH"])
-async def on_guild_vote(vote_data: topgg.GuildVoteData, client: commands.Bot = topgg.data(commands.Bot)):
+async def on_guild_vote(vote_data: topgg.GuildVoteData, client: bridge.Bot = topgg.data(bridge.Bot)):
     user = await client.fetch_user(vote_data.user)
     guild: discord.Guild = await client.fetch_guild(vote_data.guild)
     if vote_data.type == "test":

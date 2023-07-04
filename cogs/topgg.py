@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, bridge
 import os
 import topgg
 from ext.topgg import manager, dblclient
@@ -13,11 +13,11 @@ def on_autopost_error(exception: Exception):
     print("Failed to post:", exception)
 
 
-def stats(client: commands.Bot = topgg.data(commands.Bot)):
+def stats(client: bridge.Bot = topgg.data(bridge.Bot)):
     return topgg.StatsWrapper(guild_count=len(client.guilds))
 
 class Topgg(commands.Cog):
-    def __init__(self, client: commands.Bot):
+    def __init__(self, client: bridge.Bot):
         self.client = client
         self.webhook_manager = manager.set_data(self.client)
         self.dblclient = dblclient.set_data(self.client)
