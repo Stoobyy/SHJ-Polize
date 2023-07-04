@@ -215,7 +215,7 @@ class Misc(commands.Cog):
     async def welcome(
         self,
         interaction: discord.Interaction,
-        channel: discord.TextChannel,
+        channel: discord.TextChannel = "",
         *,
         message: str = "Hello there,{}\nWelcome to {}\nGet yourself some roles\nHave a great time here in the server!",
     ):
@@ -232,7 +232,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command(name="joindm", description="set the join dm message")
     @commands.has_permissions(manage_guild=True)
-    async def joindm(self, interaction: discord.Interaction, *, message):
+    async def joindm(self, interaction: discord.Interaction, *, message = ""):
         if str(interaction.guild.id) not in welcomedict:
             serverDB.insert_one({"_id": str(interaction.guild.id), "welcomeChannel": "", "welcomeMessage": "", "joinDM": message})
             welcomedict[str(interaction.guild.id)] = {"welcomeChannel": "", "welcomeMessage": "", "joinDM": message}
