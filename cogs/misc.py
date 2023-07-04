@@ -198,12 +198,12 @@ class Misc(commands.Cog):
         guildid = str(member.guild.id)
         if guildid not in welcomedict:
             return
-        if welcomedict[guildid]["joinDM"] != "":
+        if "joinDM" in welcomedict[guildid]:
             try:
                 await member.send(welcomedict[guildid]["joinDM"])
             except:
                 pass
-        if welcomedict[guildid]["welcomeChannel"] != "":
+        if "welcomeChannel" in welcomedict[guildid] and "welcomeMessage" in welcomedict[guildid]:
             channel = await self.bot.fetch_channel(welcomedict[str(member.guild.id)]["welcomeChannel"])
             try:
                 await channel.send(welcomedict[str(member.guild.id)]["welcomeMessage"].replace("{user}", member.mention).replace("{server}", member.guild.name))
@@ -221,7 +221,7 @@ class Misc(commands.Cog):
     ):
         if str(interaction.guild.id) not in welcomedict:
             serverDB.insert_one({"_id": str(interaction.guild.id), "welcomeChannel": channel.id, "welcomeMessage": message, "joinDM": ""})
-
+            welcomedict[str(interaction.guild.id)] = {"welcomeChannel": channel.id, "welcomeMessage": message, "joinDM": ""}
         else:
             serverDB.update_one({"_id": str(interaction.guild.id)}, {"$set": {"welcomeChannel": channel.id, "welcomeMessage": message}})
 
@@ -235,6 +235,7 @@ class Misc(commands.Cog):
     async def joindm(self, interaction: discord.Interaction, *, message):
         if str(interaction.guild.id) not in welcomedict:
             serverDB.insert_one({"_id": str(interaction.guild.id), "welcomeChannel": "", "welcomeMessage": "", "joinDM": message})
+            welcomedict[str(interaction.guild.id)] = {"welcomeChannel": "", "welcomeMessage": "", "joinDM": message}
 
         else:
             serverDB.update_one({"_id": str(interaction.guild.id)}, {"$set": {"joinDM": message}})
