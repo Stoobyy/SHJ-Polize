@@ -94,9 +94,9 @@ async def help(ctx: discord.ApplicationContext):
     embed4.add_field(name="`delete`", value="Delete a snipe")
 
     embed5 = discord.Embed(title="Highlight", color=discord.Color.blurple())
-    embed5.add_field(name="`/hl add`", value="Add a highlight word")
-    embed5.add_field(name="`/hl list`", value="List all highlight words")
-    embed5.add_field(name="`/hl remove`", value="Remove a highlight word")
+    embed5.add_field(name="`/highlight add`", value="Add a highlight word")
+    embed5.add_field(name="`/highlight list`", value="List all highlight words")
+    embed5.add_field(name="`/highlight remove`", value="Remove a highlight word")
 
     embed6 = discord.Embed(title="Minecraft", color=discord.Color.blurple())
     embed6.add_field(name="`server`", value="Get info about a minecraft server")
