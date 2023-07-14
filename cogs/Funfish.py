@@ -40,12 +40,14 @@ class Funfish(commands.Cog):
         try:
             channel = await self.bot.fetch_channel(734011317798830111)
             await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
-        except:
-            pass
+        except error as e:
+            raise e
     
     
     @commands.Cog.listener()
     async def on_message(self, message):
+        if not message.guild:
+            return
         if message.guild.id != 723259592800206940:
             return
         if message.author.id != 302050872383242240:
@@ -64,8 +66,8 @@ class Funfish(commands.Cog):
             try:
                 channel = await self.bot.fetch_channel(757581111512530954) 
                 await channel.send("<@&773548077024804874> the server needs your help. Bump it please")
-            except:
-                pass
+            except error as e:
+                raise e
     
     @bump_check.before_loop
     async def before_my_task(self): 
