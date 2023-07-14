@@ -1,12 +1,14 @@
 import discord
 from discord.ext import commands
 import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 
 class Funfish(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.timestamp = 0
+        self.bump_check.start()
     
     def dxb_status(self):
         return self.bot.get_guild(723259592800206940).get_member(763642116953604098).status == discord.Status.online
@@ -35,9 +37,38 @@ class Funfish(commands.Cog):
             return
         if self.dxb_status():
             return
-        channel = await self.bot.fetch_channel(734011317798830111)
-        await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
+        try:
+            channel = await self.bot.fetch_channel(734011317798830111)
+            await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
+        except:
+            pass
+        
+     @commands.Cog.listener()
+     async def on_message(self, message):
+         if message.guild.id != 723259592800206940:
+             return
+         if message.author.id != 302050872383242240:
+             return
+         if message.embeds:
+             if message.embeds[0].description.startswith("Bump done"):
+                 self.timestamp = message.created_at
 
+    @tasks.loop(seconds=60) 
+     async def bump_check(self):
+        if self.timestamp == 0:
+            return
+        if self.dxb_status():
+            return
+        if datetime.now(tzinfo=timezone.utc).timestamp - self.timestamp > 7200:
+            try:
+                channel = await self.bot.fetch_channel(757581111512530954) 
+                await channel.send("<@&773548077024804874> the server needs your help. Bump it please")
+            except:
+                pass
+
+    @bump_check.before_loop
+     async def before_my_task(self): 
+         await self.wait_until_ready()
 
 def setup(bot):
     bot.add_cog(Funfish(bot))
