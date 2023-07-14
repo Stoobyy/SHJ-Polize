@@ -42,17 +42,18 @@ class Funfish(commands.Cog):
             await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
         except:
             pass
-        
-     @commands.Cog.listener()
-     async def on_message(self, message):
-         if message.guild.id != 723259592800206940:
-             return
-         if message.author.id != 302050872383242240:
-             return
-         if message.embeds:
-             if message.embeds[0].description.startswith("Bump done"):
-                 self.timestamp = message.created_at
-
+    
+    
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.guild.id != 723259592800206940:
+            return
+        if message.author.id != 302050872383242240:
+            return
+        if message.embeds:
+            if message.embeds[0].description.startswith("Bump done"):
+                self.timestamp = message.created_at
+    
     @tasks.loop(seconds=60) 
      async def bump_check(self):
         if self.timestamp == 0:
