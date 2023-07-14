@@ -31,7 +31,7 @@ class Funfish(commands.Cog):
     
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        if ctx.guild.id != 723259592800206940:
+        if member.guild.id != 723259592800206940:
             return
         if self.dxb_status():
             return
