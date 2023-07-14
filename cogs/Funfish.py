@@ -55,7 +55,7 @@ class Funfish(commands.Cog):
                 self.timestamp = message.created_at
     
     @tasks.loop(seconds=60) 
-     async def bump_check(self):
+    async def bump_check(self):
         if self.timestamp == 0:
             return
         if self.dxb_status():
@@ -66,11 +66,11 @@ class Funfish(commands.Cog):
                 await channel.send("<@&773548077024804874> the server needs your help. Bump it please")
             except:
                 pass
-
+    
     @bump_check.before_loop
-     async def before_my_task(self): 
-         await self.wait_until_ready()
-
+    async def before_my_task(self): 
+        await self.wait_until_ready()
+    
 def setup(bot):
     bot.add_cog(Funfish(bot))
     print("Funfish cog loaded")
