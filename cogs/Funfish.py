@@ -75,7 +75,7 @@ class Funfish(commands.Cog):
     
     @bump_check.before_loop
     async def before_my_task(self): 
-        await self.wait_until_ready()
+        await self.bot.wait_until_ready()
     
 def setup(bot):
     bot.add_cog(Funfish(bot))
