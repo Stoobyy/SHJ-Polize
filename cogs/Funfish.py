@@ -54,7 +54,7 @@ class Funfish(commands.Cog):
             return
         if message.embeds:
             if message.embeds[0].description.startswith("Bump done"):
-                self.timestamp = message.created_at
+                self.timestamp = message.created_at.timestamp()
     
     @tasks.loop(seconds=60) 
     async def bump_check(self):
@@ -62,7 +62,7 @@ class Funfish(commands.Cog):
             return
         if self.dxb_status():
             return
-        if datetime.now(tzinfo=timezone.utc).timestamp - self.timestamp > 7200:
+        if datetime.now().timestamp() - self.timestamp > 7200:
             try:
                 channel = await self.bot.fetch_channel(757581111512530954) 
                 await channel.send("<@&773548077024804874> the server needs your help. Bump it please")
