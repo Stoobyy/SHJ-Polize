@@ -19,8 +19,12 @@ async def get_prefix(bot, message):
     prefix = prefixes.get(str(message.guild.id if message.guild else None), ">")
     return commands.when_mentioned_or(prefix)(bot, message)
 
+intents = discord.Intents.default()
+intents.members = True
+# intents.presences = True
+intents.message_content = True
 
-bot = bridge.Bot(command_prefix=get_prefix, intents=discord.Intents.all(), help_command=None)
+bot = bridge.Bot(command_prefix=get_prefix, intents=intents, help_command=None)
 
 class HelpDropdown(discord.ui.Select):
     def __init__(self, embeds):
