@@ -12,7 +12,7 @@ serverDB = db["serverConfig"]
 welcomedict = {}
 
 
-with open("ext\games.json", "r") as f:
+with open("ext/games.json", "r") as f:
     GAMES = json.load(f)
 
 
