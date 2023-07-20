@@ -3,6 +3,7 @@ from discord.ext import commands
 import datetime
 from datetime import timedelta, timezone
 import asyncio
+import json
 
 from ext.database import db
 
@@ -10,6 +11,15 @@ serverDB = db["serverConfig"]
 
 welcomedict = {}
 
+
+with open("ext\games.json", "r") as f:
+    GAMES = json.load(f)
+
+
+async def get_game(ctx: discord.AutocompleteContext):
+    if ctx.value == "":
+        return GAMES
+    return [game for game in GAMES if ctx.value.lower() in game.lower()]
 
 class Misc(commands.Cog):
     def __init__(self, bot):
@@ -244,6 +254,29 @@ class Misc(commands.Cog):
 
         await interaction.response.send_message(f"Join DM message set to `{message}`")
 
+    @commands.slash_command(name='teammates', description='Get a list of all users playing a certain game')
+    @discord.option(name='game', description='The game to search for', required=True, autocomplete=get_game)
+    async def teammates(self, interaction: discord.Interaction, game: str):
+        guild = interaction.guild
+        members = []
+        icon = None
+        for member in guild.members:
+            if not member.activities:
+                continue
+            for activity in member.activities:
+                if not activity.type == discord.ActivityType.playing:
+                    continue
+                if activity.name.lower() == game.lower():
+                    members.append(member)
+                    if not icon:
+                        icon = activity.small_image_url or activity.large_image_url
+        if not members:
+            await interaction.response.send_message(f"No one is playing {game}")
+            return
+        embed = discord.Embed(title=f"Users playing {game}", color=discord.Color.random(), thumbnail=icon)
+        for member in members:
+            embed.add_field(name=member.name, value=member.mention, inline=False)
+        await interaction.response.send_message(embed=embed)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
