@@ -270,10 +270,20 @@ class Misc(commands.Cog):
                     members.append(member)
                     if not icon:
                         icon = activity.small_image_url or activity.large_image_url
-        if not members:
-            await interaction.response.send_message(f"No one is playing {game}")
+                    game = activity.name
+                    
+        if len(members) == 0:
+            embed = discord.Embed(title=f"No users playing {game}", color=discord.Color.red())
+            embed.set_thumbnail(url = 'https://em-content.zobj.net/thumbs/160/apple/21/pensive-face_1f614.png')
+            embed.set_footer(text='Try again later')
+            embed.timestamp = datetime.datetime.utcnow()
+            await interaction.response.send_message(embed=embed)
             return
-        embed = discord.Embed(title=f"Users playing {game}", color=discord.Color.random(), thumbnail=icon)
+        embed = discord.Embed(title=f"Users playing {game}", color=discord.Color.random())
+        embed.set_footer(text=f"Total users: {len(members)}")
+        print(icon.url)
+        embed.set_thumbnail(url=f'attachment://{icon}')
+        embed.timestamp = datetime.datetime.utcnow()
         for member in members:
             embed.add_field(name=member.name, value=member.mention, inline=False)
         await interaction.response.send_message(embed=embed)

@@ -21,7 +21,7 @@ async def get_prefix(bot, message):
 
 intents = discord.Intents.default()
 intents.members = True
-# intents.presences = True
+intents.presences = True
 intents.message_content = True
 
 bot = bridge.Bot(command_prefix=get_prefix, intents=intents, help_command=None)
