@@ -284,7 +284,7 @@ class Misc(commands.Cog):
             return
         embed = discord.Embed(title=f"Users playing {game}", color=discord.Color.random())
         embed.set_footer(text=f"Total users: {len(members)}")
-        if not icon:
+        if icon:
             embed.set_thumbnail(url=icon)
         embed.timestamp = datetime.datetime.utcnow()
         for member in members:
