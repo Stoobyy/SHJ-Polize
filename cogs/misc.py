@@ -267,7 +267,7 @@ class Misc(commands.Cog):
                 if not activity.type == discord.ActivityType.playing:
                     continue
                 if activity.name.lower() == game.lower():
-                    members.append(member)
+                    members[member] = activity.start
                     if not icon:
                         icon = activity.small_image_url or activity.large_image_url
                     game = activity.name
@@ -285,7 +285,11 @@ class Misc(commands.Cog):
             embed.set_thumbnail(url=icon)
         embed.timestamp = datetime.datetime.utcnow()
         for member in members:
-            embed.add_field(name=member.name, value=member.mention, inline=False)
+            if members[member]:
+                value = f"Started: <t:{int(members[member].timestamp())}:R>"
+            else:	
+                value = "Started: Unknown"
+            embed.add_field(name=f"{member.mention}({member.name})", value=value)
         await interaction.response.send_message(embed=embed)
 
 def setup(bot):

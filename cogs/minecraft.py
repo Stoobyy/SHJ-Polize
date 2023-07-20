@@ -10,9 +10,8 @@ from PIL import Image, ImageFilter
 from io import BytesIO
 import requests
 
-clients = {"Lunar Client": "https://pbs.twimg.com/profile_images/1608698913476812801/uLTLhANK_400x400.jpg", "Badlion Client": "https://assets.badlion.net/site/assets/badlion-logo.webp", "Feather": "https://pbs.twimg.com/profile_images/1486362057750421507/Lb5PEFp1_400x400.png", "Minecraft (Vanilla)": "https://cdn.icon-icons.com/icons2/2699/PNG/512/minecraft_logo_icon_168974.png"}
-async def get_client(ctx: discord.AutocompleteContext):
-    return ["Lunar Client", "Badlion Client", "Feather", "Minecraft (Vanilla)"]
+CLIENTS = {"Minecraft": "https://cdn.icon-icons.com/icons2/2699/PNG/512/minecraft_logo_icon_168974.png", "Lunar Client": "https://pbs.twimg.com/profile_images/1608698913476812801/uLTLhANK_400x400.jpg", "Badlion": "https://assets.badlion.net/site/assets/badlion-logo.webp", "Feather": "https://pbs.twimg.com/profile_images/1486362057750421507/Lb5PEFp1_400x400.png", "LabyMod": "https://cdn.discordapp.com/app-assets/576456544942686228/605344043886575617.png", "Essential" : "https://cdn.discordapp.com/app-assets/894984875755597825/1006995398029758514.png", "SkyClient" : "https://cdn.discordapp.com/app-assets/857240025288802356/976838645833158666.png"}
+
 
 class CapeDropdown(discord.ui.Select):
     def __init__(self, embeds, files):
@@ -251,11 +250,11 @@ class Mc(commands.Cog):
         )
         await ctx.followup.send(embed=embed, view=CapeView(embeds, files))
     
-    @commands.slash_command(name='client', description='Get a list of all users playing on a certain client')
-    @discord.option(name='client', description='The client to search for', required=True, autocomplete=get_client)
+    @commands.slash_command(name='mc_client', description='Get a list of all users playing on a certain client')
+    @discord.option(name='client', description='The client to search for', required=True, choices=list(CLIENTS))
     async def client(self, interaction: discord.Interaction, client: str):
         guild = interaction.guild
-        members = []
+        members = {}
         icon = None
         for member in guild.members:
             if not member.activities:
@@ -263,10 +262,16 @@ class Mc(commands.Cog):
             for activity in member.activities:
                 if not activity.type == discord.ActivityType.playing:
                     continue
-                if activity.name.lower() == client.split('(')[0].strip().lower():
-                    members.append(member)
-                    icon = clients[client]
-                    client = activity.name
+                if activity.name.lower().startswith(client.lower()):
+                    text = f"{activity.name} {activity.details} {activity.state} {activity.small_image_text} {activity.large_image_text}"
+                    version = None
+                    for word in text.split():
+                        if word.startswith("1.") and word.split(".")[1].isdigit() and int(word.split(".")[1])<=21 and len(word.split(".")) in [2,3]:
+                            version = word
+                            break
+                    time = activity.start
+                    members[member] = time, version
+                    icon = CLIENTS[client]
                     
         if len(members) == 0:
             embed = discord.Embed(title=f"No users playing on {client}", color=discord.Color.red())
@@ -280,7 +285,17 @@ class Mc(commands.Cog):
         embed.set_thumbnail(url=icon)
         embed.timestamp = datetime.utcnow()
         for member in members:
-            embed.add_field(name=member.name, value=member.mention, inline=False)
+            time = members[member][0]
+            if time is None:
+                time = "Unknown"
+            else:
+                time = f"<t:{int(time.timestamp())}:R>"
+            version = members[member][1]
+            if version is None:
+                version = ""
+            else:
+                version = f"Version: {version} - "
+            embed.add_field(name=f"{member.mention}({member.name})", value=f"{version}Started: {time}")
         await interaction.response.send_message(embed=embed)
 
 
