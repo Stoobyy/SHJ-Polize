@@ -10,6 +10,9 @@ from PIL import Image, ImageFilter
 from io import BytesIO
 import requests
 
+clients = {"Lunar Client": "https://pbs.twimg.com/profile_images/1608698913476812801/uLTLhANK_400x400.jpg", "Badlion Client": "https://assets.badlion.net/site/assets/badlion-logo.webp", "Feather": "https://pbs.twimg.com/profile_images/1486362057750421507/Lb5PEFp1_400x400.png", "Minecraft (Vanilla)": "https://cdn.icon-icons.com/icons2/2699/PNG/512/minecraft_logo_icon_168974.png"}
+async def get_client(ctx: discord.AutocompleteContext):
+    return ["Lunar Client", "Badlion Client", "Feather", "Minecraft (Vanilla)"]
 
 class CapeDropdown(discord.ui.Select):
     def __init__(self, embeds, files):
@@ -247,6 +250,38 @@ class Mc(commands.Cog):
             colour=15105570,
         )
         await ctx.followup.send(embed=embed, view=CapeView(embeds, files))
+    
+    @commands.slash_command(name='client', description='Get a list of all users playing on a certain client')
+    @discord.option(name='client', description='The client to search for', required=True, autocomplete=get_client)
+    async def client(self, interaction: discord.Interaction, client: str):
+        guild = interaction.guild
+        members = []
+        icon = None
+        for member in guild.members:
+            if not member.activities:
+                continue
+            for activity in member.activities:
+                if not activity.type == discord.ActivityType.playing:
+                    continue
+                if activity.name.lower() == client.split('(')[0].strip().lower():
+                    members.append(member)
+                    icon = clients[client]
+                    client = activity.name
+                    
+        if len(members) == 0:
+            embed = discord.Embed(title=f"No users playing on {client}", color=discord.Color.red())
+            embed.set_thumbnail(url = 'https://em-content.zobj.net/thumbs/160/apple/21/pensive-face_1f614.png')
+            embed.set_footer(text='Try again later')
+            embed.timestamp = datetime.utcnow()
+            await interaction.response.send_message(embed=embed)
+            return
+        embed = discord.Embed(title=f"Users playing {client}", color=discord.Color.random())
+        embed.set_footer(text=f"Total users: {len(members)}")
+        embed.set_thumbnail(url=icon)
+        embed.timestamp = datetime.utcnow()
+        for member in members:
+            embed.add_field(name=member.name, value=member.mention, inline=False)
+        await interaction.response.send_message(embed=embed)
 
 
 def setup(bot):

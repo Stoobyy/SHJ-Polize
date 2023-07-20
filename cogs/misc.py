@@ -254,7 +254,7 @@ class Misc(commands.Cog):
 
         await interaction.response.send_message(f"Join DM message set to `{message}`")
 
-    @commands.slash_command(name='teammates', description='Get a list of all users playing a certain game')
+    @commands.slash_command(name='whosplaying', description='Get a list of all users playing a certain game')
     @discord.option(name='game', description='The game to search for', required=True, autocomplete=get_game)
     async def teammates(self, interaction: discord.Interaction, game: str):
         guild = interaction.guild
@@ -281,8 +281,8 @@ class Misc(commands.Cog):
             return
         embed = discord.Embed(title=f"Users playing {game}", color=discord.Color.random())
         embed.set_footer(text=f"Total users: {len(members)}")
-        print(icon.url)
-        embed.set_thumbnail(url=f'attachment://{icon}')
+        if not icon:
+            embed.set_thumbnail(url=icon)
         embed.timestamp = datetime.datetime.utcnow()
         for member in members:
             embed.add_field(name=member.name, value=member.mention, inline=False)
