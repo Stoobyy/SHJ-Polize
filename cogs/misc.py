@@ -258,7 +258,7 @@ class Misc(commands.Cog):
     @discord.option(name='game', description='The game to search for', required=True, autocomplete=get_game)
     async def teammates(self, interaction: discord.Interaction, game: str):
         guild = interaction.guild
-        members = []
+        members = {}
         icon = None
         for member in guild.members:
             if not member.activities:
@@ -269,7 +269,10 @@ class Misc(commands.Cog):
                 if activity.name.lower() == game.lower():
                     members[member] = activity.start
                     if not icon:
-                        icon = activity.small_image_url or activity.large_image_url
+                        try:
+                            icon = activity.small_image_url or activity.large_image_url
+                        except:
+                            pass
                     game = activity.name
                     
         if len(members) == 0:
@@ -287,9 +290,9 @@ class Misc(commands.Cog):
         for member in members:
             if members[member]:
                 value = f"Started: <t:{int(members[member].timestamp())}:R>"
-            else:	
+            else:
                 value = "Started: Unknown"
-            embed.add_field(name=f"{member.mention}({member.name})", value=value)
+            embed.add_field(name=f"{member.name}", value=value)
         await interaction.response.send_message(embed=embed)
 
 def setup(bot):

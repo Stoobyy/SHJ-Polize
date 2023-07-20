@@ -255,7 +255,7 @@ class Mc(commands.Cog):
     async def client(self, interaction: discord.Interaction, client: str):
         guild = interaction.guild
         members = {}
-        icon = None
+        icon = CLIENTS[client]
         for member in guild.members:
             if not member.activities:
                 continue
@@ -271,11 +271,10 @@ class Mc(commands.Cog):
                             break
                     time = activity.start
                     members[member] = time, version
-                    icon = CLIENTS[client]
                     
         if len(members) == 0:
             embed = discord.Embed(title=f"No users playing on {client}", color=discord.Color.red())
-            embed.set_thumbnail(url = 'https://em-content.zobj.net/thumbs/160/apple/21/pensive-face_1f614.png')
+            embed.set_thumbnail(url = icon)
             embed.set_footer(text='Try again later')
             embed.timestamp = datetime.utcnow()
             await interaction.response.send_message(embed=embed)
@@ -295,7 +294,7 @@ class Mc(commands.Cog):
                 version = ""
             else:
                 version = f"Version: {version} - "
-            embed.add_field(name=f"{member.mention}({member.name})", value=f"{version}Started: {time}")
+            embed.add_field(name=f"{member.name}", value=f"{version}Started: {time}")
         await interaction.response.send_message(embed=embed)
 
 
