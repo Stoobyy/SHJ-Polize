@@ -40,7 +40,7 @@ class Funfish(commands.Cog):
         try:
             channel = await self.bot.fetch_channel(734011317798830111)
             await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
-        except error as e:
+        except Exception as e:
             raise e
     
     
@@ -67,7 +67,7 @@ class Funfish(commands.Cog):
                 channel = await self.bot.fetch_channel(757581111512530954) 
                 await channel.send("<@&773548077024804874> the server needs your help. Bump it please")
                 self.timestamp = 0
-            except error as e:
+            except Exception as e:
                 raise e
     
     @bump_check.before_loop
