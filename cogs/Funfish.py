@@ -11,6 +11,7 @@ class Funfish(commands.Cog):
         self.bump_check.start()
     
     def dxb_status(self):
+        return True
         return self.bot.get_guild(723259592800206940).get_member(763642116953604098).status == discord.Status.online
     
     @commands.command(hidden=True)
