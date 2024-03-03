@@ -18,7 +18,7 @@ class Funfish(commands.Cog):
     async def serverinfo(self, ctx):
         if ctx.guild.id != 723259592800206940:
             return
-        embed = discord.Embed(title="FishyMC", description="Version = `1.19 `\nIP = `funfishmc.aternos.me`", colour=2123412)
+        embed = discord.Embed(title="FishyMC", description="Version = `1.20.4 `\nIP = `funfish.aternos.me`", colour=2123412)
         embedd = discord.Embed(
             title="Rules",
             description="""1. Swearing is allowed, but don’t get personal.
@@ -29,7 +29,6 @@ class Funfish(commands.Cog):
     Players found to break these rules are subject to severe punishments. These punishments include chat mutes, temporary bans, permanant bans, etc. Punishment will depend on the severity of the offense commited.""",
             colour=1243903,
         )
-        await ctx.send(content="FishyMC V(Lost track) is finally live.", embed=embed)
         await ctx.send(embed=embedd)
     
     @commands.Cog.listener()

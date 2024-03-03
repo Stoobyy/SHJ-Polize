@@ -68,7 +68,7 @@ class Mc(commands.Cog):
     async def server(self, ctx, ip=None):
         if ip is None:
             if ctx.guild.id == 723259592800206940:
-                ip = "funfishmc.aternos.me"
+                ip = "funfish.aternos.me"
             else:
                 await ctx.reply("Please specify an IP", mention_author=False)
                 return
