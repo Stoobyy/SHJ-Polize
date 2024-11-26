@@ -26,6 +26,16 @@ intents.message_content = True
 
 bot = bridge.Bot(command_prefix=get_prefix, intents=intents, help_command=None)
 
+for cog in os.listdir("./cogs"):
+    if cog.endswith(".py"):
+        try:
+            bot.load_extension(f"cogs.{cog[:-3]}", store=False)
+        except Exception as e:
+            print(f"Failed to load {cog[:-3]}")
+            print(e)
+
+bot.load_extension("jishaku")
+
 class HelpDropdown(discord.ui.Select):
     def __init__(self, embeds):
         self.embeds = embeds
@@ -236,17 +246,6 @@ async def on_application_command_error(ctx, error):
     else:
         await ctx.respond(f"`{type(error)}\n{error}`", ephemeral=True)
         raise error
-
-
-for cog in os.listdir("./cogs"):
-    if cog.endswith(".py"):
-        try:
-            bot.load_extension(f"cogs.{cog[:-3]}", store=False)
-        except Exception as e:
-            print(f"Failed to load {cog[:-3]}")
-            print(e)
-
-bot.load_extension("jishaku")
 
 token = os.environ["TOKEN"]
 
