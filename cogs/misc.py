@@ -34,7 +34,7 @@ class Misc(commands.Cog):
             del welcomedict[i["_id"]]["_id"]
 
     @commands.slash_command()
-    async def spotify(self, interaction: discord.Interaction, user: discord.Member = None):
+    async def spotify(self, interaction: discord.ApplicationContext, user: discord.Member = None):
         user = user or interaction.user
         user = interaction.guild.get_member(user.id)
         if not user.activities:
@@ -56,7 +56,7 @@ class Misc(commands.Cog):
         await interaction.response.send_message("User is not listening to Spotify", ephemeral=True)
 
     @commands.user_command(name="Spotify")
-    async def _spotify(self, interaction: discord.Interaction, user: discord.Member = None):
+    async def _spotify(self, interaction: discord.ApplicationContext, user: discord.Member = None):
         user = user or interaction.user
         user = interaction.guild.get_member(user.id)
         if not user.activities:
@@ -105,7 +105,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command(name="say", description="say something as the bot", guild_ids=[906909577394663484])
     @commands.is_owner()
-    async def say(self, interaction: discord.Interaction, message: str, guild_id: str, channel_id: str, reply_message_id: str = None):
+    async def say(self, interaction: discord.ApplicationContext, message: str, guild_id: str, channel_id: str, reply_message_id: str = None):
         try:
             guild: discord.Guild = await self.bot.fetch_guild(int(guild_id))
         except discord.Forbidden:
@@ -143,7 +143,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command(name="copy", description="you dont wanna know", guild_ids=[906909577394663484])
     @commands.is_owner()
-    async def copy(self, interaction: discord.Interaction, guild_id: str, channel_id: str):
+    async def copy(self, interaction: discord.ApplicationContext, guild_id: str, channel_id: str):
         # copy user messages from one channel to another and timeout after 2 minutes
         try:
             guild: discord.Guild = await self.bot.fetch_guild(int(guild_id))
@@ -196,7 +196,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command(name="stop", description="stop the copy command", guild_ids=[906909577394663484])
     @commands.is_owner()
-    async def stop(self, interaction: discord.Interaction):
+    async def stop(self, interaction: discord.ApplicationContext):
         if self.copy_message:
             self.copy_message = False
             await interaction.response.send_message("Copy stopped")
@@ -224,7 +224,7 @@ class Misc(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def welcome(
         self,
-        interaction: discord.Interaction,
+        interaction: discord.ApplicationContext,
         channel: discord.TextChannel = "",
         *,
         message: str = "Hello there,{user}\nWelcome to {server}\nGet yourself some roles\nHave a great time here in the server!",
@@ -242,7 +242,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command(name="joindm", description="set the join dm message")
     @commands.has_permissions(manage_guild=True)
-    async def joindm(self, interaction: discord.Interaction, *, message = ""):
+    async def joindm(self, interaction: discord.ApplicationContext, *, message = ""):
         if str(interaction.guild.id) not in welcomedict:
             serverDB.insert_one({"_id": str(interaction.guild.id), "welcomeChannel": "", "welcomeMessage": "", "joinDM": message})
             welcomedict[str(interaction.guild.id)] = {"welcomeChannel": "", "welcomeMessage": "", "joinDM": message}
@@ -256,7 +256,7 @@ class Misc(commands.Cog):
 
     @commands.slash_command(name='whosplaying', description='Get a list of all users playing a certain game')
     @discord.option(name='game', description='The game to search for', required=True, autocomplete=get_game)
-    async def teammates(self, interaction: discord.Interaction, game: str):
+    async def teammates(self, interaction: discord.ApplicationContext, game: str):
         guild = interaction.guild
         members = {}
         icon = None

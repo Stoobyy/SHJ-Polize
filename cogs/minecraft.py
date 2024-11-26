@@ -252,7 +252,7 @@ class Mc(commands.Cog):
     
     @commands.slash_command(name='mc_client', description='Get a list of all users playing on a certain client')
     @discord.option(name='client', description='The client to search for', required=True, choices=list(CLIENTS))
-    async def client(self, interaction: discord.Interaction, client: str):
+    async def client(self, interaction: discord.ApplicationContext, client: str):
         guild = interaction.guild
         members = {}
         icon = CLIENTS[client]
