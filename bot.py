@@ -34,7 +34,7 @@ for cog in os.listdir("./cogs"):
             print(f"Failed to load {cog[:-3]}")
             print(e)
 
-bot.load_extension("jishaku")
+# bot.load_extension("jishaku")
 
 class HelpDropdown(discord.ui.Select):
     def __init__(self, embeds):
