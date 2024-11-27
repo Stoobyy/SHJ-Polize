@@ -64,8 +64,8 @@ class Funfish(commands.Cog):
             return
         if datetime.now().timestamp() - self.timestamp > 7200:
             try:
-                channel = await self.bot.fetch_channel(757581111512530954) 
-                await channel.send("<@&773548077024804874> the server needs your help. Bump it please")
+                channel : discord.TextChannel = await self.bot.fetch_channel(757581111512530954) 
+                await channel.send("<@&773548077024804874> the server needs your help. Bump it please", allowed_mentions=discord.AllowedMentions(roles=True))
                 self.timestamp = 0
             except Exception as e:
                 raise e
