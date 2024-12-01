@@ -4,5 +4,5 @@ pymongo[srv]
 psutil
 pillow
 jishaku
-git+https://github.com/top-gg/python-sdk/
+git+https://github.com/null8626/python-sdk.git@patch-1
 mojang
