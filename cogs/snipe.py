@@ -67,6 +67,8 @@ class DeleteView(View):
                     await message.delete()
                 except discord.Forbidden:
                     pass
+                except discord.NotFound:
+                    pass
         else:
             await interaction.response.send_message("You are not allowed to delete this message <a:nochamp:1021040710142668870>", ephemeral=True)
 
@@ -412,7 +414,7 @@ class Snipe(commands.Cog):
                 s_user = None
 
             try:
-                s_user = message.interaction.user.id
+                s_user = message.interaction_metadata.user.id
             except:
                 s_user = None
 
@@ -423,6 +425,8 @@ class Snipe(commands.Cog):
                         try:
                             await snipemsg.delete()
                         except discord.Forbidden:
+                            pass
+                        except discord.NotFound:
                             pass
             if s_m == True:
                 del msg["DontSnipe"]
@@ -444,7 +448,7 @@ class Snipe(commands.Cog):
                 s_user = None
 
             try:
-                s_user = message.interaction.user.id
+                s_user = message.interaction_metadata.user.id
             except:
                 s_user = None
 
@@ -455,6 +459,8 @@ class Snipe(commands.Cog):
                     if s_user != None:
                         await snipemsg.delete()
                 except discord.Forbidden:
+                    pass
+                except discord.NotFound:
                     pass
             else:
                 try:
