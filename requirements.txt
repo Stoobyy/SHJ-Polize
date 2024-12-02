@@ -3,6 +3,6 @@ py-cord
 pymongo[srv]
 psutil
 pillow
-jishaku
+jishaku==2.3.2
 git+https://github.com/null8626/python-sdk.git@patch-1
 mojang
