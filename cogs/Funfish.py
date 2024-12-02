@@ -75,7 +75,7 @@ class Funfish(commands.Cog):
     @discord.option(name="member", description="Mention the user to remove from gulag", required=True)
     async def _nikal(self, ctx, member: discord.Member):
         try:
-            gulag_role = ctx.guild.get_role(757148530082054194)  
+            gulag_role = ctx.guild.get_role(757148530082054194)
             if gulag_role in member.roles:
                 await member.remove_roles(gulag_role, reason="Removed from gulag by command")
                 await ctx.respond(f"{member.mention} has clutched gulag!")
@@ -119,7 +119,7 @@ class Funfish(commands.Cog):
             return
         try:
             channel = await self.bot.fetch_channel(734011317798830111)
-            await channel.send(f'Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!')
+            await channel.send(f"Hello there,{member.mention}\nGet yourself some roles from <#767320632663998494>\nHave a great time here in the server!")
         except Exception as e:
             raise e
 
@@ -130,32 +130,39 @@ class Funfish(commands.Cog):
         try:
             level = int(message.content.split()[-1].strip("!"))
             user = message.mentions[0]
-            role = None
-            if level >= 100 and not discord.utils.get(user.roles, id=734307600547708978):
-                role = 734307600547708978
-            elif level >= 70 and not discord.utils.get(user.roles, id=734306269430677515):
-                role = 734306269430677515
-            elif level >= 65 and not discord.utils.get(user.roles, id=734307591630356530):
-                role = 734307591630356530
-            elif level >= 50 and not discord.utils.get(user.roles, id=734304865794392094):
-                role = 734304865794392094
-            elif level >= 35 and not discord.utils.get(user.roles, id=734302384032841759):
-                role = 734302384032841759
-            elif level >= 25 and not discord.utils.get(user.roles, id=757698628360863876):
-                role = 757698628360863876
-            elif level >= 10 and not discord.utils.get(user.roles, id=734305511759151144):
-                role = 734305511759151144
-                await user.remove_roles(discord.Object(id=734302084350083166))
-            elif level >= 5 and not discord.utils.get(user.roles, id=734302084350083166):
-                role = 734302084350083166
-                await user.remove_roles(discord.Object(id=756979356332589117))
-            elif level >= 3 and not discord.utils.get(user.roles, id=756979356332589117):
-                role = 756979356332589117
-                await user.remove_roles(discord.Object(id=734056569041322066))
-            if role:
-                await user.add_roles(discord.Object(id=role))
+            roles_to_remove = []
+            role_to_assign = None
+            if level >= 100:
+                role_to_assign = 734307600547708978
+            elif level >= 70:
+                role_to_assign = 734306269430677515
+            elif level >= 65:
+                role_to_assign = 734307591630356530
+            elif level >= 50:
+                role_to_assign = 734304865794392094
+            elif level >= 35:
+                role_to_assign = 734302384032841759
+            elif level >= 25:
+                role_to_assign = 757698628360863876
+            elif level >= 10:
+                role_to_assign = 734305511759151144
+                roles_to_remove = [734302084350083166, 756979356332589117, 734056569041322066]
+            elif level >= 5:
+                role_to_assign = 734302084350083166
+                roles_to_remove = [756979356332589117, 734056569041322066]
+            elif level >= 3:
+                role_to_assign = 756979356332589117
+                roles_to_remove = [734056569041322066]
+
+            if role_to_assign and not discord.utils.get(user.roles, id=role_to_assign):
+                for role_id in roles_to_remove:
+                    try:
+                        await user.remove_roles(discord.Object(id=role_id))
+                    except Exception:
+                        pass
+                await user.add_roles(discord.Object(id=role_to_assign))
                 channel: discord.TextChannel = await self.bot.fetch_channel(734011317798830111)
-                await channel.send(embed=discord.Embed(description=roles_data[role].format(user.mention)))
+                await channel.send(embed=discord.Embed(description=roles_data[role_to_assign].format(user.mention)))
         except Exception as e:
             if isinstance(e, commands.errors.BotMissingPermissions):
                 pass
@@ -182,7 +189,7 @@ class Funfish(commands.Cog):
             return
         if datetime.now().timestamp() - self.timestamp > 7200:
             try:
-                channel : discord.TextChannel = await self.bot.fetch_channel(757581111512530954) 
+                channel: discord.TextChannel = await self.bot.fetch_channel(757581111512530954)
                 await channel.send("<@&773548077024804874> the server needs your help. Bump it please")
                 self.timestamp = 0
             except Exception as e:
@@ -223,6 +230,7 @@ class Funfish(commands.Cog):
     @bump_check.before_loop
     async def before_my_task(self):
         await self.bot.wait_until_ready()
+
 
 def setup(bot):
     bot.add_cog(Funfish(bot))
