@@ -128,8 +128,11 @@ class Funfish(commands.Cog):
         if not message.guild or message.guild.id != self.funfish_id or message.author.id != 159985415099514880:
             return
         try:
-            level = int(message.content.split()[-1].strip("!"))
+            if not message.mentions:
+                return
             user = message.mentions[0]
+            level = int(message.content.split()[-1].strip("!"))
+
             roles_to_remove = []
             role_to_assign = None
             if level >= 100:
@@ -154,20 +157,19 @@ class Funfish(commands.Cog):
                 role_to_assign = 756979356332589117
                 roles_to_remove = [734056569041322066]
 
-            if role_to_assign and not discord.utils.get(user.roles, id=role_to_assign):
-                for role_id in roles_to_remove:
-                    try:
-                        await user.remove_roles(discord.Object(id=role_id))
-                    except Exception:
-                        pass
-                await user.add_roles(discord.Object(id=role_to_assign))
-                channel: discord.TextChannel = await self.bot.fetch_channel(734011317798830111)
+            guild = message.guild
+            role_to_assign_obj = guild.get_role(role_to_assign)
+            roles_to_remove_objs = [guild.get_role(role_id) for role_id in roles_to_remove]
+            roles_to_remove_objs = [role for role in roles_to_remove_objs if role is not None]
+            if role_to_assign_obj and role_to_assign_obj not in user.roles:
+                for role in roles_to_remove_objs:
+                    if role in user.roles:
+                        await user.remove_roles(role)
+                await user.add_roles(role_to_assign_obj)
+                channel = await self.bot.fetch_channel(734011317798830111)
                 await channel.send(embed=discord.Embed(description=roles_data[role_to_assign].format(user.mention)))
         except Exception as e:
-            if isinstance(e, commands.errors.BotMissingPermissions):
-                pass
-            else:
-                raise e
+            raise e
 
     @commands.Cog.listener("on_message")
     async def bump_message(self, message):
