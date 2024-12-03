@@ -125,14 +125,13 @@ class Funfish(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def role_assign(self, message: discord.Message):
-        if not message.guild or message.guild.id != self.funfish_id or message.author.id != 159985415099514880:
+        if not message.guild or message.guild.id != self.funfish_id:
+            return
+        if message.author.id != 159985415099514880 or message.channel.id != 734468894949114008:
             return
         try:
-            if not message.mentions:
-                return
             user = message.mentions[0]
             level = int(message.content.split()[-1].strip("!"))
-
             roles_to_remove = []
             role_to_assign = None
             if level >= 100:
@@ -166,8 +165,9 @@ class Funfish(commands.Cog):
                     if role in user.roles:
                         await user.remove_roles(role)
                 await user.add_roles(role_to_assign_obj)
-                channel = await self.bot.fetch_channel(734011317798830111)
-                await channel.send(embed=discord.Embed(description=roles_data[role_to_assign].format(user.mention)))
+                channel = await guild.fetch_channel(734011317798830111)
+                text = roles_data[role_to_assign].format(user.mention)
+                await channel.send(embed=discord.Embed(description=text))
         except Exception as e:
             raise e
 
