@@ -125,37 +125,40 @@ class Funfish(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def role_assign(self, message: discord.Message):
-        if not message.guild or message.guild.id != self.funfish_id:
+        if not message.guild:
             return
-        if message.author.id != 159985415099514880 or message.channel.id != 734468894949114008:
+        if message.guild.id != self.funfish_id:
             return
+        if message.channel.id != 734468894949114008:
+            return
+        if message.author.id != 159985415099514880:
+            return
+        user = message.mentions[0]
+        level = int(message.content.split()[-1].strip("!"))
+        roles_to_remove = []
+        role_to_assign = None
+        if level >= 100:
+            role_to_assign = 734307600547708978
+        elif level >= 70:
+            role_to_assign = 734306269430677515
+        elif level >= 65:
+            role_to_assign = 734307591630356530
+        elif level >= 50:
+            role_to_assign = 734304865794392094
+        elif level >= 35:
+            role_to_assign = 734302384032841759
+        elif level >= 25:
+            role_to_assign = 757698628360863876
+        elif level >= 10:
+            role_to_assign = 734305511759151144
+            roles_to_remove = [734302084350083166, 756979356332589117, 734056569041322066]
+        elif level >= 5:
+            role_to_assign = 734302084350083166
+            roles_to_remove = [756979356332589117, 734056569041322066]
+        elif level >= 3:
+            role_to_assign = 756979356332589117
+            roles_to_remove = [734056569041322066]
         try:
-            user = message.mentions[0]
-            level = int(message.content.split()[-1].strip("!"))
-            roles_to_remove = []
-            role_to_assign = None
-            if level >= 100:
-                role_to_assign = 734307600547708978
-            elif level >= 70:
-                role_to_assign = 734306269430677515
-            elif level >= 65:
-                role_to_assign = 734307591630356530
-            elif level >= 50:
-                role_to_assign = 734304865794392094
-            elif level >= 35:
-                role_to_assign = 734302384032841759
-            elif level >= 25:
-                role_to_assign = 757698628360863876
-            elif level >= 10:
-                role_to_assign = 734305511759151144
-                roles_to_remove = [734302084350083166, 756979356332589117, 734056569041322066]
-            elif level >= 5:
-                role_to_assign = 734302084350083166
-                roles_to_remove = [756979356332589117, 734056569041322066]
-            elif level >= 3:
-                role_to_assign = 756979356332589117
-                roles_to_remove = [734056569041322066]
-
             guild = message.guild
             role_to_assign_obj = guild.get_role(role_to_assign)
             roles_to_remove_objs = [guild.get_role(role_id) for role_id in roles_to_remove]
@@ -168,8 +171,8 @@ class Funfish(commands.Cog):
                 channel = await guild.fetch_channel(734011317798830111)
                 text = roles_data[role_to_assign].format(user.mention)
                 await channel.send(embed=discord.Embed(description=text))
-        except Exception as e:
-            raise e
+        except Exception as error:
+            print(f"Failed to assign role:{type(error)}\n{error}`")
 
     @commands.Cog.listener("on_message")
     async def bump_message(self, message):
