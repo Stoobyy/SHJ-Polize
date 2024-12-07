@@ -131,7 +131,7 @@ class Funfish(commands.Cog):
             return
         if message.channel.id != 734468894949114008:
             return
-        if message.author.id != 159985415099514880:
+        if message.author.id != 159985870458322944:
             return
         user = message.mentions[0]
         level = int(message.content.split()[-1].strip("!"))
