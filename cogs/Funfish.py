@@ -171,8 +171,8 @@ class Funfish(commands.Cog):
                 channel = await guild.fetch_channel(734011317798830111)
                 text = roles_data[role_to_assign].format(user.mention)
                 await channel.send(embed=discord.Embed(description=text))
-        except Exception as error:
-            print(f"Failed to assign role:{type(error)}\n{error}`")
+        except Exception as e:
+            raise e
 
     @commands.Cog.listener("on_message")
     async def bump_message(self, message):
@@ -185,6 +185,21 @@ class Funfish(commands.Cog):
         if message.embeds:
             if message.embeds[0].description.startswith("Bump done"):
                 self.timestamp = message.created_at.timestamp()
+        
+    @commands.Cog.listener("on_message")
+    async def bday_react(self, message):
+        if not message.guild:
+            return
+        if message.guild.id != self.funfish_id:
+            return
+        if message.channel.id != 770003642622410772:
+            return
+        if message.author.id != 656621136808902656:
+            return
+        try:
+            await message.add_reaction("🎂")
+        except Exception as e:
+            raise e
 
     @tasks.loop(seconds=60)
     async def bump_check(self):
